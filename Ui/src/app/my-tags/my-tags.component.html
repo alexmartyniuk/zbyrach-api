@@ -1,20 +1,20 @@
 <p>my-tags works!</p>
 
-<input [(ngModel)]="currentTag" (keyup.enter)="addTag()">
+<input [(ngModel)]="currentTagName" (keyup.enter)="addCurrentTag()">
 
-<button (click)="addTag()">Add</button>
+<button (click)="addCurrentTag()">Add</button>
 
 <h3>Related Tags</h3>
 <ul>
-    <div *ngFor="let tag of relatedTags">
-        <app-my-tag [value]='tag' (onRemove)='onRemove($event)' (onClick)='onClick($event)'></app-my-tag>
+    <div *ngFor="let tag of relatedTags | keyvalue">
+        <app-my-tag [tag]='tag.value' (onRemove)='onRemoveRelatedTag($event)' (onClick)='onClickRelatedTag($event)'></app-my-tag>
     </div>
 </ul>
 <br>
 
 <h3>Tags</h3>
 <ul>
-    <div *ngFor="let tag of tags">
-        <app-my-tag [value]='tag' (onRemove)='onRemove($event)' (onClick)='onClick($event)'></app-my-tag>
+    <div *ngFor="let tag of tags | keyvalue">
+        <app-my-tag [tag]='tag.value' (onRemove)='onRemoveTag($event)' (onClick)='onClickTag($event)'></app-my-tag>
     </div>
 </ul>

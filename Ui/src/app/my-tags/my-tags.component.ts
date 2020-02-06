@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Tag } from '../models/tag';
 
 @Component({
   selector: 'app-my-tags',
@@ -13,46 +14,67 @@ export class MyTagsComponent implements OnInit {
   ngOnInit() {
   }
 
-  currentTag: String = "";
+  currentTagName: string = "";
 
-  relatedTags: Array<String> = new Array<String>();
+  relatedTags: Map<string, Tag> = new Map<string, Tag>();
 
-  tags: Array<String> = new Array<String>(); 
+  tags: Map<string, Tag> = new Map<string, Tag>();
 
-  async addTag(): Promise<any> {
-    if (!this.currentTag) {
+  async addCurrentTag(): Promise<any> {
+    if (!this.currentTagName) {
       return;
     }
 
-    if (this.tags.includes(this.currentTag)) {
-      return;
+    if (!this.tags.get(this.currentTagName)) {
+      let newTag: Tag = {'name': this.currentTagName, 'url': null, 'parentTagName': null};
+      this.tags.set(this.currentTagName, newTag);
+      await this.getRelatedTags(newTag);
     }
 
-    this.tags.push(this.currentTag);
-    await this.getRelatedTags(this.currentTag);
-
-    this.currentTag = "";
+    this.currentTagName = "";
   }
 
-  onRemove(event): void {
-    console.log(event);
+  async addTag(tag: Tag): Promise<any> {
+    if (!this.tags.get(tag.name)) {
+      this.tags.set(tag.name, tag);
+      await this.getRelatedTags(tag);
+    }
+
+    this.currentTagName = "";
   }
 
-  onClick(event): void {
-    console.log(event);
+  async addRelatedTag(tag: Tag): Promise<any> {
+    if (!this.relatedTags.get(tag.name)) {
+      this.relatedTags.set(tag.name, tag);
+    }
   }
 
-  private async getRelatedTags(tag: String): Promise<void> {   
-    const url = `http://localhost:5000/tags/${tag}/related`;
+  onRemoveTag(tag: Tag): void {
+    this.tags.delete(tag.name);
+    this.relatedTags.delete(tag.name);
+  }
+
+  onClickTag(tag: Tag): void {
+    //
+  }
+
+  onRemoveRelatedTag(tag: Tag): void {
+    this.relatedTags.delete(tag.name);
+  }
+
+  onClickRelatedTag(tag: Tag): void {
+    this.addTag(tag);
+    this.onRemoveRelatedTag(tag);
+  }
+
+  private async getRelatedTags(tag: Tag): Promise<void> {
+    const url = `http://localhost:5000/tags/${tag.name}/related`;
     let relatedTags: Tag[] = await this.http.get<Tag[]>(url).toPromise();
-    let tagNames = relatedTags.map(tag => tag.url);
 
-    this.relatedTags.concat(tagNames);
+    for (let relatedTag of relatedTags) {
+      relatedTag.parentTagName = tag.name;
+      await this.addRelatedTag(relatedTag);
+    }
   }
 
-}
-
-class Tag{
-  name: string;
-  url: string;
 }
