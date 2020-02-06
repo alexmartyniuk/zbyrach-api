@@ -26,7 +26,7 @@ namespace MediumGrabber.Api.Controllers
             }
             catch(Exception e)
             {                
-                throw new Exception($"Error during getting data from 'medium.com':\r\n {e.ToString()}");
+                throw new Exception($"Error during getting data from 'medium.com':\r\n {e}");
             }                   
         }
 
