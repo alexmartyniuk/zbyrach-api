@@ -30,6 +30,23 @@ namespace MediumGrabber.Api.Controllers
             }                   
         }
 
+        [HttpGet]
+        [Route("/tags/{tagName}/related")]
+        public async Task<IEnumerable<TagDto>> GetRelated(string tagName)
+        {
+            var config = Configuration.Default.WithDefaultLoader();            
+            var context = BrowsingContext.New(config);
+            try
+            {   
+                var mainDocument = await context.OpenAsync($"https://medium.com/tag/{tagName}");                            
+                return GetRelatedTags(mainDocument); 
+            }
+            catch(Exception e)
+            {                
+                throw new Exception($"Error during getting data from 'medium.com':\r\n {e}");
+            }                   
+        }
+
         private TagFullDto GetFullTag(IDocument mainDocument, IDocument archiveDocument)
         {
             var name = mainDocument
@@ -125,11 +142,7 @@ namespace MediumGrabber.Api.Controllers
 
         private static string GetDescription(IElement article)
         {
-            var descriptionNode = article.QuerySelector("h4");
-            if (descriptionNode == null)
-            {
-                descriptionNode = article.QuerySelector("p.graf");                
-            }
+            var descriptionNode = article.QuerySelector("h4") ?? article.QuerySelector("p.graf");
 
             return descriptionNode?
                 .TextContent
