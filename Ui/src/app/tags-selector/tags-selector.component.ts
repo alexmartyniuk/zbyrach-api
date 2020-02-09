@@ -3,11 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Tag } from '../models/tag';
 
 @Component({
-  selector: 'app-my-tags',
-  templateUrl: './my-tags.component.html',
-  styleUrls: ['./my-tags.component.css']
+  selector: 'mg-tags-selector',
+  templateUrl: './tags-selector.component.html',
+  styleUrls: ['./tags-selector.component.css']
 })
-export class MyTagsComponent implements OnInit {
+export class TagsSelectorComponent implements OnInit {
 
   constructor(private http: HttpClient) { }
 

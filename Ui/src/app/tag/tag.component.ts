@@ -2,11 +2,11 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Tag } from '../models/tag';
 
 @Component({
-  selector: 'app-my-tag',
-  templateUrl: './my-tag.component.html',
-  styleUrls: ['./my-tag.component.css']
+  selector: 'mg-tag',
+  templateUrl: './tag.component.html',
+  styleUrls: ['./tag.component.css']
 })
-export class MyTagComponent implements OnInit {
+export class TagComponent implements OnInit {
 
   constructor() { }
 
