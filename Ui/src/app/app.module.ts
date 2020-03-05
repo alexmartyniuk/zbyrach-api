@@ -3,30 +3,49 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { SocialLoginModule, AuthServiceConfig } from 'angularx-social-login';
+import { GoogleLoginProvider } from 'angularx-social-login';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { TagInputModule } from 'ngx-chips';
 import { TagsSelectorComponent } from './tags-selector/tags-selector.component';
 import { TagComponent } from './tag/tag.component';
+import { LoginComponent } from './login/login.component';
 
+let config = new AuthServiceConfig([
+  {
+    id: GoogleLoginProvider.PROVIDER_ID,
+    provider: new GoogleLoginProvider("175396273730-4a2qpvrls8vh3kplihb48sdn37ev5vg5.apps.googleusercontent.com")
+  },
+]);
+export function provideConfig() {
+  return config;
+}
 
 @NgModule({
   declarations: [
     AppComponent,
     TagsSelectorComponent,
-    TagComponent
+    TagComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    BrowserAnimationsModule, 
-    FormsModule, 
-    ReactiveFormsModule, 
-    TagInputModule, 
-    HttpClientModule
+    BrowserAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TagInputModule,
+    HttpClientModule,
+    SocialLoginModule.initialize(config)
   ],
-  providers: [],
+  providers: [
+    {
+      provide: AuthServiceConfig,
+      useFactory: provideConfig
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
