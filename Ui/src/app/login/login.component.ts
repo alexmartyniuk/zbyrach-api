@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from 'angularx-social-login';
 import { GoogleLoginProvider } from 'angularx-social-login';
+import { AccountService } from '../services/account.service';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +16,7 @@ export class LoginComponent implements OnInit {
   // create a field to hold error messages so we can bind it to our        template
   resultMessage: string;
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private accountService: AccountService) { }
 
   ngOnInit() {
     //some code
@@ -41,6 +42,17 @@ export class LoginComponent implements OnInit {
         });
 
         this.resultMessage = response.email;
+
+        this.accountService.Login(this.userData[0]).subscribe(
+          result => {
+            console.log('success', result);
+          },
+          error => {
+            this.resultMessage = 'it didn\'t work and that sucks';
+            console.log(error);
+          }
+        );
+
       },
       (error) => {
         console.log(error);

@@ -7,6 +7,11 @@
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.2" />
   </ItemGroup>
 
 

@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using Api.Models;
+using Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +26,8 @@ namespace MediumGrabber.Api
         {
             services.AddCors();
             services.AddControllers();
+            services.AddDbContext<ApplicationContext>();
+            services.AddScoped<UsersService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
