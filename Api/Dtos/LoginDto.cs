@@ -8,5 +8,7 @@ namespace Api.Dtos
         public string EmailAddress { get; set; }
         public string PictureUrl { get; set; }
         public string Provider { get; set; }
+        public string AuthToken { get; set; }
+        public string IdToken { get; set; }                 
     }
 }

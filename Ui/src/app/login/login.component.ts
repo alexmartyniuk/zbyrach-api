@@ -38,7 +38,9 @@ export class LoginComponent implements OnInit {
           FirstName: response.firstName,
           LastName: response.lastName,
           EmailAddress: response.email,
-          PictureUrl: response.photoUrl
+          PictureUrl: response.photoUrl,
+          authToken: response.authToken,
+          idToken: response.idToken
         });
 
         this.resultMessage = response.email;
