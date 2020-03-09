@@ -21,43 +21,38 @@ namespace Api.Controllers
         [Route("/account/login")]
         public IActionResult Login([FromBody] LoginDto loginData)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.First().Errors;
                 return BadRequest(new JsonResult(errors));
             }
 
-            var loginedUser = _tokenService.GetUserByToken(loginData.AuthToken);
-            if (loginedUser != null)
+            var existingToken = _tokenService.GetTokenWithUser(loginData.AuthToken);
+            if (existingToken != null)
             {
-                // User was found, return User data
-                return Ok(loginedUser);
+                // Valid token was found, return User data
+                return Ok(existingToken.User);
             }                       
 
-            var user = _usersService.GetUserByEmail(loginData.EmailAddress);
-            if (user == null)
-            {
-                user = new User
-                {
-                    Email = loginData.EmailAddress,
-                    Name = $"{loginData.FirstName} {loginData.LastName}",
-                    PictureUrl = loginData.PictureUrl
-                };                
-            }
-
-            var isTokenValid = _tokenService.CheckLoginData(loginData, user);
-            if (!isTokenValid)
+            var validToken = _tokenService.ValidateToken(loginData.AuthToken);
+            if (validToken == null)
             {
                 return Unauthorized("Token is invalid");
             }
 
-            if (user.Id == 0)
+            var user = _usersService.GetUserByEmail(loginData.EmailAddress);
+            if (user == null)
             {
-                _usersService.AddNewUser(user);
-            }    
-            
-            var token = _tokenService.SaveToken(loginData, user);
-            return Ok(token);
+                user = _usersService.AddNewUser(new User
+                {
+                    Email = loginData.EmailAddress,
+                    Name = $"{loginData.FirstName} {loginData.LastName}",
+                    PictureUrl = loginData.PictureUrl
+                });               
+            }
+
+            var savedToken = _tokenService.SaveToken(user, validToken);
+            return Ok(savedToken);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace MediumGrabber.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AccessToken");
+                    b.ToTable("AccessTokens");
                 });
 
             modelBuilder.Entity("Api.Models.User", b =>

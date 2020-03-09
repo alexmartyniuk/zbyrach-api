@@ -17,7 +17,7 @@ namespace Api.Services
             return _db.Users.SingleOrDefault(u => u.Email == email);
         }
 
-        public void AddNewUser(User user)
+        public User AddNewUser(User user)
         {
             if (user.Id != default)
             {
@@ -31,6 +31,8 @@ namespace Api.Services
 
             _db.Users.Add(user);
             _db.SaveChanges();
+
+            return user;
         }
     }
 }
