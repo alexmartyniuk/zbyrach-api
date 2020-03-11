@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediumGrabber.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200309210632_Initial")]
-    partial class Initial
+    [Migration("20200311034715_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,10 +25,6 @@ namespace MediumGrabber.Api.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("ExpiredAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Token")

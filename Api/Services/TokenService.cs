@@ -34,17 +34,19 @@ namespace Api.Services
             return null;
         }
 
-        public AccessToken ValidateToken(string authToken)
+        public GoogleToken ValidateGoogleToken(string idToken)
         {
-            var response = _http.GetStringAsync($"https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={authToken}")
+            var response = _http.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}")
                 .GetAwaiter()
                 .GetResult();
-            var googleToken = JsonSerializer.Deserialize<GoogleTokenDto>(response);
-            
+            return JsonSerializer.Deserialize<GoogleToken>(response);
+        }
+
+        public AccessToken CreateFromGoogleToken(GoogleToken googleToken, string authToken)
+        {
             return new AccessToken
             {
                 ExpiredAt = UnixTimestampToDateTime(googleToken.exp),
-                Provider = "GOOGLE",
                 Token = authToken
             };
         }

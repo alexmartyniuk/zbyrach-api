@@ -37,9 +37,6 @@ namespace Api.Models
                .HasIndex(p => p.Token)
                .IsUnique();
             modelBuilder.Entity<AccessToken>()
-                .Property(p => p.Provider)
-                .IsRequired();
-            modelBuilder.Entity<AccessToken>()
                 .Property(p => p.ExpiredAt)
                 .IsRequired();
             modelBuilder.Entity<AccessToken>()

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MediumGrabber.Api.Migrations
 {
-    public partial class Initial : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -29,7 +29,6 @@ namespace MediumGrabber.Api.Migrations
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Token = table.Column<string>(nullable: false),
-                    Provider = table.Column<string>(nullable: false),
                     ExpiredAt = table.Column<DateTime>(nullable: false),
                     UserId = table.Column<long>(nullable: false)
                 },

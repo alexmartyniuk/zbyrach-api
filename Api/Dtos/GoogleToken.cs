@@ -1,6 +1,6 @@
 namespace Api.Dtos
 {
-    public class GoogleTokenDto
+    public class GoogleToken
     {
         public string iss { get; set; }
         public string sub { get; set; }

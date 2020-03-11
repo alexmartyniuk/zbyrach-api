@@ -8,18 +8,16 @@ namespace Api.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UsersService _usersService;
-        private readonly TokenService _tokenService;
+        private readonly AccountService _accountService;
 
-        public AccountController(UsersService usersService, TokenService tokenService)
+        public AccountController(AccountService accountService)
         {
-            _usersService = usersService;
-            _tokenService = tokenService;
+            _accountService = accountService;
         }
 
         [HttpPost]
         [Route("/account/login")]
-        public IActionResult Login([FromBody] LoginDto loginData)
+        public IActionResult Login([FromBody] LoginRequestDto loginData)
         {
             if (!ModelState.IsValid)
             {
@@ -27,32 +25,25 @@ namespace Api.Controllers
                 return BadRequest(new JsonResult(errors));
             }
 
-            var existingToken = _tokenService.GetTokenWithUser(loginData.AuthToken);
-            if (existingToken != null)
-            {
-                // Valid token was found, return User data
-                return Ok(existingToken.User);
-            }                       
-
-            var validToken = _tokenService.ValidateToken(loginData.AuthToken);
-            if (validToken == null)
+            var token = _accountService.Login(loginData.IdToken);
+            if (token == null)
             {
                 return Unauthorized("Token is invalid");
             }
 
-            var user = _usersService.GetUserByEmail(loginData.EmailAddress);
-            if (user == null)
+            var response = new LoginResponseDto
             {
-                user = _usersService.AddNewUser(new User
+                AuthToken = token.Token,
+                User = new UserDto
                 {
-                    Email = loginData.EmailAddress,
-                    Name = $"{loginData.FirstName} {loginData.LastName}",
-                    PictureUrl = loginData.PictureUrl
-                });               
-            }
-
-            var savedToken = _tokenService.SaveToken(user, validToken);
-            return Ok(savedToken);
+                    Id = token.User.Id,
+                    Email = token.User.Email,
+                    Name = token.User.Name,
+                    PictureUrl = token.User.PictureUrl
+                }
+            };
+            
+            return Ok(response);
         }
     }
 }

@@ -25,10 +25,6 @@ namespace MediumGrabber.Api.Migrations
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasColumnType("TEXT");
