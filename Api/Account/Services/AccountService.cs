@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace MediumGrabber.Api.Account
 {
@@ -13,24 +14,24 @@ namespace MediumGrabber.Api.Account
             _usersService = userService;
         }
 
-        public AccessToken Login(string idToken)
+        public async Task<AccessToken> Login(string idToken)
         {
-            var existingToken = _tokenService.GetTokenWithUserByValue(idToken);
+            var existingToken = await _tokenService.GetTokenWithUserByValue(idToken);
             if (existingToken != null)
             {
                 return existingToken;
             }
 
-            var googleToken = _tokenService.ValidateGoogleToken(idToken);
+            var googleToken = await _tokenService.ValidateGoogleToken(idToken);
             if (googleToken == null)
             {
                 return null;
             }
 
-            var user = _usersService.GetUserByEmail(googleToken.email);
+            var user = await _usersService.GetUserByEmail(googleToken.email);
             if (user == null)
             {
-                user = _usersService.AddNewUser(new User
+                user = await _usersService.AddNewUser(new User
                 {
                     Email = googleToken.email,
                     Name = $"{googleToken.given_name} {googleToken.family_name}",
@@ -39,19 +40,19 @@ namespace MediumGrabber.Api.Account
             }
 
             var newToken = _tokenService.CreateFromGoogleToken(googleToken, idToken);
-            return _tokenService.SaveToken(user, newToken);
+            return await _tokenService.SaveToken(user, newToken);
         }
 
-        public void Logout()
+        public async Task Logout()
         {
-            var user = _usersService.GetCurrentUser();
-            var token = _tokenService.GetTokenByUser(user);
+            var user = await _usersService.GetCurrentUser();
+            var token = await _tokenService.GetTokenByUser(user);
             if (token== null)
             {
                 throw new Exception("Token was not found for current user.");
             }
             
-            if (!_tokenService.RemoveToken(token))
+            if (!await _tokenService.RemoveToken(token))
             {
                 throw new Exception("Token was not removed during logout.");
             }           

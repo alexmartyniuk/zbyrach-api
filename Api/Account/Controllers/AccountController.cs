@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +20,7 @@ namespace MediumGrabber.Api.Account
         [AllowAnonymous]
         [HttpPost]
         [Route("/account/login")]
-        public IActionResult Login([FromBody] LoginRequestDto loginData)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginData)
         {
             if (!ModelState.IsValid)
             {
@@ -27,7 +28,7 @@ namespace MediumGrabber.Api.Account
                 return BadRequest(new JsonResult(errors));
             }
 
-            var token = _accountService.Login(loginData.IdToken);
+            var token = await _accountService.Login(loginData.IdToken);
             if (token == null)
             {
                 return Unauthorized("Token is invalid");

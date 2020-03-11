@@ -38,7 +38,7 @@ namespace MediumGrabber.Api.Account
             }
 
             var authHeader = Request.Headers["AuthToken"];
-            var tokenWithUser = _tokenService.GetTokenWithUserByValue(authHeader);
+            var tokenWithUser = await _tokenService.GetTokenWithUserByValue(authHeader);
             if (tokenWithUser == null)
             {
                 return AuthenticateResult.Fail("Invalid Username or Password");
