@@ -2,6 +2,8 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -24,6 +26,12 @@ namespace Api.Services
 
         protected async override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
+            var endpoint = Context.GetEndpoint();
+            if (endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null)
+            {
+                return AuthenticateResult.NoResult();
+            }
+
             if (!Request.Headers.ContainsKey("AuthToken"))
             {
                 return AuthenticateResult.Fail("Missing AuthToken Header");
