@@ -9,30 +9,33 @@ export class AccountService {
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
-  private baseUrlLogin = 'https://localhost:5001/account/login';
-  private baseUrlLogout = 'https://localhost:5001/account/logout';
+  private baseUrl = 'https://localhost:5001/';
 
   public async Login(): Promise<User> {
-    const googleResponse = await this.authService.signIn(GoogleLoginProvider.PROVIDER_ID);
+    try {
+      const googleResponse = await this.authService.signIn(GoogleLoginProvider.PROVIDER_ID);
+      const response = await this.http
+        .post<LoginResponse>(this.baseUrl + 'account/login', googleResponse).toPromise();
 
-    console.log(googleResponse);
-
-    const response = await this.http.post<LoginResponse>(this.baseUrlLogin, googleResponse).toPromise();
-
-    this.SetToken(response.authToken);
-    this.SetUser(response.user);
-
-    return Promise.resolve(response.user);
+      this.SetToken(response.authToken);
+      this.SetUser(response.user);
+      return Promise.resolve(response.user);
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 
-  public async Logout(): Promise<void> {
-    await this.authService.signOut();
+  public async Logout(): Promise<any> {
+    try {
+      await this.authService.signOut();
+      await this.http.post(this.baseUrl + 'account/logout', null).toPromise();
 
-    const response = await this.http.post(this.baseUrlLogout, null).toPromise();
-
-    this.RemoveToken();
-    this.RemoveUser();
-    console.log('User has signed out');
+      this.RemoveToken();
+      this.RemoveUser();
+      return Promise.resolve();
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 
   public GetToken(): string {

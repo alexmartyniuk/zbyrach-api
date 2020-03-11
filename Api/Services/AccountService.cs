@@ -1,3 +1,4 @@
+using System;
 using Api.Models;
 
 namespace Api.Services
@@ -10,16 +11,16 @@ namespace Api.Services
         public AccountService(TokenService tokenService, UsersService userService)
         {
             _tokenService = tokenService;
-            _usersService = userService;    
+            _usersService = userService;
         }
 
         public AccessToken Login(string idToken)
         {
-            var existingToken = _tokenService.GetTokenWithUser(idToken);
+            var existingToken = _tokenService.GetTokenWithUserByValue(idToken);
             if (existingToken != null)
             {
                 return existingToken;
-            }                       
+            }
 
             var googleToken = _tokenService.ValidateGoogleToken(idToken);
             if (googleToken == null)
@@ -35,11 +36,26 @@ namespace Api.Services
                     Email = googleToken.email,
                     Name = $"{googleToken.given_name} {googleToken.family_name}",
                     PictureUrl = googleToken.picture
-                });               
+                });
             }
 
             var newToken = _tokenService.CreateFromGoogleToken(googleToken, idToken);
             return _tokenService.SaveToken(user, newToken);
+        }
+
+        public void Logout()
+        {
+            var user = _usersService.GetCurrentUser();
+            var token = _tokenService.GetTokenByUser(user);
+            if (token== null)
+            {
+                throw new Exception("Token was not found for current user.");
+            }
+            
+            if (!_tokenService.RemoveToken(token))
+            {
+                throw new Exception("Token was not removed during logout.");
+            }           
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Api.Services
             _http = new HttpClient();
         }
 
-        public AccessToken GetTokenWithUser(string token)
+        public AccessToken GetTokenWithUserByValue(string token)
         {
             var accessToken = _db.AccessTokens
                 .Include(t => t.User)
@@ -33,6 +33,25 @@ namespace Api.Services
 
             return null;
         }
+
+        public AccessToken GetTokenByUser(User user)
+        {
+            return _db.AccessTokens                
+                .SingleOrDefault(t => t.UserId == user.Id);            
+        }
+
+        public bool RemoveToken(AccessToken token)
+        {
+            var existingToken = _db.AccessTokens.Find(token.Id);
+            if (existingToken == null)
+            {
+                return false;
+            }
+
+            _db.AccessTokens.Remove(existingToken);            
+            return _db.SaveChanges() > 0;
+        }
+
 
         public GoogleToken ValidateGoogleToken(string idToken)
         {

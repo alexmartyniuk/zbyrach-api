@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { SocialLoginModule, AuthServiceConfig } from 'angularx-social-login';
 import { GoogleLoginProvider } from 'angularx-social-login';
 
@@ -12,6 +12,7 @@ import { TagInputModule } from 'ngx-chips';
 import { TagsSelectorComponent } from './tags-selector/tags-selector.component';
 import { TagComponent } from './tag/tag.component';
 import { LoginComponent } from './login/login.component';
+import { TokenInterceptorService } from './services/token-interceptor.service';
 
 let config = new AuthServiceConfig([
   {
@@ -44,6 +45,11 @@ export function provideConfig() {
     {
       provide: AuthServiceConfig,
       useFactory: provideConfig
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptorService,
+      multi: true
     }
   ],
   bootstrap: [AppComponent]

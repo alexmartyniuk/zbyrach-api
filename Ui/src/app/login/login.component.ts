@@ -23,23 +23,28 @@ export class LoginComponent implements OnInit {
   }
 
   //logIn with google method. Takes the platform (Google) parameter.
-  logInWithGoogle(platform: string): void {
-
+  public LogInWithGoogle(): void {
     this.accountService.Login().then(
       (user) => {
         console.log('success', user);
         this.resultMessage = user.email;
       },
       (error) => {
-        this.resultMessage = 'it didn\'t work and that sucks';
+        this.resultMessage = error;
         console.log(error);
       }
     );
-
   }
 
-  logOut(): void {
-    this.authService.signOut();
-    console.log('User has signed our');
+  public LogOut(): void {
+    this.accountService.Logout().then(
+      () => {
+        console.log('User has signed out');
+      },
+      (error) => {
+        this.resultMessage = error;
+        console.log(error);
+      }
+    );
   }
 }

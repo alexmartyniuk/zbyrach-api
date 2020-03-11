@@ -1,15 +1,19 @@
 using System.Linq;
+using System.Security.Claims;
 using Api.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Api.Services
 {
     public class UsersService
     {
         private readonly ApplicationContext _db;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsersService(ApplicationContext db)
+        public UsersService(ApplicationContext db, IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public User GetUserByEmail(string email)
@@ -33,6 +37,13 @@ namespace Api.Services
             _db.SaveChanges();
 
             return user;
+        }
+
+        public User GetCurrentUser()
+        {
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            return _db.Users.Find(long.Parse(userId));
         }
     }
 }

@@ -1,8 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using Api.Models;
 using Api.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,7 +27,14 @@ namespace MediumGrabber.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
-            services.AddControllers();
+
+            services.AddAuthentication("TokenAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, AuthenticationHandler>("TokenAuthentication", null);
+            services.AddAuthorization();
+
+            services.AddControllers();           
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDbContext<ApplicationContext>();
             services.AddScoped<UsersService>();
             services.AddScoped<TokenService>();
@@ -39,7 +48,7 @@ namespace MediumGrabber.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseCors(builder => builder
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
@@ -48,7 +57,7 @@ namespace MediumGrabber.Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseAuthentication();    
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
