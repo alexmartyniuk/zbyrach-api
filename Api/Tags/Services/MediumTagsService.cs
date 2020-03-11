@@ -4,41 +4,48 @@ using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
+using MediumGrabber.Api.Account;
 
 namespace MediumGrabber.Api.Tags
 {
     public class MediumTagsService
     {
-        const string _baseUrl = "https://medium.com/";
+        private const string _baseUrl = "https://medium.com/";
+
         public async Task<TagFullDto> GetFullTagInfoByName(string tagName)
         {
-           var config = Configuration.Default.WithDefaultLoader();            
+            var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
             try
-            {   
-                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");                            
-                var archiveDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}/archive");    
-                return GetFullTag(mainDocument, archiveDocument);  
+            {
+                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");
+                var archiveDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}/archive");
+                return GetFullTag(mainDocument, archiveDocument);
             }
-            catch(Exception e)
-            {                
+            catch (Exception e)
+            {
                 throw new Exception($"Error during getting data from 'medium.com':\r\n {e}");
-            }                   
+            }
         }
 
         public async Task<IEnumerable<TagDto>> GetRelatedTags(string tagName)
         {
-            var config = Configuration.Default.WithDefaultLoader();            
+            var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
             try
-            {   
-                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");                            
-                return GetRelatedTags(mainDocument); 
+            {
+                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");
+                return GetRelatedTags(mainDocument);
             }
-            catch(Exception e)
-            {                
+            catch (Exception e)
+            {
                 throw new Exception($"Error during getting data from 'medium.com':\r\n {e}");
-            }                   
+            }
+        }
+
+        internal Task GetMyTags()
+        {
+            throw new NotImplementedException();
         }
 
         private TagFullDto GetFullTag(IDocument mainDocument, IDocument archiveDocument)
@@ -54,32 +61,32 @@ namespace MediumGrabber.Api.Tags
 
             return new TagFullDto
             {
-               Name = name,
-               Url = url,
-               RelatedTags = relatedTags, 
-               TopStories = topStories,
-               Archive = archive
+                Name = name,
+                Url = url,
+                RelatedTags = relatedTags,
+                TopStories = topStories,
+                Archive = archive
             };
         }
 
         private IEnumerable<TagDto> GetRelatedTags(IDocument document)
-        {                        
+        {
             return document
                 .QuerySelectorAll("ul.tags li a")
-                .Select(link => 
+                .Select(link =>
                     new TagDto
                     {
                         Name = link.TextContent.Trim(),
                         Url = link.Attributes["href"].Value
                     }
-                ); 
+                );
         }
 
         private IEnumerable<StoryDto> GetTopStories(IDocument document)
         {
             return document
                 .QuerySelectorAll("div.postArticle")
-                .Select(article => GetStory(article)); 
+                .Select(article => GetStory(article));
         }
 
         private StoryDto GetStory(IElement article)
@@ -160,11 +167,11 @@ namespace MediumGrabber.Api.Tags
         {
             var years = archiveDocument
                 .QuerySelectorAll("div.timebucket a")
-                .Select(a => 
+                .Select(a =>
                     {
                         var text = a.TextContent.Trim();
                         return long.Parse(text);
-                    });         
+                    });
             var topStories = GetTopStories(archiveDocument);
 
             return new ArchiveDto

@@ -1,4 +1,5 @@
 using MediumGrabber.Api.Account;
+using MediumGrabber.Api.Tags;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediumGrabber.Api.Migrations
@@ -7,7 +8,7 @@ namespace MediumGrabber.Api.Migrations
     {
         public DbSet<User> Users { get; set; }
         public DbSet<AccessToken> AccessTokens { get; set; }
-
+        public DbSet<Tag> Tags { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options.UseSqlite("Data Source=medium_grabber.db");
@@ -46,6 +47,19 @@ namespace MediumGrabber.Api.Migrations
             modelBuilder.Entity<AccessToken>()
                 .HasOne(m => m.User)
                 .WithMany(u => u.AccessTokens);
+
+            modelBuilder.Entity<Tag>()
+               .Property(p => p.Id)
+               .IsRequired();
+            modelBuilder.Entity<Tag>()
+               .Property(p => p.Name)
+               .IsRequired();
+            modelBuilder.Entity<Tag>()
+                .Property(p => p.UserId)
+                .IsRequired();
+            modelBuilder.Entity<Tag>()
+                .HasOne(m => m.User)
+                .WithMany(u => u.Tags);
         }
     }
 }

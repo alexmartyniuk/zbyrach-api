@@ -9,12 +9,10 @@ namespace MediumGrabber.Api.Account
     public class AccountController : Controller
     {
         private readonly AccountService _accountService;
-        private readonly UsersService _usersService;
 
-        public AccountController(AccountService accountService, UsersService usersService)
+        public AccountController(AccountService accountService)
         {
             _accountService = accountService;
-            _usersService = usersService;
         }
 
         [AllowAnonymous]
@@ -52,7 +50,7 @@ namespace MediumGrabber.Api.Account
         [HttpPost]
         [Route("/account/logout")]
         public IActionResult Logout()
-        {            
+        {
             _accountService.Logout();
             return Ok();
         }

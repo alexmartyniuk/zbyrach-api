@@ -37,6 +37,7 @@ namespace MediumGrabber.Api
             services.AddScoped<TokenService>();
             services.AddScoped<AccountService>();
             services.AddScoped<MediumTagsService>();
+            services.AddScoped<TagService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

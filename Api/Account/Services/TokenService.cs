@@ -35,8 +35,8 @@ namespace MediumGrabber.Api.Account
 
         public Task<AccessToken> GetTokenByUser(User user)
         {
-            return _db.AccessTokens                
-                .SingleOrDefaultAsync(t => t.UserId == user.Id);            
+            return _db.AccessTokens
+                .SingleOrDefaultAsync(t => t.UserId == user.Id);
         }
 
         public async Task<bool> RemoveToken(AccessToken token)
@@ -47,7 +47,7 @@ namespace MediumGrabber.Api.Account
                 return false;
             }
 
-            _db.AccessTokens.Remove(existingToken);            
+            _db.AccessTokens.Remove(existingToken);
             return await _db.SaveChangesAsync() > 0;
         }
 
@@ -55,7 +55,7 @@ namespace MediumGrabber.Api.Account
         public async Task<GoogleToken> ValidateGoogleToken(string idToken)
         {
             var response = await _http.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}");
-            
+
             return JsonSerializer.Deserialize<GoogleToken>(response);
         }
 

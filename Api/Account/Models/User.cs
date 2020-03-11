@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using MediumGrabber.Api.Tags;
 
 namespace MediumGrabber.Api.Account
 {
@@ -9,7 +9,7 @@ namespace MediumGrabber.Api.Account
         public string Name { get; set; }
         public string Email { get; set; }
         public string PictureUrl { get; set; }
-
         public ICollection<AccessToken> AccessTokens { get; set; }
+        public ICollection<Tag> Tags { get; set; }
     }
 }
