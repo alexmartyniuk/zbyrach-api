@@ -1,6 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
-using Api.Models;
-using Api.Services;
+using MediumGrabber.Api.Account;
+using MediumGrabber.Api.Migrations;
+using MediumGrabber.Api.Tags;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -8,9 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-[assembly: SuppressMessage("Readability", "RCS1037")]
-[assembly: SuppressMessage("Readability", "RCS1090")]
 
 namespace MediumGrabber.Api
 {

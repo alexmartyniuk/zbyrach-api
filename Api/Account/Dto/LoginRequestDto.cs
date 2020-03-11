@@ -1,4 +1,4 @@
-namespace Api.Dtos
+namespace MediumGrabber.Api.Account
 {
     public class LoginRequestDto
     {

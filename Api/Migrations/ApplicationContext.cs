@@ -1,6 +1,7 @@
+using MediumGrabber.Api.Account;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.Models
+namespace MediumGrabber.Api.Migrations
 {
     public class ApplicationContext : DbContext
     {

@@ -1,13 +1,8 @@
-using System;
 using System.Linq;
-using System.Security.Claims;
-using Api.Dtos;
-using Api.Models;
-using Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Controllers
+namespace MediumGrabber.Api.Account
 {
     [Authorize]
     public class AccountController : Controller

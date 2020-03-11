@@ -1,7 +1,6 @@
 using System;
-using System.Text.Json.Serialization;
 
-namespace Api.Models
+namespace MediumGrabber.Api.Account
 {
     public class AccessToken
     {

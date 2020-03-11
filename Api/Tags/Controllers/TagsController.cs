@@ -1,9 +1,8 @@
 using System.Threading.Tasks;
-using Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MediumGrabber.Api.Controllers
+namespace MediumGrabber.Api.Tags
 {
     [AllowAnonymous]
     public class TagsController : ControllerBase

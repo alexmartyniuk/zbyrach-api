@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Api.Models
+namespace MediumGrabber.Api.Account
 {
     public class User
     {
@@ -10,7 +10,6 @@ namespace Api.Models
         public string Email { get; set; }
         public string PictureUrl { get; set; }
 
-        [JsonIgnore]
         public ICollection<AccessToken> AccessTokens { get; set; }
     }
 }

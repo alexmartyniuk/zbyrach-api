@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Security.Claims;
-using Api.Models;
+using MediumGrabber.Api.Migrations;
 using Microsoft.AspNetCore.Http;
 
-namespace Api.Services
+namespace MediumGrabber.Api.Account
 {
     public class UsersService
     {

@@ -2,12 +2,10 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Api.Dtos;
-using Api.Models;
+using MediumGrabber.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.Services
+namespace MediumGrabber.Api.Account
 {
     public class TokenService
     {

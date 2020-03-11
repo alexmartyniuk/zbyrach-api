@@ -1,4 +1,4 @@
-namespace MediumGrabber.Api.Dtos
+namespace MediumGrabber.Api.Tags
 {
     public class StoryDto
     {

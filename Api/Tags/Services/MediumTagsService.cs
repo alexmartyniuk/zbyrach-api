@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
-using MediumGrabber.Api.Dtos;
 
-namespace Api.Services
+namespace MediumGrabber.Api.Tags
 {
     public class MediumTagsService
     {
