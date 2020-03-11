@@ -45,5 +45,12 @@ namespace Api.Controllers
             
             return Ok(response);
         }
+
+        [HttpPost]
+        [Route("/account/logout")]
+        public IActionResult Logout()
+        {
+            throw new NotImplemented();
+        }
     }
 }
