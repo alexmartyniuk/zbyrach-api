@@ -32,8 +32,12 @@ namespace MediumGrabber.Api.Tags
             var currentUser = await _userService.GetCurrentUser();
             var tagsExisting = await _db.Tags.Where(t => t.UserId == currentUser.Id).ToListAsync();
 
-            var tagsToAdd = tags.Except(tagsExisting, _tagsComparer);
-            var tagsToRemove = tagsExisting.Except(tags, _tagsComparer);
+            var tagsToAdd = tags
+                .Except(tagsExisting, _tagsComparer)
+                .ToList();
+            var tagsToRemove = tagsExisting
+                .Except(tags, _tagsComparer)
+                .ToList();
 
             foreach (var tag in tagsToAdd)
             {
@@ -42,6 +46,7 @@ namespace MediumGrabber.Api.Tags
 
             _db.Tags.AddRange(tagsToAdd);
             _db.Tags.RemoveRange(tagsToRemove);
+
             await _db.SaveChangesAsync();
         }
     }

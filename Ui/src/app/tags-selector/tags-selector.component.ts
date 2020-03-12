@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Tag } from '../models/tag';
+import { TagService } from '../services/tag.service';
 
 @Component({
   selector: 'mg-tags-selector',
@@ -9,16 +10,21 @@ import { Tag } from '../models/tag';
 })
 export class TagsSelectorComponent implements OnInit {
 
-  constructor(private http: HttpClient) { }
-
-  ngOnInit() {
-  }
-
   currentTagName: string = "";
 
   relatedTags: Map<string, Tag> = new Map<string, Tag>();
 
   tags: Map<string, Tag> = new Map<string, Tag>();
+
+  constructor(private tagService: TagService) { }
+
+  async ngOnInit() {
+    const tags = await this.tagService.getMyTags();
+
+    for (let tag of tags) {
+      this.addTag(tag);
+    }
+  }
 
   async addCurrentTag(): Promise<any> {
     if (!this.currentTagName) {
@@ -67,12 +73,14 @@ export class TagsSelectorComponent implements OnInit {
     this.onRemoveRelatedTag(tag);
   }
 
-  private async getRelatedTags(tag: Tag): Promise<void> {
-    const url = `http://localhost:5000/tags/${tag.name}/related`;
-    let relatedTags: Tag[] = await this.http.get<Tag[]>(url).toPromise();
+  async save(): Promise<void> {
+    const tagNames = Array.from(this.tags.values()).map(t => t.name);
+    return this.tagService.setMyTags(tagNames);
+  }
 
+  private async getRelatedTags(tag: Tag): Promise<void> {
+    let relatedTags = await this.tagService.getRelatedTags(tag.name);
     for (let relatedTag of relatedTags) {
-      relatedTag.parentTagName = tag.name;
       await this.addRelatedTag(relatedTag);
     }
   }
