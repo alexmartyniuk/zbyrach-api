@@ -39,7 +39,7 @@ namespace MediumGrabber.Api.Mailing
 
             if (existingSettings == null)
             {
-                existingSettings = new MailingSettings();                
+                existingSettings = new MailingSettings();
                 existingSettings.UserId = user.Id;
                 _db.MailingSettings.Add(existingSettings);
             }

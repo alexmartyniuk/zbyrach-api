@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediumGrabber.Api.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +12,13 @@ namespace MediumGrabber.Api.Tags
     {
         private readonly MediumTagsService _mediumTagsService;
         private readonly TagService _tagService;
+        private readonly UsersService _userService;
 
-        public TagsController(MediumTagsService mediumTagsService, TagService tagService)
+        public TagsController(MediumTagsService mediumTagsService, TagService tagService, UsersService userService)
         {
             _mediumTagsService = mediumTagsService;
             _tagService = tagService;
+            _userService = userService;
         }
 
         [AllowAnonymous]
@@ -50,7 +53,8 @@ namespace MediumGrabber.Api.Tags
         [Route("/tags/my")]
         public async Task<IActionResult> GetMyTags()
         {
-            var myTags = await _tagService.GetMyTags();
+            var currentUser = await _userService.GetCurrentUser();
+            var myTags = await _tagService.GetByUser(currentUser);
             return Ok(myTags.Select(t => new TagDto { Name = t.Name }));
         }
 
@@ -58,13 +62,14 @@ namespace MediumGrabber.Api.Tags
         [Route("/tags/my")]
         public async Task<IActionResult> SetMyTags([FromBody] List<string> values)
         {
+            var currentUser = await _userService.GetCurrentUser();
             var tags = values.Select(v => new Tag
             {
                 Name = v
             });
-            await _tagService.SetMyTags(tags);
+            await _tagService.SetByUser(currentUser, tags);
 
-            var myTags = await _tagService.GetMyTags();
+            var myTags = await _tagService.GetByUser(currentUser);
             return Ok(myTags.Select(t => new TagDto { Name = t.Name }));
         }
     }

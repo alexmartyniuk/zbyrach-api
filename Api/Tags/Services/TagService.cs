@@ -21,16 +21,20 @@ namespace MediumGrabber.Api.Tags
             _db = db;
         }
 
-        public async Task<IEnumerable<Tag>> GetMyTags()
+        public async Task<IEnumerable<Tag>> GetByUser(User user)
         {
-            var currentUser = await _userService.GetCurrentUser();
-            return await _db.Tags.Where(t => t.UserId == currentUser.Id).ToListAsync();
+            var originalUser = _db.Users.Find(user.Id);
+            return await _db.Tags
+                .Where(t => t.UserId == originalUser.Id)
+                .ToListAsync();
         }
 
-        public async Task SetMyTags(IEnumerable<Tag> tags)
+        public async Task SetByUser(User user, IEnumerable<Tag> tags)
         {
-            var currentUser = await _userService.GetCurrentUser();
-            var tagsExisting = await _db.Tags.Where(t => t.UserId == currentUser.Id).ToListAsync();
+            var originalUser = _db.Users.Find(user.Id);
+            var tagsExisting = await _db.Tags
+                .Where(t => t.UserId == originalUser.Id)
+                .ToListAsync();
 
             var tagsToAdd = tags
                 .Except(tagsExisting, _tagsComparer)
@@ -41,7 +45,7 @@ namespace MediumGrabber.Api.Tags
 
             foreach (var tag in tagsToAdd)
             {
-                tag.User = currentUser;
+                tag.User = originalUser;
             }
 
             _db.Tags.AddRange(tagsToAdd);
