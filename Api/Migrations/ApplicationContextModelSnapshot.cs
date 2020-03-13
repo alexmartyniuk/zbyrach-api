@@ -67,6 +67,30 @@ namespace MediumGrabber.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MediumGrabber.Api.Mailing.MailingSettings", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("NumberOfArticles")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Schedule")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("MailingSettings");
+                });
+
             modelBuilder.Entity("MediumGrabber.Api.Tags.Tag", b =>
                 {
                     b.Property<long>("Id")
@@ -92,6 +116,15 @@ namespace MediumGrabber.Api.Migrations
                     b.HasOne("MediumGrabber.Api.Account.User", "User")
                         .WithMany("AccessTokens")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MediumGrabber.Api.Mailing.MailingSettings", b =>
+                {
+                    b.HasOne("MediumGrabber.Api.Account.User", "User")
+                        .WithOne("MailingSettings")
+                        .HasForeignKey("MediumGrabber.Api.Mailing.MailingSettings", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

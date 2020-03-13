@@ -1,4 +1,5 @@
 using MediumGrabber.Api.Account;
+using MediumGrabber.Api.Mailing;
 using MediumGrabber.Api.Tags;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,8 @@ namespace MediumGrabber.Api.Migrations
         public DbSet<User> Users { get; set; }
         public DbSet<AccessToken> AccessTokens { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<MailingSettings> MailingSettings { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options.UseSqlite("Data Source=medium_grabber.db");
@@ -60,6 +63,19 @@ namespace MediumGrabber.Api.Migrations
             modelBuilder.Entity<Tag>()
                 .HasOne(m => m.User)
                 .WithMany(u => u.Tags);
+            
+             modelBuilder.Entity<MailingSettings>()
+               .Property(m => m.Id)
+               .IsRequired();
+            modelBuilder.Entity<MailingSettings>()
+               .Property(m => m.Schedule)
+               .IsRequired();
+            modelBuilder.Entity<MailingSettings>()
+                .Property(m => m.Schedule)
+                .IsRequired();
+            modelBuilder.Entity<MailingSettings>()
+                .HasOne(m => m.User)
+                .WithOne(u => u.MailingSettings);               
         }
     }
 }

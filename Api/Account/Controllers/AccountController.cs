@@ -49,9 +49,9 @@ namespace MediumGrabber.Api.Account
 
         [HttpPost]
         [Route("/account/logout")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            _accountService.Logout();
+            await _accountService.Logout();
             return Ok();
         }
     }
