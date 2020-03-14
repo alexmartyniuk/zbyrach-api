@@ -1,25 +1,25 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { GoogleLoginProvider, AuthService } from 'angularx-social-login';
+import { ApiService } from './api.service';
+import { User } from '../models/user';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountService {
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
-
-  private baseUrl = 'https://localhost:5001/';
+  constructor(private api: ApiService, private authService: AuthService) { }
 
   public async Login(): Promise<User> {
     try {
       const googleResponse = await this.authService.signIn(GoogleLoginProvider.PROVIDER_ID);
-      const response = await this.http
-        .post<LoginResponse>(this.baseUrl + 'account/login', googleResponse).toPromise();
+      const response = await this.api.Login(googleResponse);
+      const user = response.user;
+      const token = response.authToken; 
 
-      this.SetToken(response.authToken);
-      this.SetUser(response.user);
-      return Promise.resolve(response.user);
+      this.SetToken(token);
+      this.SetUser(user);
+      return Promise.resolve(user);
     } catch (e) {
       return Promise.reject(e);
     }
@@ -28,7 +28,7 @@ export class AccountService {
   public async Logout(): Promise<any> {
     try {
       await this.authService.signOut();
-      await this.http.post(this.baseUrl + 'account/logout', null).toPromise();
+      await this.api.Logout();
 
       this.RemoveToken();
       this.RemoveUser();
@@ -61,16 +61,4 @@ export class AccountService {
   private RemoveUser() {
     localStorage.removeItem('user');
   }
-}
-
-class User {
-  id: number;
-  name: string;
-  email: string;
-  pictureUrl: string;
-}
-
-class LoginResponse {
-  authToken: string;
-  user: User;
 }
