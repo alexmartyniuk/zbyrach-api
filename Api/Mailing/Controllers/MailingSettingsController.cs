@@ -57,7 +57,11 @@ namespace MediumGrabber.Api.Mailing
 
             var savedSettings = await _mailingSettingService.GetByUser(currentUser);
 
-            return Ok(savedSettings);
+            return Ok(new MailingSettingsDto
+            {
+                ScheduleType = _cronService.ExpressionToSchedule(savedSettings.Schedule),
+                NumberOfArticles = savedSettings.NumberOfArticles
+            });
         }
     }
 }

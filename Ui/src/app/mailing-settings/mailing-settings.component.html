@@ -1,3 +1,18 @@
 <p>mailing-settings works!</p>
+<div>
+    <div>Number of articles:</div>
+    <div><input type="number" [(ngModel)]="NumberOfArticles" ></div>
+</div>
+
+<div>
+    <div>Schedule:</div>
+    <div>
+        <select [(ngModel)]="Schedule">
+            <option *ngFor="let item of ScheduleValues" [value]="item.key">{{item.value}}</option>
+         </select>
+    </div>
+</div>
+
+<button (click)="Save()">Save</button>
 
 <a routerLink="/tags">Previous</a>

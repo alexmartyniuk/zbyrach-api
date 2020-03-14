@@ -8,10 +8,12 @@ namespace MediumGrabber.Api.Mailing
     public class MailingSettingsService
     {
         private readonly ApplicationContext _db;
+        private readonly CronService _cronService;
 
-        public MailingSettingsService(ApplicationContext db)
+        public MailingSettingsService(ApplicationContext db, CronService cronService)
         {
             _db = db;
+            _cronService = cronService;
         }
 
         public async Task<MailingSettings> GetByUser(User user)
@@ -25,7 +27,7 @@ namespace MediumGrabber.Api.Mailing
                 settings = new MailingSettings
                 {
                     UserId = user.Id,
-                    Schedule = "0 0 12 * * FRI",
+                    Schedule = _cronService.ScheduleToExpression(ScheduleType.EveryWeek),
                     NumberOfArticles = 5
                 };
             }
@@ -41,13 +43,18 @@ namespace MediumGrabber.Api.Mailing
             {
                 existingSettings = new MailingSettings
                 {
-                    UserId = user.Id
+                    UserId = user.Id,
+                    NumberOfArticles = settings.NumberOfArticles,
+                    Schedule = settings.Schedule
                 };
                 _db.MailingSettings.Add(existingSettings);
             }
-
-            existingSettings.NumberOfArticles = settings.NumberOfArticles;
-            existingSettings.Schedule = settings.Schedule;
+            else
+            {
+                existingSettings.NumberOfArticles = settings.NumberOfArticles;
+                existingSettings.Schedule = settings.Schedule;
+                _db.MailingSettings.Update(existingSettings);
+            }
 
             return await _db.SaveChangesAsync() > 0;
         }
