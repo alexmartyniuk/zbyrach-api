@@ -10,17 +10,27 @@ export class AccountService {
 
   constructor(private api: ApiService, private authService: AuthService) { }
 
-  public async Login(): Promise<User> {
+  public async LoginWithGoogle(): Promise<User> {
     try {
-      const googleResponse = await this.authService.signIn(GoogleLoginProvider.PROVIDER_ID);
-      const response = await this.api.Login(googleResponse);
-      const user = response.user;
-      const token = response.authToken; 
-
-      this.SetToken(token);
-      this.SetUser(user);
-      return Promise.resolve(user);
+      const googleResponse = await this.authService
+        .signIn(GoogleLoginProvider.PROVIDER_ID);
+      return this.LoginByToken(googleResponse.idToken);
     } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+
+  public async LoginByToken(token: string): Promise<User> {
+    try {
+      const response = await this.api.Login(token);
+
+      this.SetToken(response.token);
+      this.SetUser(response.user);
+
+      return Promise.resolve(response.user);
+    } catch (e) {
+      this.RemoveToken();
+      this.RemoveUser();
       return Promise.reject(e);
     }
   }

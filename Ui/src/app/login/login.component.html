@@ -1,3 +1,11 @@
 <h5>{{resultMessage}}</h5>
-<button (click)="LogInWithGoogle()"> Google Login </button>
-<button  (click)="LogOut()" class="btn btn-success">Sign Out</button>
+
+<div *ngIf="!IsLogedIn">
+    <button (click)="LogInWithGoogle()"> Google Login </button>
+</div>
+
+<div *ngIf="IsLogedIn">
+    <h3>{{ UserName }}</h3>
+    <img src="{{UserPictureUrl}}"/>
+    <button (click)="LogOut()" class="btn btn-success">Logout</button>
+</div>

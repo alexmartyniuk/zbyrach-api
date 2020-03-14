@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -54,9 +55,16 @@ namespace MediumGrabber.Api.Account
 
         public async Task<GoogleToken> ValidateGoogleToken(string idToken)
         {
-            var response = await _http.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}");
-
-            return JsonSerializer.Deserialize<GoogleToken>(response);
+            try
+            {
+                var response = await _http.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}");
+                return JsonSerializer.Deserialize<GoogleToken>(response);
+            }
+            catch (HttpRequestException e)
+            {
+                Debug.WriteLine(e);
+                return null;
+            }
         }
 
         public AccessToken CreateFromGoogleToken(GoogleToken googleToken, string authToken)

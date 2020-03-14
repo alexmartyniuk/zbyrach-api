@@ -13,6 +13,10 @@ import { TagsSelectorComponent } from './tags-selector/tags-selector.component';
 import { TagComponent } from './tag/tag.component';
 import { LoginComponent } from './login/login.component';
 import { TokenInterceptorService } from './services/token-interceptor.service';
+import { MailingSettingsComponent } from './mailing-settings/mailing-settings.component';
+import { Routes, RouterModule } from '@angular/router';
+import { NotFoundComponent } from './not-found/not-found.component';
+import { TagSettingsComponent } from './tag-settings/tag-settings.component';
 
 let config = new AuthServiceConfig([
   {
@@ -24,12 +28,22 @@ export function provideConfig() {
   return config;
 }
 
+const appRoutes: Routes = [
+  { path: '', redirectTo: 'tags', pathMatch:'full' },
+  { path: 'tags', component: TagSettingsComponent },
+  { path: 'mailing', component: MailingSettingsComponent },
+  { path: '**', component: NotFoundComponent }
+];
+
 @NgModule({
   declarations: [
     AppComponent,
     TagsSelectorComponent,
     TagComponent,
-    LoginComponent
+    LoginComponent,
+    MailingSettingsComponent,
+    TagSettingsComponent,
+    NotFoundComponent
   ],
   imports: [
     BrowserModule,
@@ -39,7 +53,8 @@ export function provideConfig() {
     ReactiveFormsModule,
     TagInputModule,
     HttpClientModule,
-    SocialLoginModule.initialize(config)
+    SocialLoginModule.initialize(config),
+    RouterModule.forRoot(appRoutes)
   ],
   providers: [
     {

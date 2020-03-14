@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from 'angularx-social-login';
 import { GoogleLoginProvider } from 'angularx-social-login';
 import { AccountService } from '../services/account.service';
+import { User } from '../models/user';
 
 @Component({
   selector: 'app-login',
@@ -10,41 +11,54 @@ import { AccountService } from '../services/account.service';
 })
 export class LoginComponent implements OnInit {
 
-  //create array to store user data we need
-  userData: any[] = [];
+  public IsLogedIn: boolean = false;
+  public UserName: string = "";
+  public UserPictureUrl: string = "";
 
-  // create a field to hold error messages so we can bind it to our        template
-  resultMessage: string;
+  constructor(private accountService: AccountService) { }
 
-  constructor(private authService: AuthService, private accountService: AccountService) { }
-
-  ngOnInit() {
-    //some code
+  async ngOnInit() {
+    const token = this.accountService.GetToken();
+    if (token) {
+      const user = await this.accountService.LoginByToken(token);
+      this.setLogedIn(user);
+      console.log('User has loged in by token');
+    }
   }
 
-  //logIn with google method. Takes the platform (Google) parameter.
-  public LogInWithGoogle(): void {
-    this.accountService.Login().then(
-      (user) => {
-        console.log('success', user);
-        this.resultMessage = user.email;
-      },
-      (error) => {
-        this.resultMessage = error;
-        console.log(error);
-      }
-    );
+  public async LogInWithGoogle(): Promise<void> {
+    try {
+      const user = await this.accountService.LoginWithGoogle();
+      this.setLogedIn(user);
+
+      console.log('User has loged in with Google');
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  public LogOut(): void {
-    this.accountService.Logout().then(
-      () => {
-        console.log('User has signed out');
-      },
-      (error) => {
-        this.resultMessage = error;
-        console.log(error);
-      }
-    );
+  public async LogOut(): Promise<void> {
+    try {
+      await this.accountService.Logout();
+      this.setLogedOut();
+      console.log('User has loged out');
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
+
+  private setLogedIn(user:User) {
+    this.UserName = user.name;
+    this.UserPictureUrl = user.pictureUrl;
+
+    this.IsLogedIn = true;
+  }
+
+  private setLogedOut() {
+    this.UserName = "";
+    this.UserPictureUrl = "";
+
+    this.IsLogedIn = false;
   }
 }

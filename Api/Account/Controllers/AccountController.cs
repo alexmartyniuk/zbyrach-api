@@ -26,7 +26,7 @@ namespace MediumGrabber.Api.Account
                 return BadRequest(new JsonResult(errors));
             }
 
-            var token = await _accountService.Login(loginData.IdToken);
+            var token = await _accountService.Login(loginData.Token);
             if (token == null)
             {
                 return Unauthorized("Token is invalid");
@@ -34,7 +34,7 @@ namespace MediumGrabber.Api.Account
 
             var response = new LoginResponseDto
             {
-                AuthToken = token.Token,
+                Token = token.Token,
                 User = new UserDto
                 {
                     Id = token.User.Id,

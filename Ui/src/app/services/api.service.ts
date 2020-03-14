@@ -12,9 +12,9 @@ export class ApiService {
 
   private baseUrl = 'https://localhost:5001/';
 
-  public async Login(googleResponse: any): Promise<LoginResponse> {
+  public async Login(token: string): Promise<LoginResponse> {
     return this.http
-        .post<LoginResponse>(this.baseUrl + 'account/login', googleResponse)
+        .post<LoginResponse>(this.baseUrl + 'account/login', { token: token })
         .toPromise();
   }
 
@@ -42,9 +42,16 @@ export class ApiService {
     const url = this.baseUrl +'tags/my';
     return this.http.post(url, tags).toPromise();
   }
+
+  public async GetMyMailingSettins(): Promise<Tag[]> {
+    const url = this.baseUrl +'tags/my';
+    return this.http
+      .get<Tag[]>(url)
+      .toPromise();
+  }
 }
 
 class LoginResponse {
-  authToken: string;
+  token: string;
   user: User;
 }
