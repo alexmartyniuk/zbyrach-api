@@ -11,11 +11,16 @@ namespace MediumGrabber.Api.Mailing
     {
         private readonly UsersService _userService;
         private readonly MailingSettingsService _mailingSettingService;
+        private readonly CronService _cronService;
 
-        public MailingSettingsController(UsersService userService, MailingSettingsService mailingSettingService)
+        public MailingSettingsController(
+            UsersService userService, 
+            MailingSettingsService mailingSettingService,
+            CronService cronService)
         {
             _userService = userService;
             _mailingSettingService = mailingSettingService;
+            _cronService = cronService;
         }
 
         [HttpGet]
@@ -27,7 +32,7 @@ namespace MediumGrabber.Api.Mailing
             var settings = await _mailingSettingService.GetByUser(currentUser);
             return Ok(new MailingSettingsDto
             {
-                Schedule = settings.Schedule,
+                ScheduleType = _cronService.ExpressionToSchedule(settings.Schedule),
                 NumberOfArticles = settings.NumberOfArticles
             });
         }
@@ -47,11 +52,11 @@ namespace MediumGrabber.Api.Mailing
             await _mailingSettingService.SetByUser(currentUser, new MailingSettings
             {
                 NumberOfArticles = settings.NumberOfArticles,
-                Schedule = settings.Schedule
+                Schedule = _cronService.ScheduleToExpression(settings.ScheduleType)
             });
 
             var savedSettings = await _mailingSettingService.GetByUser(currentUser);
-                        
+
             return Ok(savedSettings);
         }
     }

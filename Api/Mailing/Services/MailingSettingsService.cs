@@ -19,7 +19,7 @@ namespace MediumGrabber.Api.Mailing
             var settings = await _db
                 .MailingSettings
                 .SingleOrDefaultAsync(m => m.UserId == user.Id);
-            
+
             if (settings == null)
             {
                 settings = new MailingSettings
@@ -39,15 +39,17 @@ namespace MediumGrabber.Api.Mailing
 
             if (existingSettings == null)
             {
-                existingSettings = new MailingSettings();
-                existingSettings.UserId = user.Id;
+                existingSettings = new MailingSettings
+                {
+                    UserId = user.Id
+                };
                 _db.MailingSettings.Add(existingSettings);
             }
 
             existingSettings.NumberOfArticles = settings.NumberOfArticles;
             existingSettings.Schedule = settings.Schedule;
 
-            return await _db.SaveChangesAsync() > 0;                
+            return await _db.SaveChangesAsync() > 0;
         }
     }
 }

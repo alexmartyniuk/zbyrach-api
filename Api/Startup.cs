@@ -1,4 +1,5 @@
 using MediumGrabber.Api.Account;
+using MediumGrabber.Api.Mailing;
 using MediumGrabber.Api.Migrations;
 using MediumGrabber.Api.Tags;
 using Microsoft.AspNetCore.Authentication;
@@ -29,7 +30,7 @@ namespace MediumGrabber.Api
                 .AddScheme<AuthenticationSchemeOptions, AuthenticationHandler>("TokenAuthentication", null);
             services.AddAuthorization();
 
-            services.AddControllers();           
+            services.AddControllers();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDbContext<ApplicationContext>();
@@ -38,6 +39,8 @@ namespace MediumGrabber.Api
             services.AddScoped<AccountService>();
             services.AddScoped<MediumTagsService>();
             services.AddScoped<TagService>();
+            services.AddScoped<CronService>();
+            services.AddScoped<MailingSettingsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,7 +59,7 @@ namespace MediumGrabber.Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            app.UseAuthentication();    
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

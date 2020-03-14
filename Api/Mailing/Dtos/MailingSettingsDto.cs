@@ -5,7 +5,7 @@ namespace MediumGrabber.Api.Mailing
     public class MailingSettingsDto
     {
         [Required]
-        public string Schedule { get; set; }
+        public ScheduleType ScheduleType { get; set; }
 
         [Required]
         public long NumberOfArticles { get; set; }
