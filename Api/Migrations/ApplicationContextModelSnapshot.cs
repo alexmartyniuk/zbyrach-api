@@ -101,14 +101,24 @@ namespace MediumGrabber.Api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("MediumGrabber.Api.Tags.TagUser", b =>
+                {
                     b.Property<long>("UserId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.Property<long>("TagId")
+                        .HasColumnType("INTEGER");
 
-                    b.HasIndex("UserId");
+                    b.HasKey("UserId", "TagId");
 
-                    b.ToTable("Tags");
+                    b.HasIndex("TagId");
+
+                    b.ToTable("TagUsers");
                 });
 
             modelBuilder.Entity("MediumGrabber.Api.Account.AccessToken", b =>
@@ -129,10 +139,16 @@ namespace MediumGrabber.Api.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MediumGrabber.Api.Tags.Tag", b =>
+            modelBuilder.Entity("MediumGrabber.Api.Tags.TagUser", b =>
                 {
+                    b.HasOne("MediumGrabber.Api.Tags.Tag", "Tag")
+                        .WithMany("TagUsers")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MediumGrabber.Api.Account.User", "User")
-                        .WithMany("Tags")
+                        .WithMany("TagUsers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediumGrabber.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20200311220830_TagsAdded")]
-    partial class TagsAdded
+    [Migration("20200315182234_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -69,6 +69,30 @@ namespace MediumGrabber.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MediumGrabber.Api.Mailing.MailingSettings", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("NumberOfArticles")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Schedule")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("MailingSettings");
+                });
+
             modelBuilder.Entity("MediumGrabber.Api.Tags.Tag", b =>
                 {
                     b.Property<long>("Id")
@@ -79,14 +103,24 @@ namespace MediumGrabber.Api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("MediumGrabber.Api.Tags.TagUser", b =>
+                {
                     b.Property<long>("UserId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.Property<long>("TagId")
+                        .HasColumnType("INTEGER");
 
-                    b.HasIndex("UserId");
+                    b.HasKey("UserId", "TagId");
 
-                    b.ToTable("Tags");
+                    b.HasIndex("TagId");
+
+                    b.ToTable("TagUsers");
                 });
 
             modelBuilder.Entity("MediumGrabber.Api.Account.AccessToken", b =>
@@ -98,10 +132,25 @@ namespace MediumGrabber.Api.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MediumGrabber.Api.Tags.Tag", b =>
+            modelBuilder.Entity("MediumGrabber.Api.Mailing.MailingSettings", b =>
                 {
                     b.HasOne("MediumGrabber.Api.Account.User", "User")
-                        .WithMany("Tags")
+                        .WithOne("MailingSettings")
+                        .HasForeignKey("MediumGrabber.Api.Mailing.MailingSettings", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MediumGrabber.Api.Tags.TagUser", b =>
+                {
+                    b.HasOne("MediumGrabber.Api.Tags.Tag", "Tag")
+                        .WithMany("TagUsers")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediumGrabber.Api.Account.User", "User")
+                        .WithMany("TagUsers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

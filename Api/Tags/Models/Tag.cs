@@ -1,5 +1,4 @@
-using System;
-using MediumGrabber.Api.Account;
+using System.Collections.Generic;
 
 namespace MediumGrabber.Api.Tags
 {
@@ -7,7 +6,8 @@ namespace MediumGrabber.Api.Tags
     {
         public long Id { get; set; }
         public string Name {get; set;}
-        public long UserId { get; set; }
-        public User User { get; set; }
+        public ICollection<TagUser> TagUsers { get; set; }
+
+        public override string ToString() => Name;
     }
 }

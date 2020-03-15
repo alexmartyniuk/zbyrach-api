@@ -25,33 +25,73 @@ namespace MediumGrabber.Api.Tags
         {
             var originalUser = _db.Users.Find(user.Id);
             return await _db.Tags
-                .Where(t => t.UserId == originalUser.Id)
+                .Include(t => t.TagUsers)
+                .Where(t => t.TagUsers.Any(tu => tu.UserId == originalUser.Id))
                 .ToListAsync();
         }
 
         public async Task SetByUser(User user, IEnumerable<Tag> tags)
         {
             var originalUser = _db.Users.Find(user.Id);
-            var tagsExisting = await _db.Tags
-                .Where(t => t.UserId == originalUser.Id)
+            tags = await SaveTagsIfNeeded(tags);
+
+            var tagsExisting = await _db
+                .TagUsers
+                .Include(tu => tu.Tag)
+                .Where(tu => tu.UserId == originalUser.Id)
+                .Select(tu => tu.Tag)
                 .ToListAsync();
 
             var tagsToAdd = tags
                 .Except(tagsExisting, _tagsComparer)
                 .ToList();
-            var tagsToRemove = tagsExisting
+            var tagToRemove = tagsExisting
                 .Except(tags, _tagsComparer)
                 .ToList();
 
-            foreach (var tag in tagsToAdd)
-            {
-                tag.User = originalUser;
-            }
+            var tagUsersToAdd = tagsToAdd
+                .Select(t => new TagUser
+                {
+                    TagId = t.Id,
+                    Tag = t,
+                    UserId = originalUser.Id,
+                    User = originalUser
+                })
+                .ToList();
+            _db.TagUsers.AddRange(tagUsersToAdd);
 
-            _db.Tags.AddRange(tagsToAdd);
-            _db.Tags.RemoveRange(tagsToRemove);
+            var tagUsersToRemove = tagToRemove
+                .Select(t => new TagUser
+                {
+                    TagId = t.Id,
+                    Tag = t,
+                    UserId = originalUser.Id,
+                    User = originalUser
+                })
+                .ToList();
+            _db.TagUsers.RemoveRange(tagUsersToRemove);
 
             await _db.SaveChangesAsync();
+        }
+
+        private async Task<IEnumerable<Tag>> SaveTagsIfNeeded(IEnumerable<Tag> tags)
+        {
+            var tagNames = tags
+                .Select(t => t.Name)
+                .ToList();
+            var tagsExisting = _db.Tags
+                .Where(t => tagNames.Contains(t.Name))
+                .ToList();
+            var tagsToAdd = tags
+                .Except(tagsExisting, _tagsComparer)
+                .ToList();
+            _db.Tags.AddRange(tagsToAdd);
+            await _db.SaveChangesAsync();
+
+            return await _db
+                .Tags
+                .Where(t => tagNames.Contains(t.Name))
+                .ToListAsync();
         }
     }
 
