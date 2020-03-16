@@ -34,7 +34,7 @@ STORY
 {
   "title": <STRING>,
   "description": <STRING>,
-  "PublicatedAt": <DATE>,
+  "publicatedAt": <DATE>,
   "url": <URL>,
   "illustrationUrl": <URL>,
   "author": 
