@@ -43,11 +43,6 @@ namespace MediumGrabber.Api.Tags
             }
         }
 
-        internal Task GetMyTags()
-        {
-            throw new NotImplementedException();
-        }
-
         private TagFullDto GetFullTag(IDocument mainDocument, IDocument archiveDocument)
         {
             var name = mainDocument

@@ -124,6 +124,48 @@ namespace MediumGrabber.Api.Migrations
                     b.ToTable("Articles");
                 });
 
+            modelBuilder.Entity("MediumGrabber.Api.Articles.ArticleTag", b =>
+                {
+                    b.Property<long>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TagId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ArticleId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("ArticleTags");
+                });
+
+            modelBuilder.Entity("MediumGrabber.Api.Articles.ArticleUser", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ArticleId", "UserId");
+
+                    b.ToTable("ArticleUsers");
+                });
+
             modelBuilder.Entity("MediumGrabber.Api.Mailing.MailingSettings", b =>
                 {
                     b.Property<long>("Id")
@@ -146,33 +188,6 @@ namespace MediumGrabber.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("MailingSettings");
-                });
-
-            modelBuilder.Entity("MediumGrabber.Api.Readings.Reading", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("ArticleId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ReadAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ReadTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("ArticleId", "UserId");
-
-                    b.ToTable("Readings");
                 });
 
             modelBuilder.Entity("MediumGrabber.Api.Tags.Tag", b =>
@@ -217,8 +232,38 @@ namespace MediumGrabber.Api.Migrations
             modelBuilder.Entity("MediumGrabber.Api.Articles.Article", b =>
                 {
                     b.HasOne("MediumGrabber.Api.Tags.Tag", "Tag")
-                        .WithMany("Articles")
+                        .WithMany()
                         .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MediumGrabber.Api.Articles.ArticleTag", b =>
+                {
+                    b.HasOne("MediumGrabber.Api.Articles.Article", "Article")
+                        .WithMany("ArticleTags")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediumGrabber.Api.Tags.Tag", "Tag")
+                        .WithMany("ArticleTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MediumGrabber.Api.Articles.ArticleUser", b =>
+                {
+                    b.HasOne("MediumGrabber.Api.Articles.Article", "Article")
+                        .WithMany("ArticleUsers")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediumGrabber.Api.Account.User", "User")
+                        .WithMany("ArticleUsers")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -228,21 +273,6 @@ namespace MediumGrabber.Api.Migrations
                     b.HasOne("MediumGrabber.Api.Account.User", "User")
                         .WithOne("MailingSettings")
                         .HasForeignKey("MediumGrabber.Api.Mailing.MailingSettings", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("MediumGrabber.Api.Readings.Reading", b =>
-                {
-                    b.HasOne("MediumGrabber.Api.Articles.Article", "Article")
-                        .WithMany("Readings")
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MediumGrabber.Api.Account.User", "User")
-                        .WithMany("Readings")
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

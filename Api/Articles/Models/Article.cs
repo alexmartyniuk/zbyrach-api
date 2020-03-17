@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MediumGrabber.Api.Readings;
 using MediumGrabber.Api.Tags;
 
 namespace MediumGrabber.Api.Articles
@@ -22,6 +21,7 @@ namespace MediumGrabber.Api.Articles
         public long CommentsCount { get; set; }
         public long LikesCount { get; set; }
         public string ReadTime { get; set; }
-        public ICollection<Reading> Readings { get; set; }
+        public ICollection<ArticleUser> ArticleUsers { get; set; }
+        public ICollection<ArticleTag> ArticleTags { get; set; }
     }
 }

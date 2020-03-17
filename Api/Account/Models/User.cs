@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using MediumGrabber.Api.Articles;
 using MediumGrabber.Api.Mailing;
-using MediumGrabber.Api.Readings;
 using MediumGrabber.Api.Tags;
 
 namespace MediumGrabber.Api.Account
@@ -14,6 +14,6 @@ namespace MediumGrabber.Api.Account
         public ICollection<AccessToken> AccessTokens { get; set; }
         public ICollection<TagUser> TagUsers { get; set; }
         public MailingSettings MailingSettings { get; set; }
-        public ICollection<Reading> Readings { get; set; }
+        public ICollection<ArticleUser> ArticleUsers { get; set; }
     }
 }

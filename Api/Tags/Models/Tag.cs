@@ -8,7 +8,7 @@ namespace MediumGrabber.Api.Tags
         public long Id { get; set; }
         public string Name {get; set;}
         public ICollection<TagUser> TagUsers { get; set; }
-        public ICollection<Article> Articles { get; internal set; }
+        public ICollection<ArticleTag> ArticleTags { get; set; }
 
         public override string ToString() => Name;
     }

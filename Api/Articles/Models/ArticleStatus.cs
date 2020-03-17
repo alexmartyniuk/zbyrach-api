@@ -1,0 +1,11 @@
+namespace MediumGrabber.Api.Articles
+{
+    public enum ArticleStatus
+    {
+        Undefined = 0,
+        Added = 1,
+        Sent = 2,
+        Opened = 3,
+        Removed = 4
+    }
+}

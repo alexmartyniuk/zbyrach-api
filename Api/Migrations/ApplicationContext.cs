@@ -2,7 +2,6 @@ using MediumGrabber.Api.Account;
 using MediumGrabber.Api.Articles;
 using MediumGrabber.Api.Mailing;
 using MediumGrabber.Api.Tags;
-using MediumGrabber.Api.Readings;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediumGrabber.Api.Migrations
@@ -15,7 +14,8 @@ namespace MediumGrabber.Api.Migrations
         public DbSet<TagUser> TagUsers { get; set; }
         public DbSet<MailingSettings> MailingSettings { get; set; }
         public DbSet<Article> Articles { get; set; }
-        public DbSet<Reading> Readings { get; set; }
+        public DbSet<ArticleUser> ArticleUsers { get; set; }
+        public DbSet<ArticleTag> ArticleTags { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
@@ -98,24 +98,35 @@ namespace MediumGrabber.Api.Migrations
                .IsUnique();
             modelBuilder.Entity<Article>()
                .Property(m => m.Url)
-               .IsRequired();
-            modelBuilder.Entity<Article>()
-               .HasOne(a => a.Tag)
-               .WithMany(t => t.Articles);
+               .IsRequired();            
 
-            modelBuilder.Entity<Reading>()
+            modelBuilder.Entity<ArticleUser>()
                .Property(r => r.Id)
                .IsRequired();
-            modelBuilder.Entity<Reading>()
+            modelBuilder.Entity<ArticleUser>()
                .HasIndex(r => new { r.ArticleId, r.UserId });
-            modelBuilder.Entity<Reading>()
+            modelBuilder.Entity<ArticleUser>()
                .HasOne(r => r.User)
-               .WithMany(u => u.Readings)
+               .WithMany(u => u.ArticleUsers)
                .HasForeignKey(r => r.UserId);
-            modelBuilder.Entity<Reading>()
+            modelBuilder.Entity<ArticleUser>()
                .HasOne(r => r.Article)
-               .WithMany(a => a.Readings)
+               .WithMany(a => a.ArticleUsers)
                .HasForeignKey(r => r.ArticleId);
+            modelBuilder.Entity<ArticleUser>()
+               .HasIndex(au => au.Status)
+               .IsUnique();
+
+            modelBuilder.Entity<ArticleTag>()
+               .HasKey(at => new { at.ArticleId, at.TagId });
+            modelBuilder.Entity<ArticleTag>()
+               .HasOne(at => at.Article)
+               .WithMany(a => a.ArticleTags)
+               .HasForeignKey(at => at.ArticleId);
+            modelBuilder.Entity<ArticleTag>()
+               .HasOne(at => at.Tag)
+               .WithMany(t => t.ArticleTags)
+               .HasForeignKey(at => at.TagId);
         }
     }
 }
