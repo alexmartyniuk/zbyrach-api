@@ -2,11 +2,16 @@ import { Injectable } from '@angular/core';
 import { GoogleLoginProvider, AuthService } from 'angularx-social-login';
 import { ApiService } from './api.service';
 import { User } from '../models/user';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountService {
+
+  private loginStateChangeSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  public LoginStateChanged$: Observable<boolean> = this.loginStateChangeSubject.asObservable();
 
   constructor(private api: ApiService, private authService: AuthService) { }
 
@@ -31,6 +36,7 @@ export class AccountService {
     } catch (e) {
       this.RemoveToken();
       this.RemoveUser();
+
       return Promise.reject(e);
     }
   }
@@ -42,6 +48,7 @@ export class AccountService {
 
       this.RemoveToken();
       this.RemoveUser();
+
       return Promise.resolve();
     } catch (e) {
       return Promise.reject(e);
@@ -64,11 +71,19 @@ export class AccountService {
     return JSON.parse(localStorage.getItem('user'));
   }
 
+  public IsLogedIn(): boolean {
+    return this.loginStateChangeSubject.value;
+  }
+
   private SetUser(user: User) {
     localStorage.setItem('user', JSON.stringify(user));
+    this.loginStateChangeSubject.next(true);
+    console.log('User has loged in');
   }
 
   private RemoveUser() {
     localStorage.removeItem('user');
+    this.loginStateChangeSubject.next(false);
+    console.log('User has loged out');
   }
 }

@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -17,6 +17,7 @@ import { MailingSettingsComponent } from './mailing-settings/mailing-settings.co
 import { Routes, RouterModule } from '@angular/router';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { TagSettingsComponent } from './tag-settings/tag-settings.component';
+import { AppInitService } from './services/app-init.service';
 
 let config = new AuthServiceConfig([
   {
@@ -26,6 +27,10 @@ let config = new AuthServiceConfig([
 ]);
 export function provideConfig() {
   return config;
+}
+
+export function appInit(appInitService: AppInitService) {
+  return () => appInitService.Login();
 }
 
 const appRoutes: Routes = [
@@ -65,6 +70,12 @@ const appRoutes: Routes = [
       provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptorService,
       multi: true
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: appInit,
+      multi: true,
+      deps: [AppInitService]
     }
   ],
   bootstrap: [AppComponent]

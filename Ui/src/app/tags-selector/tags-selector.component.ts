@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Tag } from '../models/tag';
 import { TagService } from '../services/tag.service';
+import { AccountService } from '../services/account.service';
 
 @Component({
   selector: 'mg-tags-selector',
@@ -16,14 +17,21 @@ export class TagsSelectorComponent implements OnInit {
 
   tags: Map<string, Tag> = new Map<string, Tag>();
 
-  constructor(private tagService: TagService) { }
+  constructor(private tagService: TagService, private accountService: AccountService) { }
 
   async ngOnInit() {
-    const tags = await this.tagService.getMyTags();
+    this.accountService.LoginStateChanged$.subscribe(async (logedin) => {
+      if (logedin) {
+        const tags = await this.tagService.getMyTags();
 
-    for (let tag of tags) {
-      this.addTag(tag);
-    }
+        for (let tag of tags) {
+          this.addTag(tag);
+        }
+      } else {
+        this.tags.clear();
+        this.relatedTags.clear();
+      }
+    });
   }
 
   async addCurrentTag(): Promise<any> {
@@ -32,7 +40,7 @@ export class TagsSelectorComponent implements OnInit {
     }
 
     if (!this.tags.get(this.currentTagName)) {
-      let newTag: Tag = {'name': this.currentTagName, 'url': null, 'parentTagName': null};
+      let newTag: Tag = { 'name': this.currentTagName, 'url': null, 'parentTagName': null };
       this.tags.set(this.currentTagName, newTag);
       await this.getRelatedTags(newTag);
     }
