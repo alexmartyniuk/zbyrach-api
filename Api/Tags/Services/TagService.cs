@@ -21,10 +21,10 @@ namespace MediumGrabber.Api.Tags
             _db = db;
         }
 
-        public async Task<IEnumerable<Tag>> GetByUser(User user)
+        public Task<List<Tag>> GetByUser(User user)
         {
             var originalUser = _db.Users.Find(user.Id);
-            return await _db.Tags
+            return _db.Tags
                 .Include(t => t.TagUsers)
                 .Where(t => t.TagUsers.Any(tu => tu.UserId == originalUser.Id))
                 .ToListAsync();

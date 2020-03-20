@@ -1,4 +1,5 @@
 using MediumGrabber.Api.Account;
+using MediumGrabber.Api.Articles;
 using MediumGrabber.Api.Mailing;
 using MediumGrabber.Api.Migrations;
 using MediumGrabber.Api.Tags;
@@ -30,6 +31,7 @@ namespace MediumGrabber.Api
                 .AddScheme<AuthenticationSchemeOptions, AuthenticationHandler>("TokenAuthentication", null);
             services.AddAuthorization();
 
+            services.AddHostedService<ArticlesSearcher>();
             services.AddControllers();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -41,6 +43,7 @@ namespace MediumGrabber.Api
             services.AddScoped<TagService>();
             services.AddScoped<CronService>();
             services.AddScoped<MailingSettingsService>();
+            services.AddScoped<ArticleService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

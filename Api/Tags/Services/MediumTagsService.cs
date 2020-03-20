@@ -117,6 +117,8 @@ namespace MediumGrabber.Api.Tags
                 .Attributes["title"]
                 .Value;
 
+            url = NormalizeUrl(url);
+
             return new StoryDto
             {
                 Author = author,
@@ -129,6 +131,13 @@ namespace MediumGrabber.Api.Tags
                 LikesCount = likesCount,
                 ReadingTime = readTime
             };
+        }
+
+        private string NormalizeUrl(string url)
+        {
+            var builder = new UriBuilder(new Uri(url));
+            builder.Query = string.Empty;            
+            return builder.Uri.ToString();
         }
 
         private string GetDescription(IElement article)

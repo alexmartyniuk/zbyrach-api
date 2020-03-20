@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using MediumGrabber.Api.Migrations;
@@ -20,6 +22,14 @@ namespace MediumGrabber.Api.Account
         public Task<User> GetUserByEmail(string email)
         {
             return _db.Users.SingleOrDefaultAsync(u => u.Email == email);
+        }
+
+        public Task<List<User>> GetUsersWithTags()
+        {
+            return _db.Users
+                .Include(u => u.TagUsers)
+                .ThenInclude(tu => tu.Tag)
+                .ToListAsync();
         }
 
         public async Task<User> AddNewUser(User user)
