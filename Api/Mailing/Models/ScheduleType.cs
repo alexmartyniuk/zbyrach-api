@@ -3,8 +3,9 @@ namespace MediumGrabber.Api.Mailing
     public enum ScheduleType
     {
         Undefined = 0,
-        EveryDay = 1,
-        EveryWeek = 2,
-        EveryMonth = 3
+        Never = 1,
+        EveryDay = 2,
+        EveryWeek = 3,
+        EveryMonth = 4
     }
 }

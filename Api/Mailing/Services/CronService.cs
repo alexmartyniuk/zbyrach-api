@@ -9,7 +9,8 @@ namespace MediumGrabber.Api.Mailing
         {
             {"0 0 9 ? * * *", ScheduleType.EveryDay},
             {"0 0 9 ? * FRI *", ScheduleType.EveryWeek},
-            {"0 0 9 L * ?", ScheduleType.EveryMonth}
+            {"0 0 9 L * ?", ScheduleType.EveryMonth},
+            {"", ScheduleType.Never}
         };
 
         public ScheduleType ExpressionToSchedule(string expression)
