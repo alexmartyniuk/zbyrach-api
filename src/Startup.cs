@@ -40,7 +40,11 @@ namespace MediumGrabber.Api
             });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<PdfService>();
+            services.AddSingleton<FileService>();
+
             services.AddDbContext<ApplicationContext>();
+            
             services.AddScoped<UsersService>();
             services.AddScoped<TokenService>();
             services.AddScoped<AccountService>();
