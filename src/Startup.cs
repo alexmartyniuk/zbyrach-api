@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
 namespace MediumGrabber.Api
 {
@@ -33,6 +34,10 @@ namespace MediumGrabber.Api
 
             services.AddHostedService<ArticlesSearcher>();
             services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Zbyrach API", Version = "v1" });
+            });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDbContext<ApplicationContext>();
@@ -60,6 +65,13 @@ namespace MediumGrabber.Api
                 .AllowAnyHeader());
 
             app.UseHttpsRedirection();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Zbyrach API");
+                c.RoutePrefix = string.Empty;
+            });
 
             app.UseRouting();
             app.UseAuthentication();
