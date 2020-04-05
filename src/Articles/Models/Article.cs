@@ -7,12 +7,12 @@ namespace MediumGrabber.Api.Articles
     public class Article
     {
         public long Id { get; set; }
-        public long TagId { get; set; }
-        public Tag Tag { get; set; }
         public string ExternalId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime PublicatedAt { get; set; }
+        public DateTime FoundAt { get; set; }
+        public string FileName { get; set; }
         public string Url { get; set; }
         public string IllustrationUrl { get; set; }
         public string AuthorName { get; set; }

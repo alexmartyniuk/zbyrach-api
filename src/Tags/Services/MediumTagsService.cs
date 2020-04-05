@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
-using MediumGrabber.Api.Account;
 
 namespace MediumGrabber.Api.Tags
 {
@@ -74,19 +75,21 @@ namespace MediumGrabber.Api.Tags
                         Name = link.TextContent.Trim(),
                         Url = link.Attributes["href"].Value
                     }
-                );
+                ).ToList();
         }
 
         private IEnumerable<StoryDto> GetTopStories(IDocument document)
         {
             return document
                 .QuerySelectorAll("div.postArticle")
-                .Select(article => GetStory(article));
+                .Select(article => GetStory(article))
+                .ToList();
         }
 
         private StoryDto GetStory(IElement article)
         {
             var author = GetAuthor(article);
+
             var title = article
                 .QuerySelector("h3")
                 .TextContent
@@ -125,19 +128,60 @@ namespace MediumGrabber.Api.Tags
                 Title = title,
                 Description = description,
                 Url = url,
-                PublicatedAt = date,
+                PublicatedAt = GetDateTime(date),
                 IllustrationUrl = illustrationUrl,
-                CommentsCount = commentsCount,
-                LikesCount = likesCount,
+                CommentsCount = GetNumber(commentsCount),
+                LikesCount = GetNumber(likesCount),
                 ReadingTime = readTime
             };
         }
 
         private string NormalizeUrl(string url)
         {
-            var builder = new UriBuilder(new Uri(url));
-            builder.Query = string.Empty;            
+            var builder = new UriBuilder(new Uri(url))
+            {
+                Query = string.Empty
+            };
             return builder.Uri.ToString();
+        }
+
+        private DateTime GetDateTime(string value)
+        {
+            var result = DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+            return result;
+        }
+
+        private long GetNumber(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return 0;
+            }
+
+            var mutiplicator = 1000;
+            var value = GetByRegexp(text, @"(\d*)K", 1);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                mutiplicator = 1;
+                value = GetByRegexp(text, @"(\d*)\D", 1);
+            }
+
+            long.TryParse(value, out long result);
+            return mutiplicator * result;
+        }
+
+        private string GetByRegexp(string input, string regexp, int group, string defaultValue = "")
+        {
+            var match = Regex.Match(input,
+                regexp,
+                RegexOptions.IgnoreCase);
+
+            if (!match.Success)
+            {
+                return defaultValue;
+            }
+
+            return match.Groups[group].Value;
         }
 
         private string GetDescription(IElement article)

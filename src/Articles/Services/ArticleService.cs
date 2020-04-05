@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,21 @@ namespace MediumGrabber.Api.Articles
             return _db.Articles                
                 .Where(a => urls.Contains(a.Url))
                 .ToListAsync();
+        }
+
+        public async Task SaveOne(Article article)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Article> GetByExternalIdWithTags(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal async Task UpdateOne(Article originalArticle)
+        {
+            throw new NotImplementedException();
         }
     }
 }
