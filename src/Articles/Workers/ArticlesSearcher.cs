@@ -48,6 +48,7 @@ namespace MediumGrabber.Api.Articles
             var mediumTagService = scope.ServiceProvider.GetRequiredService<MediumTagsService>();
             var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
 
+            // TODO: move to tags service
             var users = await userService.GetUsersWithTags();
             var tags = users
                 .SelectMany(u => u.TagUsers)
@@ -60,51 +61,54 @@ namespace MediumGrabber.Api.Articles
                 var topStories = result.TopStories;  
                 foreach (var story in result.TopStories)
                 {
-                    await SaveArticle(articleService, story, tag);
+                    await SaveArticleIfNeeded(articleService, story, tag);
                 }
             }
         }
 
-        private async Task SaveArticle(ArticleService articleService, StoryDto story, Tag tag)
+        private async Task SaveArticleIfNeeded(ArticleService articleService, StoryDto story, Tag tag)
         {
-            var id = GetId(story.Url);
+            var externalId = GetId(story.Url);
 
-            var originalArticle = await articleService.GetByExternalIdWithTags(id);
+            var originalArticle = await articleService.GetByExternalIdWithTags(externalId);
             if (originalArticle == null)
             {
-                var fileName = await SavePdf(story.Url);
-                var newArticle = new Article
-                {
-                    FoundAt = DateTime.UtcNow,
-                    ExternalId = id,
-                    FileName = fileName,
-                    PublicatedAt = story.PublicatedAt,
-                    IllustrationUrl = story.IllustrationUrl,
-                    Description = story.Description,
-                    ReadTime = story.ReadingTime,
-                    Title = story.Title,
-                    Url = story.Url,
-                    LikesCount = story.LikesCount,
-                    CommentsCount = story.CommentsCount,
-                    AuthorName = story.Author.Name,
-                    AuthorPhoto = story.Author.AvatarUrl
-                };
-                await articleService.SaveOne(newArticle);
+                originalArticle = await SaveArticle(articleService, story, externalId);   
             } 
-            else 
+            
+            if (!originalArticle.ArticleTags
+                .Select(at => at.Tag.Name)
+                .Contains(tag.Name))
             {
-                if (!originalArticle.ArticleTags
-                    .Select(at => at.Tag.Name)
-                    .Contains(tag.Name))
+                originalArticle.ArticleTags.Add(new ArticleTag
                 {
-                    originalArticle.ArticleTags.Add(new ArticleTag
-                    {
-                        ArticleId = originalArticle.Id,
-                        TagId = tag.Id,
-                    });
-                    await articleService.UpdateOne(originalArticle);
-                }    
-            }            
+                    ArticleId = originalArticle.Id,
+                    TagId = tag.Id,
+                });
+                await articleService.UpdateOne(originalArticle);
+            }                
+        }
+
+        private async Task<Article> SaveArticle(ArticleService articleService, StoryDto story, string externalId)
+        {
+            var fileName = await SavePdf(story.Url);
+            var newArticle = new Article
+            {
+                FoundAt = DateTime.UtcNow,
+                ExternalId = externalId,
+                FileName = fileName,
+                PublicatedAt = story.PublicatedAt,
+                IllustrationUrl = story.IllustrationUrl,
+                Description = story.Description,
+                ReadTime = story.ReadingTime,
+                Title = story.Title,
+                Url = story.Url,
+                LikesCount = story.LikesCount,
+                CommentsCount = story.CommentsCount,
+                AuthorName = story.Author.Name,
+                AuthorPhoto = story.Author.AvatarUrl
+            };
+            return await articleService.SaveOne(newArticle);
         }
 
         private async Task<string> SavePdf(string url)
@@ -112,15 +116,13 @@ namespace MediumGrabber.Api.Articles
             var fileName = GetFileName(url);
             fileName = Path.ChangeExtension(fileName, ".pdf");
 
-            if (!_fileService.IsFileExists(fileName))
+            if (_fileService.IsFileExists(fileName))
             {
-                var stream = await _pdfService.ConvertUrlToPdf(url);
-                await _fileService.PutFile(fileName, stream);
+                throw new Exception($"File already exists: {fileName}");
             }
-            else
-            {
-                System.Console.WriteLine($"File already exists: {fileName}");
-            }
+
+            var stream = await _pdfService.ConvertUrlToPdf(url);
+            await _fileService.PutFile(fileName, stream);
 
             return fileName;
         }

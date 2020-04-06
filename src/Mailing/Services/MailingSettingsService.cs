@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Cronos;
 using MediumGrabber.Api.Account;
 using MediumGrabber.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +49,8 @@ namespace MediumGrabber.Api.Mailing
                 {
                     UserId = user.Id,
                     NumberOfArticles = settings.NumberOfArticles,
-                    Schedule = settings.Schedule
+                    Schedule = settings.Schedule,
+                    UpdatedAt = DateTime.UtcNow,
                 };
                 _db.MailingSettings.Add(existingSettings);
             }
@@ -53,10 +58,37 @@ namespace MediumGrabber.Api.Mailing
             {
                 existingSettings.NumberOfArticles = settings.NumberOfArticles;
                 existingSettings.Schedule = settings.Schedule;
+                existingSettings.UpdatedAt = DateTime.UtcNow;
+                existingSettings.LastSentAt = default;
                 _db.MailingSettings.Update(existingSettings);
             }
 
             return await _db.SaveChangesAsync() > 0;
+        }
+
+        public async Task<List<MailingSettings>> GetScheduledFor(TimeSpan schedulePeriod)
+        {
+            return (await _db.MailingSettings
+                .Include(m => m.User)
+                .ToListAsync())
+                .Where(m => IsApplicable(m, schedulePeriod))
+                .ToList();
+        }
+
+        // TODO: Move to CRON service
+        private bool IsApplicable(MailingSettings settings, TimeSpan schedulePeriod)
+        {
+            var expression = CronExpression.Parse(settings.Schedule);
+            var dateFrom = settings.LastSentAt != default ? settings.LastSentAt : settings.UpdatedAt;
+            dateFrom = DateTime.SpecifyKind(dateFrom, DateTimeKind.Utc);
+
+            var nextUtc = expression.GetNextOccurrence(dateFrom);
+            if (!nextUtc.HasValue)
+            {
+                return false;
+            }
+
+            return (nextUtc < DateTime.UtcNow + schedulePeriod);
         }
     }
 }

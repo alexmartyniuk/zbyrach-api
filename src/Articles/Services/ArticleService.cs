@@ -23,19 +23,26 @@ namespace MediumGrabber.Api.Articles
                 .ToListAsync();
         }
 
-        public async Task SaveOne(Article article)
+        public async Task<Article> SaveOne(Article article)
         {
-            throw new NotImplementedException();
+            _db.Articles.Add(article);
+            await _db.SaveChangesAsync();
+
+            return await _db.Articles.FindAsync(article.Id);
         }
 
-        public async Task<Article> GetByExternalIdWithTags(string id)
+        public async Task<Article> GetByExternalIdWithTags(string extenalId)
         {
-            throw new NotImplementedException();
+            return await _db.Articles
+                .Include(a => a.ArticleTags)
+                .ThenInclude(at => at.Tag)
+                .SingleOrDefaultAsync(a => a.ExternalId == extenalId);
         }
 
-        internal async Task UpdateOne(Article originalArticle)
+        public async Task UpdateOne(Article originalArticle)
         {
-            throw new NotImplementedException();
+            _db.Articles.Update(originalArticle);
+            await _db.SaveChangesAsync();
         }
     }
 }

@@ -21,7 +21,13 @@ namespace MediumGrabber.Api.Articles
         public long CommentsCount { get; set; }
         public long LikesCount { get; set; }
         public string ReadTime { get; set; }
-        public ICollection<ArticleUser> ArticleUsers { get; set; }
-        public ICollection<ArticleTag> ArticleTags { get; set; }
+        public ICollection<ArticleUser> ArticleUsers { get; }
+        public ICollection<ArticleTag> ArticleTags { get; }
+
+        public Article()
+        {
+            ArticleUsers = new List<ArticleUser>();
+            ArticleTags = new List<ArticleTag>();
+        }
     }
 }

@@ -33,6 +33,7 @@ namespace MediumGrabber.Api
             services.AddAuthorization();
 
             services.AddHostedService<ArticlesSearcher>();
+            services.AddHostedService<NotificationsSender>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -44,7 +45,7 @@ namespace MediumGrabber.Api
             services.AddSingleton<FileService>();
 
             services.AddDbContext<ApplicationContext>();
-            
+
             services.AddScoped<UsersService>();
             services.AddScoped<TokenService>();
             services.AddScoped<AccountService>();

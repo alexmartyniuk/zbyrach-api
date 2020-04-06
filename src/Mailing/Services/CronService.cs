@@ -7,9 +7,9 @@ namespace MediumGrabber.Api.Mailing
     {
         private readonly Dictionary<string, ScheduleType> _map = new Dictionary<string, ScheduleType>
         {
-            {"0 0 9 ? * * *", ScheduleType.EveryDay},
-            {"0 0 9 ? * FRI *", ScheduleType.EveryWeek},
-            {"0 0 9 L * ?", ScheduleType.EveryMonth},
+            {"0 9 ? * *", ScheduleType.EveryDay},
+            {"0 9 ? * FRI", ScheduleType.EveryWeek},
+            {"0 9 L * ?", ScheduleType.EveryMonth},
             {"", ScheduleType.Never}
         };
 
