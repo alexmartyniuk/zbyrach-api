@@ -1,4 +1,4 @@
-﻿using MediumGrabber.Api.Account;
+﻿using Zbyrach.Api.Account;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,7 +10,7 @@ using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MediumGrabber.Api.Mailing
+namespace Zbyrach.Api.Mailing
 {
     public class NotificationsSender : BackgroundService
     {

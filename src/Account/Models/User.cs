@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using MediumGrabber.Api.Articles;
-using MediumGrabber.Api.Mailing;
-using MediumGrabber.Api.Tags;
+using Zbyrach.Api.Articles;
+using Zbyrach.Api.Mailing;
+using Zbyrach.Api.Tags;
 
-namespace MediumGrabber.Api.Account
+namespace Zbyrach.Api.Account
 {
     public class User
     {

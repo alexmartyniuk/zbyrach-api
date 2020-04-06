@@ -1,7 +1,7 @@
-using MediumGrabber.Api.Account;
+using Zbyrach.Api.Account;
 using System;
 
-namespace MediumGrabber.Api.Mailing
+namespace Zbyrach.Api.Mailing
 {
     public class MailingSettings
     {

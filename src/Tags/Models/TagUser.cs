@@ -1,7 +1,7 @@
 using System;
-using MediumGrabber.Api.Account;
+using Zbyrach.Api.Account;
 
-namespace MediumGrabber.Api.Tags
+namespace Zbyrach.Api.Tags
 {
     public class TagUser
     {

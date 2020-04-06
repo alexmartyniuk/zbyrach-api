@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MediumGrabber.Api.Tags
+namespace Zbyrach.Api.Tags
 {
     public class ArchiveDto
     {

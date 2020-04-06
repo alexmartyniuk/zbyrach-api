@@ -1,4 +1,4 @@
-namespace MediumGrabber.Api.Articles
+namespace Zbyrach.Api.Articles
 {
     public enum ArticleStatus
     {

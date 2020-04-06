@@ -4,10 +4,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using MediumGrabber.Api.Migrations;
+using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediumGrabber.Api.Account
+namespace Zbyrach.Api.Account
 {
     public class TokenService
     {

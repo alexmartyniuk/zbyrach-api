@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "MediumGrabber.Api": {
+    "Zbyrach.Api": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "weatherforecast",

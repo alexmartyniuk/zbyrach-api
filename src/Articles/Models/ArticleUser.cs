@@ -1,6 +1,6 @@
-using MediumGrabber.Api.Account;
+using Zbyrach.Api.Account;
 
-namespace MediumGrabber.Api.Articles
+namespace Zbyrach.Api.Articles
 {
     public class ArticleUser
     {

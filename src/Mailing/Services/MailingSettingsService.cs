@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cronos;
-using MediumGrabber.Api.Account;
-using MediumGrabber.Api.Migrations;
+using Zbyrach.Api.Account;
+using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediumGrabber.Api.Mailing
+namespace Zbyrach.Api.Mailing
 {
     public class MailingSettingsService
     {

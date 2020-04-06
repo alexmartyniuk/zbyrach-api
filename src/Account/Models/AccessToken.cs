@@ -1,6 +1,6 @@
 using System;
 
-namespace MediumGrabber.Api.Account
+namespace Zbyrach.Api.Account
 {
     public class AccessToken
     {

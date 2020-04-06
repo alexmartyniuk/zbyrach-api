@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MediumGrabber.Api.Migrations;
+using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediumGrabber.Api.Articles
+namespace Zbyrach.Api.Articles
 {
     public class ArticleService
     {        

@@ -1,10 +1,10 @@
-using MediumGrabber.Api.Account;
-using MediumGrabber.Api.Articles;
-using MediumGrabber.Api.Mailing;
-using MediumGrabber.Api.Tags;
+using Zbyrach.Api.Account;
+using Zbyrach.Api.Articles;
+using Zbyrach.Api.Mailing;
+using Zbyrach.Api.Tags;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediumGrabber.Api.Migrations
+namespace Zbyrach.Api.Migrations
 {
     public class ApplicationContext : DbContext
     {
@@ -17,9 +17,9 @@ namespace MediumGrabber.Api.Migrations
         public DbSet<ArticleUser> ArticleUsers { get; set; }
         public DbSet<ArticleTag> ArticleTags { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
-            options.UseSqlite("Data Source=medium_grabber.db");
+            
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

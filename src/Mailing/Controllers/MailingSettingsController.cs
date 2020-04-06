@@ -1,10 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
-using MediumGrabber.Api.Account;
+using Zbyrach.Api.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MediumGrabber.Api.Mailing
+namespace Zbyrach.Api.Mailing
 {
     [Authorize]
     public class MailingSettingsController : Controller

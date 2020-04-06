@@ -1,6 +1,6 @@
 using System;
 
-namespace MediumGrabber.Api.Tags
+namespace Zbyrach.Api.Tags
 {
     public class StoryDto
     {

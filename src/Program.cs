@@ -1,12 +1,11 @@
 using System;
-using MediumGrabber.Api.Migrations;
+using Zbyrach.Api.Migrations;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace MediumGrabber.Api
+namespace Zbyrach.Api
 {
     public class Program
     {

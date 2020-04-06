@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-using MediumGrabber.Api.Account;
-using MediumGrabber.Api.Migrations;
+using Zbyrach.Api.Account;
+using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediumGrabber.Api.Tags
+namespace Zbyrach.Api.Tags
 {
     public class TagService
     {

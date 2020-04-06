@@ -2,13 +2,13 @@ using System.Linq;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MediumGrabber.Api.Account;
+using Zbyrach.Api.Account;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MediumGrabber.Api.Tags;
+using Zbyrach.Api.Tags;
 using System.IO;
 
-namespace MediumGrabber.Api.Articles
+namespace Zbyrach.Api.Articles
 {
     public class ArticlesSearcher : BackgroundService
     {

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using MediumGrabber.Api.Tags;
+using Zbyrach.Api.Tags;
 
-namespace MediumGrabber.Api.Articles
+namespace Zbyrach.Api.Articles
 {
     public class Article
     {

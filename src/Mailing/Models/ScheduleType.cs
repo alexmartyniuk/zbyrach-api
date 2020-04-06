@@ -1,4 +1,4 @@
-namespace MediumGrabber.Api.Mailing
+namespace Zbyrach.Api.Mailing
 {
     public enum ScheduleType
     {

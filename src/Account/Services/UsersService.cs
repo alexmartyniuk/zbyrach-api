@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using MediumGrabber.Api.Migrations;
+using Zbyrach.Api.Migrations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediumGrabber.Api.Account
+namespace Zbyrach.Api.Account
 {
     public class UsersService
     {

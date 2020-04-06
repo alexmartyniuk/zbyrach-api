@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MediumGrabber.Api.Account
+namespace Zbyrach.Api.Account
 {
     [Authorize]
     public class AccountController : Controller

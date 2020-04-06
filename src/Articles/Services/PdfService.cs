@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using PuppeteerSharp;
 
-namespace MediumGrabber.Api.Articles
+namespace Zbyrach.Api.Articles
 {
     public class PdfService
     {

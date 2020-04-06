@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MediumGrabber.Api.Mailing
+namespace Zbyrach.Api.Mailing
 {
     public class CronService
     {

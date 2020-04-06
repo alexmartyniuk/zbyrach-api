@@ -1,8 +1,8 @@
-using MediumGrabber.Api.Account;
-using MediumGrabber.Api.Articles;
-using MediumGrabber.Api.Mailing;
-using MediumGrabber.Api.Migrations;
-using MediumGrabber.Api.Tags;
+using Zbyrach.Api.Account;
+using Zbyrach.Api.Articles;
+using Zbyrach.Api.Mailing;
+using Zbyrach.Api.Migrations;
+using Zbyrach.Api.Tags;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,8 +11,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace MediumGrabber.Api
+namespace Zbyrach.Api
 {
     public class Startup
     {
@@ -37,14 +38,22 @@ namespace MediumGrabber.Api
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Zbyrach API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Zbyrach API",
+                    Version = "v1"
+                });
             });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<PdfService>();
             services.AddSingleton<FileService>();
 
-            services.AddDbContext<ApplicationContext>();
+            services.AddDbContext<ApplicationContext>(options =>
+            {
+                // TODO: temporaty solution, need to be replaced with SQL database
+                options.UseSqlite($"Data Source={Configuration["Database"]}");
+            });
 
             services.AddScoped<UsersService>();
             services.AddScoped<TokenService>();

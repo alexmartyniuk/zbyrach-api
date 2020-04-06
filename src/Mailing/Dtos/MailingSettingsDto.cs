@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MediumGrabber.Api.Mailing
+namespace Zbyrach.Api.Mailing
 {
     public class MailingSettingsDto
     {

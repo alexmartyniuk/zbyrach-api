@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace MediumGrabber.Api.Account
+namespace Zbyrach.Api.Account
 {
     public class AccountService
     {
