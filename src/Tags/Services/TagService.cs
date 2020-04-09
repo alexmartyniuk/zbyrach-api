@@ -74,6 +74,20 @@ namespace Zbyrach.Api.Tags
             await _db.SaveChangesAsync();
         }
 
+        public async Task<IEnumerable<Tag>> GetTagsForSearch()
+        {     
+            // TODO: take into account schedule settings for users        
+            var users = await _db.Users
+                .Include(u => u.TagUsers)
+                .ThenInclude(tu => tu.Tag)
+                .ToListAsync();
+            var tags = users
+                .SelectMany(u => u.TagUsers)
+                .Select(tu => tu.Tag)
+                .Distinct(_tagsComparer);
+            return tags;
+        }
+
         private async Task<IEnumerable<Tag>> SaveTagsIfNeeded(IEnumerable<Tag> tags)
         {
             var tagNames = tags

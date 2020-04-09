@@ -47,15 +47,10 @@ namespace Zbyrach.Api.Articles
             var userService = scope.ServiceProvider.GetRequiredService<UsersService>();
             var mediumTagService = scope.ServiceProvider.GetRequiredService<MediumTagsService>();
             var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
+            var tagService = scope.ServiceProvider.GetRequiredService<TagService>();
 
-            // TODO: move to tags service
-            var users = await userService.GetUsersWithTags();
-            var tags = users
-                .SelectMany(u => u.TagUsers)
-                .Select(tu => tu.Tag)
-                .Distinct(); //TODO: add comparer to distinct tags
-
-            foreach (var tag in tags)
+            var tagsForSearch = await tagService.GetTagsForSearch();            
+            foreach (var tag in tagsForSearch)
             {
                 var result = await mediumTagService.GetFullTagInfoByName(tag.Name);
                 var topStories = result.TopStories;  

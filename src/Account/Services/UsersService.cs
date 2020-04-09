@@ -24,14 +24,6 @@ namespace Zbyrach.Api.Account
             return _db.Users.SingleOrDefaultAsync(u => u.Email == email);
         }
 
-        public Task<List<User>> GetUsersWithTags()
-        {
-            return _db.Users
-                .Include(u => u.TagUsers)
-                .ThenInclude(tu => tu.Tag)
-                .ToListAsync();
-        }
-
         public async Task<User> AddNewUser(User user)
         {
             if (user.Id != default)

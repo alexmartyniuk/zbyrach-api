@@ -1,3 +1,4 @@
+using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -19,12 +20,17 @@ namespace Zbyrach.Api.Articles
                 return null;
             }
 
+            var browserFetcher = Puppeteer.CreateBrowserFetcher(new BrowserFetcherOptions
+            {
+                Path = _chromiumDownloadDirectory
+            });           
+            await browserFetcher.DownloadAsync(BrowserFetcher.DefaultRevision);                      
+ 
             var options = new LaunchOptions
             {
                 Headless = true,
                 Args = new[]
-                {
-                    // TODO: Running as root without --no-sandbox is not supported. See https://crbug.com/638180.
+                {                    
                     "--no-sandbox",
                     "--disable-plugins", "--incognito", "--disable-sync", "--disable-gpu", "--disable-speech-api",
                     "--disable-remote-fonts", "--disable-shared-workers", "--disable-webgl", "--no-experiments",
@@ -33,15 +39,8 @@ namespace Zbyrach.Api.Articles
                     "--disable-permissions-api", "--disable-background-networking", "--disable-3d-apis",
                     "--disable-bundled-ppapi-flash",
                  },
-                 // TODO: Change this to using _chromiumDownloadDirectory field
-                 ExecutablePath = @"d:\Projects\Zbyrach\chromium\Win64-706915\chrome-win\chrome.exe",
+                 ExecutablePath = browserFetcher.GetExecutablePath(BrowserFetcher.DefaultRevision),
             };
-
-            var browserFetcher = Puppeteer.CreateBrowserFetcher(new BrowserFetcherOptions
-            {
-                Path = _chromiumDownloadDirectory
-            });
-            await browserFetcher.DownloadAsync(BrowserFetcher.DefaultRevision);          
 
             using var browser = await Puppeteer.LaunchAsync(options);
             using var page = await browser.NewPageAsync();

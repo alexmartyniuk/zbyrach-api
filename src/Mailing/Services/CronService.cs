@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cronos;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -36,5 +37,15 @@ namespace Zbyrach.Api.Mailing
             return string.Empty;
         }
 
+        public bool HasTimeCome(DateTime dateFrom, TimeSpan schedulePeriod, string expression)
+        {
+            var nextUtc = CronExpression.Parse(expression).GetNextOccurrence(dateFrom);
+            if (!nextUtc.HasValue)
+            {
+                return false;
+            }
+
+            return (nextUtc < DateTime.UtcNow + schedulePeriod);
+        }
     }
 }

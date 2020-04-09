@@ -12,12 +12,12 @@ namespace Zbyrach.Api.Mailing
     public class MailingSettingsService
     {
         private readonly ApplicationContext _db;
-        private readonly CronService _cronService;
+        private readonly CronService _cronService;        
 
         public MailingSettingsService(ApplicationContext db, CronService cronService)
         {
             _db = db;
-            _cronService = cronService;
+            _cronService = cronService;            
         }
 
         public async Task<MailingSettings> GetByUser(User user)
@@ -28,15 +28,20 @@ namespace Zbyrach.Api.Mailing
 
             if (settings == null)
             {
-                settings = new MailingSettings
-                {
-                    UserId = user.Id,
-                    Schedule = _cronService.ScheduleToExpression(ScheduleType.EveryWeek),
-                    NumberOfArticles = 5
-                };
+                settings = GetDefaultSettings(user);
             }
 
             return settings;
+        }
+
+        private MailingSettings GetDefaultSettings(User user)
+        {
+            return new MailingSettings
+            {
+                UserId = user.Id,
+                Schedule = _cronService.ScheduleToExpression(ScheduleType.EveryWeek),
+                NumberOfArticles = 5
+            };
         }
 
         public async Task<bool> SetByUser(User user, MailingSettings settings)
@@ -75,20 +80,14 @@ namespace Zbyrach.Api.Mailing
                 .ToList();
         }
 
-        // TODO: Move to CRON service
         private bool IsApplicable(MailingSettings settings, TimeSpan schedulePeriod)
         {
-            var expression = CronExpression.Parse(settings.Schedule);
-            var dateFrom = settings.LastSentAt != default ? settings.LastSentAt : settings.UpdatedAt;
+            var dateFrom = settings.LastSentAt != default
+                ? settings.LastSentAt
+                : settings.UpdatedAt;
             dateFrom = DateTime.SpecifyKind(dateFrom, DateTimeKind.Utc);
 
-            var nextUtc = expression.GetNextOccurrence(dateFrom);
-            if (!nextUtc.HasValue)
-            {
-                return false;
-            }
-
-            return (nextUtc < DateTime.UtcNow + schedulePeriod);
+            return _cronService.HasTimeCome(dateFrom, schedulePeriod, settings.Schedule);
         }
     }
 }
