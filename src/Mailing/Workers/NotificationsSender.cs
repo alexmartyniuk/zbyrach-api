@@ -9,6 +9,8 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
+using Zbyrach.Api.Articles;
+using System.Text;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -46,19 +48,32 @@ namespace Zbyrach.Api.Mailing
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var mailingSettingsService = scope.ServiceProvider.GetRequiredService<MailingSettingsService>();
+            var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
 
             foreach (var settings in await mailingSettingsService.GetScheduledFor(TimeSpan.FromMinutes(60)))
             {
                 var email = settings.User.Email;
                 var subject = "Your articles from Zbyrach";
-                var message = GetMessage(settings.User);
-                SendMessage(email, subject, message);
+                var body = await GetMessageBody(settings.User, articleService);
+                SendMessage(email, subject, body);
             }
         }
 
-        private string GetMessage(User user)
+        private async Task<string> GetMessageBody(User user, ArticleService articleService)
         {
-            return $"Hello {user.Name},";
+            var body = new StringBuilder();
+            body.AppendLine($"Hello {user.Name},");
+            body.AppendLine();
+
+            var articles = await articleService.GetAllForUser(user); 
+            foreach (var article in articles)
+            {
+                body.AppendLine($"{article.Title} ({article.ReadTime})");
+                body.AppendLine($"{article.Url}");
+                body.AppendLine();
+            }
+
+            return body.ToString();
         }
 
         private void SendMessage(string to, string subject, string body)

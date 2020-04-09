@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
+using Zbyrach.Api.Account;
 
 namespace Zbyrach.Api.Articles
 {
@@ -43,6 +44,20 @@ namespace Zbyrach.Api.Articles
         {
             _db.Articles.Update(originalArticle);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<List<Article>> GetAllForUser(User user)
+        {
+            var tagIds = await _db.Tags
+                .Where(t => t.TagUsers.Any(tu => tu.UserId == user.Id))
+                .Select(t => t.Id)
+                .ToListAsync();
+
+            var result = await _db.Articles
+                .Where(a => a.ArticleTags.Any(at => tagIds.Contains(at.TagId)))
+                .ToListAsync();
+
+            return result;
         }
     }
 }
