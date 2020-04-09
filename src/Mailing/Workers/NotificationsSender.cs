@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Zbyrach.Api.Articles;
+using System.Text;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -45,20 +47,33 @@ namespace Zbyrach.Api.Mailing
         private async Task SendNotifications(CancellationToken stoppingToken)
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            var mailingSettingsService = scope.ServiceProvider.GetRequiredService<MailingSettingsService>();            
+            var mailingSettingsService = scope.ServiceProvider.GetRequiredService<MailingSettingsService>();
+            var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
 
             foreach (var settings in await mailingSettingsService.GetScheduledFor(TimeSpan.FromMinutes(_sendMailsBeforeInMinutes)))
             {
                 var email = settings.User.Email;
                 var subject = "Your articles from Zbyrach";
-                var message = GetMessage(settings.User);
-                await _mailService.SendMessage(email, subject, message);
+                var body = await GetMessageBody(settings.User, articleService);
+                await _mailService.SendMessage(email, subject, body);
             }
         }
 
-        private string GetMessage(User user)
+        private async Task<string> GetMessageBody(User user, ArticleService articleService)
         {
-            return $"Hello {user.Name},";
-        }       
+            var body = new StringBuilder();
+            body.AppendLine($"Hello {user.Name},");
+            body.AppendLine();
+
+            var articles = await articleService.GetAllForUser(user); 
+            foreach (var article in articles)
+            {
+                body.AppendLine($"{article.Title} ({article.ReadTime})");
+                body.AppendLine($"{article.Url}");
+                body.AppendLine();
+            }
+
+            return body.ToString();
+        }        
     }
 }
