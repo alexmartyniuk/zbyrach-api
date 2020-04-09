@@ -11,7 +11,7 @@ namespace Zbyrach.Api.Articles
         private readonly string _chromiumDownloadDirectory;
         public PdfService(IConfiguration configuration)
         {
-            _chromiumDownloadDirectory = configuration["ChromiumDownloadDirectory"];   
+            _chromiumDownloadDirectory = configuration["ChromiumDownloadDirectory"];
         }
         public async Task<Stream> ConvertUrlToPdf(string url)
         {
@@ -23,23 +23,39 @@ namespace Zbyrach.Api.Articles
             var browserFetcher = Puppeteer.CreateBrowserFetcher(new BrowserFetcherOptions
             {
                 Path = _chromiumDownloadDirectory
-            });           
-            await browserFetcher.DownloadAsync(BrowserFetcher.DefaultRevision);                      
- 
+            });
+            await browserFetcher.DownloadAsync(BrowserFetcher.DefaultRevision);
+
             var options = new LaunchOptions
             {
                 Headless = true,
                 Args = new[]
-                {                    
+                {
                     "--no-sandbox",
-                    "--disable-plugins", "--incognito", "--disable-sync", "--disable-gpu", "--disable-speech-api",
-                    "--disable-remote-fonts", "--disable-shared-workers", "--disable-webgl", "--no-experiments",
-                    "--no-first-run", "--no-default-browser-check", "--no-wifi", "--no-pings", "--no-service-autorun",
-                    "--disable-databases", "--disable-default-apps", "--disable-demo-mode", "--disable-notifications",
-                    "--disable-permissions-api", "--disable-background-networking", "--disable-3d-apis",
+                    "--disable-plugins",
+                    "--incognito",
+                    "--disable-sync",
+                    "--disable-gpu",
+                    "--disable-speech-api",
+                    "--disable-remote-fonts",
+                    "--disable-shared-workers",
+                    "--disable-webgl",
+                    "--no-experiments",
+                    "--no-first-run",
+                    "--no-default-browser-check",
+                    "--no-wifi",
+                    "--no-pings",
+                    "--no-service-autorun",
+                    "--disable-databases",
+                    "--disable-default-apps",
+                    "--disable-demo-mode",
+                    "--disable-notifications",
+                    "--disable-permissions-api",
+                    "--disable-background-networking",
+                    "--disable-3d-apis",
                     "--disable-bundled-ppapi-flash",
                  },
-                 ExecutablePath = browserFetcher.GetExecutablePath(BrowserFetcher.DefaultRevision),
+                ExecutablePath = browserFetcher.GetExecutablePath(BrowserFetcher.DefaultRevision),
             };
 
             using var browser = await Puppeteer.LaunchAsync(options);

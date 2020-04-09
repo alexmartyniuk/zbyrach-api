@@ -9,6 +9,6 @@ namespace Zbyrach.Api.Articles
         public User User { get; set; }
         public long ArticleId { get; set; }
         public Article Article { get; set; }
-        public ArticleStatus Status { get; set; }        
+        public ArticleStatus Status { get; set; }
     }
 }

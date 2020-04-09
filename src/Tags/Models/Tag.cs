@@ -6,7 +6,7 @@ namespace Zbyrach.Api.Tags
     public class Tag
     {
         public long Id { get; set; }
-        public string Name {get; set;}
+        public string Name { get; set; }
         public ICollection<TagUser> TagUsers { get; set; }
         public ICollection<ArticleTag> ArticleTags { get; set; }
 

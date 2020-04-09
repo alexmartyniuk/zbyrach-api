@@ -34,7 +34,7 @@ namespace Zbyrach.Api.Mailing
                 Subject = subject,
             };
             mailMessage.To.Add(to);
-            client.Send(mailMessage);             
+            client.Send(mailMessage);
         }
     }
 }

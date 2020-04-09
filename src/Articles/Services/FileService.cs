@@ -26,7 +26,7 @@ namespace Zbyrach.Api.Articles
         public async Task PutFile(string fileName, Stream stream)
         {
             using var fileStream = File.Create(GetFullPath(fileName));
-            
+
             stream.Seek(0, SeekOrigin.Begin);
             await stream.CopyToAsync(fileStream);
         }
@@ -34,7 +34,7 @@ namespace Zbyrach.Api.Articles
         public async Task<Stream> GetFile(string fileName)
         {
             using var fileStream = File.OpenRead(GetFullPath(fileName));
-            
+
             var stream = new MemoryStream();
             fileStream.Seek(0, SeekOrigin.Begin);
             await fileStream.CopyToAsync(stream);

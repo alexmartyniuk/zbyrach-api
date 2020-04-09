@@ -49,11 +49,11 @@ namespace Zbyrach.Api.Articles
             var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
             var tagService = scope.ServiceProvider.GetRequiredService<TagService>();
 
-            var tagsForSearch = await tagService.GetTagsForSearch();            
+            var tagsForSearch = await tagService.GetTagsForSearch();
             foreach (var tag in tagsForSearch)
             {
                 var result = await mediumTagService.GetFullTagInfoByName(tag.Name);
-                var topStories = result.TopStories;  
+                var topStories = result.TopStories;
                 foreach (var story in result.TopStories)
                 {
                     await SaveArticleIfNeeded(articleService, story, tag);
@@ -68,9 +68,9 @@ namespace Zbyrach.Api.Articles
             var originalArticle = await articleService.GetByExternalIdWithTags(externalId);
             if (originalArticle == null)
             {
-                originalArticle = await SaveArticle(articleService, story, externalId);   
-            } 
-            
+                originalArticle = await SaveArticle(articleService, story, externalId);
+            }
+
             if (!originalArticle.ArticleTags
                 .Select(at => at.Tag.Name)
                 .Contains(tag.Name))
@@ -81,7 +81,7 @@ namespace Zbyrach.Api.Articles
                     TagId = tag.Id,
                 });
                 await articleService.UpdateOne(originalArticle);
-            }                
+            }
         }
 
         private async Task<Article> SaveArticle(ArticleService articleService, StoryDto story, string externalId)

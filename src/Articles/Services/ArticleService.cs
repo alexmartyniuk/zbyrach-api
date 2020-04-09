@@ -9,17 +9,17 @@ using Zbyrach.Api.Account;
 namespace Zbyrach.Api.Articles
 {
     public class ArticleService
-    {        
-        private readonly ApplicationContext _db;     
+    {
+        private readonly ApplicationContext _db;
 
         public ArticleService(ApplicationContext db)
-        {           
+        {
             _db = db;
         }
 
         public Task<List<Article>> GetByUrls(IEnumerable<string> urls)
-        {            
-            return _db.Articles                
+        {
+            return _db.Articles
                 .Where(a => urls.Contains(a.Url))
                 .ToListAsync();
         }

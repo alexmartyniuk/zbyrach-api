@@ -47,15 +47,15 @@ namespace Zbyrach.Api.Account
         {
             var user = await _usersService.GetCurrentUser();
             var token = await _tokenService.GetTokenByUser(user);
-            if (token== null)
+            if (token == null)
             {
                 throw new Exception("Token was not found for current user.");
             }
-            
+
             if (!await _tokenService.RemoveToken(token))
             {
                 throw new Exception("Token was not removed during logout.");
-            }           
+            }
         }
     }
 }

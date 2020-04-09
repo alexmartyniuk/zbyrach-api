@@ -6,6 +6,6 @@ namespace Zbyrach.Api.Tags
     {
         public IEnumerable<TagDto> RelatedTags { get; set; }
         public IEnumerable<StoryDto> TopStories { get; set; }
-        public ArchiveDto Archive { get; set; }        
+        public ArchiveDto Archive { get; set; }
     }
 }

@@ -75,7 +75,7 @@ namespace Zbyrach.Api.Tags
         }
 
         public async Task<IEnumerable<Tag>> GetTagsForSearch()
-        {     
+        {
             // TODO: take into account schedule settings for users        
             var users = await _db.Users
                 .Include(u => u.TagUsers)

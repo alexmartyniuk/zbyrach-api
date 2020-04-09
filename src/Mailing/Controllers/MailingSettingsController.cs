@@ -14,7 +14,7 @@ namespace Zbyrach.Api.Mailing
         private readonly CronService _cronService;
 
         public MailingSettingsController(
-            UsersService userService, 
+            UsersService userService,
             MailingSettingsService mailingSettingService,
             CronService cronService)
         {

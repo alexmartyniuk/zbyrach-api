@@ -65,7 +65,7 @@ namespace Zbyrach.Api.Mailing
             body.AppendLine($"Hello {user.Name},");
             body.AppendLine();
 
-            var articles = await articleService.GetAllForUser(user); 
+            var articles = await articleService.GetAllForUser(user);
             foreach (var article in articles)
             {
                 body.AppendLine($"{article.Title} ({article.ReadTime})");
@@ -74,6 +74,6 @@ namespace Zbyrach.Api.Mailing
             }
 
             return body.ToString();
-        }        
+        }
     }
 }

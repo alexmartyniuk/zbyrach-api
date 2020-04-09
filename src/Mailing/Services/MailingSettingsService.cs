@@ -12,12 +12,12 @@ namespace Zbyrach.Api.Mailing
     public class MailingSettingsService
     {
         private readonly ApplicationContext _db;
-        private readonly CronService _cronService;        
+        private readonly CronService _cronService;
 
         public MailingSettingsService(ApplicationContext db, CronService cronService)
         {
             _db = db;
-            _cronService = cronService;            
+            _cronService = cronService;
         }
 
         public async Task<MailingSettings> GetByUser(User user)
