@@ -48,6 +48,9 @@ namespace Zbyrach.Api
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<PdfService>();
             services.AddSingleton<FileService>();
+            services.AddSingleton<MailService>();
+            services.AddSingleton<MediumTagsService>();
+            services.AddSingleton<CronService>();
 
             services.AddDbContext<ApplicationContext>(options =>
             {
@@ -57,10 +60,8 @@ namespace Zbyrach.Api
 
             services.AddScoped<UsersService>();
             services.AddScoped<TokenService>();
-            services.AddScoped<AccountService>();
-            services.AddScoped<MediumTagsService>();
-            services.AddScoped<TagService>();
-            services.AddScoped<CronService>();
+            services.AddScoped<AccountService>();            
+            services.AddScoped<TagService>();            
             services.AddScoped<MailingSettingsService>();
             services.AddScoped<ArticleService>();
         }
