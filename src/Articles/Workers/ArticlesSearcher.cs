@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Zbyrach.Api.Tags;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Zbyrach.Api.Articles
 {
@@ -60,6 +61,8 @@ namespace Zbyrach.Api.Articles
                 }
 
                 var tag = pair.Key;
+                var users = pair.Value;
+
                 var result = await _mediumTagsService.GetFullTagInfoByName(tag.Name);
                 var topStories = result.TopStories;
                 foreach (var story in result.TopStories)
@@ -69,19 +72,19 @@ namespace Zbyrach.Api.Articles
                         break;
                     }
 
-                    await SaveArticleIfNeeded(articleService, story, tag);
+                    await SaveArticleIfNeeded(articleService, story, tag, users);
                 }
             }
         }
 
-        private async Task SaveArticleIfNeeded(ArticleService articleService, StoryDto story, Tag tag)
+        private async Task SaveArticleIfNeeded(ArticleService articleService, StoryDto story, Tag tag, List<User> users)
         {
             var externalId = GetId(story.Url);
 
             var originalArticle = await articleService.GetByExternalIdWithTags(externalId);
             if (originalArticle == null)
             {
-                originalArticle = await SaveArticle(articleService, story, externalId);
+                originalArticle = await SaveArticle(articleService, story, externalId, users);
             }
 
             if (!originalArticle.ArticleTags
@@ -97,7 +100,7 @@ namespace Zbyrach.Api.Articles
             }
         }
 
-        private async Task<Article> SaveArticle(ArticleService articleService, StoryDto story, string externalId)
+        private async Task<Article> SaveArticle(ArticleService articleService, StoryDto story, string externalId, List<User> users)
         {
             var fileName = await SavePdf(story.Url);
             var newArticle = new Article
@@ -116,6 +119,18 @@ namespace Zbyrach.Api.Articles
                 AuthorName = story.Author.Name,
                 AuthorPhoto = story.Author.AvatarUrl
             };
+
+            foreach (var user in users)
+            {
+                newArticle.ArticleUsers.Add(new ArticleUser
+                {
+                    Article = newArticle,
+                    UserId = user.Id,
+                    User = user,
+                    Status = ArticleStatus.New
+                });
+            }
+
             return await articleService.SaveOne(newArticle);
         }
 

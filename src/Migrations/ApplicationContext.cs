@@ -113,9 +113,6 @@ namespace Zbyrach.Api.Migrations
                .HasOne(r => r.Article)
                .WithMany(a => a.ArticleUsers)
                .HasForeignKey(r => r.ArticleId);
-            modelBuilder.Entity<ArticleUser>()
-               .HasIndex(au => au.Status)
-               .IsUnique();
 
             modelBuilder.Entity<ArticleTag>()
                .HasKey(at => new { at.ArticleId, at.TagId });
