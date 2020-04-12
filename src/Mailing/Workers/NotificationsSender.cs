@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Zbyrach.Api.Articles;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -52,20 +53,25 @@ namespace Zbyrach.Api.Mailing
 
             foreach (var settings in await mailingSettingsService.GetScheduledFor(TimeSpan.FromMinutes(_sendMailsBeforeInMinutes)))
             {
+                if (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                var articles = await articleService.GetNewForUser(settings.User);
+
                 var email = settings.User.Email;
                 var subject = "Your articles from Zbyrach";
-                var body = await GetMessageBody(settings.User, articleService);
+                var body = GetMessageBody(settings.User, articles);
                 await _mailService.SendMessage(email, subject, body);
             }
         }
 
-        private async Task<string> GetMessageBody(User user, ArticleService articleService)
-        {
+        private string GetMessageBody(User user, List<Article> articles)        {
             var body = new StringBuilder();
             body.AppendLine($"Hello {user.Name},");
             body.AppendLine();
-
-            var articles = await articleService.GetAllForUser(user);
+            
             foreach (var article in articles)
             {
                 body.AppendLine($"{article.Title} ({article.ReadTime})");

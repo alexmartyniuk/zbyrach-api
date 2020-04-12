@@ -46,7 +46,7 @@ namespace Zbyrach.Api.Articles
             await _db.SaveChangesAsync();
         }
 
-        public async Task<List<Article>> GetAllForUser(User user)
+        public async Task<List<Article>> GetAllForUserByTags(User user)
         {
             var tagIds = await _db.Tags
                 .Where(t => t.TagUsers.Any(tu => tu.UserId == user.Id))
@@ -55,6 +55,17 @@ namespace Zbyrach.Api.Articles
 
             var result = await _db.Articles
                 .Where(a => a.ArticleTags.Any(at => tagIds.Contains(at.TagId)))
+                .ToListAsync();
+
+            return result;
+        }
+
+        public async Task<List<Article>> GetNewForUser(User user)
+        {
+            var result = await _db.ArticleUsers
+                .Include(au => au.Article)
+                .Where(au => au.UserId == user.Id && au.Status == ArticleStatus.New)
+                .Select(au => au.Article)
                 .ToListAsync();
 
             return result;
