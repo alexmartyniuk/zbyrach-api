@@ -15,5 +15,6 @@ namespace Zbyrach.Api.Account
         public ICollection<TagUser> TagUsers { get; set; }
         public MailingSettings MailingSettings { get; set; }
         public ICollection<ArticleUser> ArticleUsers { get; set; }
+        public override string ToString() => Email;
     }
 }

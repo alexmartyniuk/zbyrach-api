@@ -15,15 +15,18 @@ namespace Zbyrach.Api.Articles
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly FileService _fileService;
         private readonly PdfService _pdfService;
+        private readonly MediumTagsService _mediumTagsService;
 
         public ArticlesSearcher(
             IServiceScopeFactory serviceScopeFactory,
             FileService fileService,
-            PdfService pdfService)
+            PdfService pdfService,
+            MediumTagsService mediumTagsService)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _fileService = fileService;
             _pdfService = pdfService;
+            _mediumTagsService = mediumTagsService;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -45,17 +48,27 @@ namespace Zbyrach.Api.Articles
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var userService = scope.ServiceProvider.GetRequiredService<UsersService>();
-            var mediumTagService = scope.ServiceProvider.GetRequiredService<MediumTagsService>();
             var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
             var tagService = scope.ServiceProvider.GetRequiredService<TagService>();
 
-            var tagsForSearch = await tagService.GetTagsForSearch();
-            foreach (var tag in tagsForSearch)
+            var tagsForSearch = await tagService.GetTagsWithUsers();
+            foreach (var pair in tagsForSearch)
             {
-                var result = await mediumTagService.GetFullTagInfoByName(tag.Name);
+                if (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                var tag = pair.Key;
+                var result = await _mediumTagsService.GetFullTagInfoByName(tag.Name);
                 var topStories = result.TopStories;
                 foreach (var story in result.TopStories)
                 {
+                    if (stoppingToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
                     await SaveArticleIfNeeded(articleService, story, tag);
                 }
             }

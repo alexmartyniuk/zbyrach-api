@@ -10,14 +10,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Zbyrach.Api.Tags
 {
     public class TagService
-    {
-        private readonly UsersService _userService;
-        private readonly ApplicationContext _db;
+    {        private readonly ApplicationContext _db;
         private readonly TagsComparer _tagsComparer = new TagsComparer();
 
-        public TagService(UsersService userService, ApplicationContext db)
+        public TagService(ApplicationContext db)
         {
-            _userService = userService;
             _db = db;
         }
 
@@ -74,7 +71,7 @@ namespace Zbyrach.Api.Tags
             await _db.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Tag>> GetTagsForSearch()
+        public async Task<Dictionary<Tag, List<User>>> GetTagsWithUsers()
         {
             // TODO: take into account schedule settings for users        
             var users = await _db.Users
@@ -84,7 +81,18 @@ namespace Zbyrach.Api.Tags
             var tags = users
                 .SelectMany(u => u.TagUsers)
                 .Select(tu => tu.Tag)
-                .Distinct(_tagsComparer);
+                .GroupBy(t => t)
+                .ToDictionary(g => g.First(), g => new List<User>());
+
+            foreach (var user in users)            
+            {
+                var userTags = user.TagUsers.Select(tg => tg.Tag);
+                foreach (var userTag in userTags)
+                {
+                    tags[userTag].Add(user);
+                }                
+            }
+
             return tags;
         }
 
