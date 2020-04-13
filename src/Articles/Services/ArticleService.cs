@@ -32,6 +32,44 @@ namespace Zbyrach.Api.Articles
             return await _db.Articles.FindAsync(article.Id);
         }
 
+        public async Task SetStatus(IEnumerable<Article> articles, IEnumerable<User> users, ArticleStatus status)
+        {
+            var articleIds = articles.Select(a => a.Id).ToList();
+            var userIds = users.Select(u => u.Id).ToList();
+
+            // 1. Update existing readings
+            var existingReading = await _db
+                .ArticleUsers
+                .Where(au => articleIds.Contains(au.ArticleId) && userIds.Contains(au.UserId))
+                .ToListAsync();
+            foreach (var reading in existingReading)
+            {
+                reading.Status = status;
+            }
+            _db.ArticleUsers.UpdateRange(existingReading);
+
+            // 2. Add new readings
+            var newArticleUserPairs = articleIds
+                .Join(userIds,
+                    a => true,
+                    u => true,
+                    (articleId, userId) => new { articleId, userId }
+                    )
+                .Where(au => !existingReading.Any(r => r.ArticleId == au.articleId && r.UserId == au.userId));
+            var newReadings = newArticleUserPairs
+                .Select(p => new ArticleUser
+                {
+                    ArticleId = p.articleId,
+                    UserId = p.userId,
+                    Status = status
+                })
+                .ToList();
+            _db.ArticleUsers.AddRange(newReadings);
+
+            // 3. Save changes
+            await _db.SaveChangesAsync();
+        }
+
         public async Task<Article> GetByExternalIdWithTags(string extenalId)
         {
             return await _db.Articles
