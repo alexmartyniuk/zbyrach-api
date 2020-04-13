@@ -81,26 +81,16 @@ namespace Zbyrach.Api.Articles
         {
             var externalId = GetId(story.Url);
 
-            var originalArticle = await articleService.GetByExternalIdWithTags(externalId);
+            var originalArticle = await articleService.GetByExternalId(externalId);
             if (originalArticle == null)
             {
-                originalArticle = await SaveArticle(articleService, story, externalId, users);
-            }
-
-            if (!originalArticle.ArticleTags
-                .Select(at => at.Tag.Name)
-                .Contains(tag.Name))
-            {
-                originalArticle.ArticleTags.Add(new ArticleTag
-                {
-                    ArticleId = originalArticle.Id,
-                    TagId = tag.Id,
-                });
-                await articleService.UpdateOne(originalArticle);
+                originalArticle = await SaveArticle(articleService, story, externalId);
+                await articleService.SetStatus(originalArticle, users, ArticleStatus.New);
+                await articleService.LinkWithTag(originalArticle, tag);
             }
         }
 
-        private async Task<Article> SaveArticle(ArticleService articleService, StoryDto story, string externalId, List<User> users)
+        private async Task<Article> SaveArticle(ArticleService articleService, StoryDto story, string externalId)
         {
             var fileName = await SavePdf(story.Url);
             var newArticle = new Article
@@ -119,17 +109,6 @@ namespace Zbyrach.Api.Articles
                 AuthorName = story.Author.Name,
                 AuthorPhoto = story.Author.AvatarUrl
             };
-
-            foreach (var user in users)
-            {
-                newArticle.ArticleUsers.Add(new ArticleUser
-                {
-                    Article = newArticle,
-                    UserId = user.Id,
-                    User = user,
-                    Status = ArticleStatus.New
-                });
-            }
 
             return await articleService.SaveOne(newArticle);
         }
@@ -163,9 +142,9 @@ namespace Zbyrach.Api.Articles
 
         private string GetStringSha256Hash(string text)
         {
-            if (String.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text))
             {
-                return String.Empty;
+                return string.Empty;
             }
 
             using var sha = new System.Security.Cryptography.SHA256Managed();

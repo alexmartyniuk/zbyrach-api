@@ -51,19 +51,22 @@ namespace Zbyrach.Api.Mailing
             var mailingSettingsService = scope.ServiceProvider.GetRequiredService<MailingSettingsService>();
             var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
 
-            foreach (var settings in await mailingSettingsService.GetScheduledFor(TimeSpan.FromMinutes(_sendMailsBeforeInMinutes)))
+            foreach (var settings in await mailingSettingsService.GetBySchedule(TimeSpan.FromMinutes(_sendMailsBeforeInMinutes)))
             {
                 if (stoppingToken.IsCancellationRequested)
                 {
                     break;
                 }
 
-                var articles = await articleService.GetNewForUser(settings.User);
+                var articles = await articleService.GetWithStatus(settings.User, ArticleStatus.New);
 
                 var email = settings.User.Email;
                 var subject = "Your articles from Zbyrach";
-                var body = GetMessageBody(settings.User, articles);
+                var body = GetMessageBody(settings.User, articles);                
                 await _mailService.SendMessage(email, subject, body);
+
+                await articleService.SetStatus(articles, settings.User, ArticleStatus.Sent);
+                await mailingSettingsService.UpdateSendDate(settings.User);
             }
         }
 

@@ -1,4 +1,4 @@
-# medium-grabber
+# Zbyrach
 
 ### Database Schema
 

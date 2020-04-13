@@ -29,7 +29,7 @@ namespace Zbyrach.Api.Mailing
         {
             var currentUser = await _userService.GetCurrentUser();
 
-            var settings = await _mailingSettingService.GetByUser(currentUser);
+            var settings = await _mailingSettingService.Get(currentUser);
             return Ok(new MailingSettingsDto
             {
                 ScheduleType = _cronService.ExpressionToSchedule(settings.Schedule),
@@ -49,13 +49,13 @@ namespace Zbyrach.Api.Mailing
 
             var currentUser = await _userService.GetCurrentUser();
 
-            await _mailingSettingService.SetByUser(currentUser, new MailingSettings
+            await _mailingSettingService.CreateOrUpdate(currentUser, new MailingSettings
             {
                 NumberOfArticles = settings.NumberOfArticles,
                 Schedule = _cronService.ScheduleToExpression(settings.ScheduleType)
             });
 
-            var savedSettings = await _mailingSettingService.GetByUser(currentUser);
+            var savedSettings = await _mailingSettingService.Get(currentUser);
 
             return Ok(new MailingSettingsDto
             {

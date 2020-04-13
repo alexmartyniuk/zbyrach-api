@@ -20,7 +20,7 @@ namespace Zbyrach.Api.Mailing
             _cronService = cronService;
         }
 
-        public async Task<MailingSettings> GetByUser(User user)
+        public async Task<MailingSettings> Get(User user)
         {
             var settings = await _db
                 .MailingSettings
@@ -44,9 +44,9 @@ namespace Zbyrach.Api.Mailing
             };
         }
 
-        public async Task<bool> SetByUser(User user, MailingSettings settings)
+        public async Task<bool> CreateOrUpdate(User user, MailingSettings settings)
         {
-            var existingSettings = await GetByUser(user);
+            var existingSettings = await Get(user);
 
             if (existingSettings == null)
             {
@@ -71,13 +71,25 @@ namespace Zbyrach.Api.Mailing
             return await _db.SaveChangesAsync() > 0;
         }
 
-        public async Task<List<MailingSettings>> GetScheduledFor(TimeSpan schedulePeriod)
+        public async Task<List<MailingSettings>> GetBySchedule(TimeSpan schedulePeriod)
         {
             return (await _db.MailingSettings
                 .Include(m => m.User)
                 .ToListAsync())
                 .Where(m => IsApplicable(m, schedulePeriod))
                 .ToList();
+        }
+
+        public async Task<MailingSettings> UpdateSendDate(User user)
+        {
+            var mailingSettingsOriginal = await Get(user);
+
+            mailingSettingsOriginal.LastSentAt = DateTime.UtcNow;
+            _db.MailingSettings.Update(mailingSettingsOriginal);
+
+            await _db.SaveChangesAsync();
+
+            return await Get(user);
         }
 
         private bool IsApplicable(MailingSettings settings, TimeSpan schedulePeriod)
