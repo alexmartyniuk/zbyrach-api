@@ -38,6 +38,7 @@ namespace Zbyrach.Api.Articles
             var stream = new MemoryStream();
             fileStream.Seek(0, SeekOrigin.Begin);
             await fileStream.CopyToAsync(stream);
+            stream.Seek(0, SeekOrigin.Begin);
 
             return stream;
         }

@@ -84,6 +84,11 @@ namespace Zbyrach.Api.Articles
             await _db.SaveChangesAsync();
         }
 
+        public ValueTask<Article> GetById(long articleId)
+        {
+            return _db.Articles.FindAsync(articleId);
+        }
+
         public async Task<Article> GetByExternalId(string extenalId)
         {
             return await _db.Articles                
