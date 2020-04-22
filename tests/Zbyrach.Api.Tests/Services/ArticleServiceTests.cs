@@ -60,9 +60,9 @@ namespace Zbyrach.Api.Tests
             var service = new ArticleService(Context);
 
             await service.SetStatus(
-                new List<Article> { article }, 
+                article, 
                 new List<User> { user1, user2 }, 
-                ArticleStatus.Opened);
+                ArticleStatus.Read);
             SaveAndRecreateContext();
 
             var savedArticle = Context
@@ -76,10 +76,10 @@ namespace Zbyrach.Api.Tests
             savedArticle.ArticleUsers.Should().HaveCount(2);
 
             var articleUser1 = savedArticle.ArticleUsers.Single(au => au.User.Email == USER1_EMAIL);
-            articleUser1.Status.Should().Be(ArticleStatus.Opened);
+            articleUser1.Status.Should().Be(ArticleStatus.Read);
 
             var articleUser2 = savedArticle.ArticleUsers.Single(au => au.User.Email == USER2_EMAIL);
-            articleUser1.Status.Should().Be(ArticleStatus.Opened);
+            articleUser1.Status.Should().Be(ArticleStatus.Read);
         }
     }
 }

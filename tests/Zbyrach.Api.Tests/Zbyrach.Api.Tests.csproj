@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Zbyrach.Api.csproj" />
+    <ProjectReference Include="..\..\src\Zbyrach.Api\Zbyrach.Api.csproj" />
   </ItemGroup>
 
 
