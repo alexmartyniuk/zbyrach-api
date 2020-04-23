@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Zbyrach.Api.Tags;
 using System.IO;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace Zbyrach.Api.Articles
 {
@@ -17,17 +18,20 @@ namespace Zbyrach.Api.Articles
         private readonly FileService _fileService;
         private readonly PdfService _pdfService;
         private readonly MediumTagsService _mediumTagsService;
+        private readonly ILogger<ArticlesSearcher> _logger;
 
         public ArticlesSearcher(
             IServiceScopeFactory serviceScopeFactory,
             FileService fileService,
             PdfService pdfService,
-            MediumTagsService mediumTagsService)
+            MediumTagsService mediumTagsService,
+            ILogger<ArticlesSearcher> logger)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _fileService = fileService;
             _pdfService = pdfService;
             _mediumTagsService = mediumTagsService;
+            _logger = logger;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -63,30 +67,51 @@ namespace Zbyrach.Api.Articles
                 var tag = pair.Key;
                 var users = pair.Value;
 
-                var result = await _mediumTagsService.GetFullTagInfoByName(tag.Name);
-                var topStories = result.TopStories;
-                foreach (var story in result.TopStories)
-                {
-                    if (stoppingToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
+                await FindAndSaveArticles(articleService, tag, users, stoppingToken);
+            }
+        }
 
-                    await SaveArticleIfNeeded(articleService, story, tag, users);
+        private async Task FindAndSaveArticles(ArticleService articleService, Tag tag, List<User> users, CancellationToken stoppingToken)
+        {
+            var result = await _mediumTagsService.GetFullTagInfoByName(tag.Name);
+            if (result.TopStories.Count() == 0)
+            {
+                _logger.LogWarning("No stories found by tag '{tagName}'", tag.Name);
+            }
+            else
+            {
+                _logger.LogInformation("Found {storiesCount} stories by tag '{tagName}'", result.TopStories.Count(), tag.Name);
+            }
+
+            foreach (var story in result.TopStories)
+            {
+                if (stoppingToken.IsCancellationRequested)
+                {
+                    break;
                 }
+
+                await SaveArticleIfNeeded(articleService, story, tag, users);
             }
         }
 
         private async Task SaveArticleIfNeeded(ArticleService articleService, StoryDto story, Tag tag, List<User> users)
         {
-            var externalId = GetId(story.Url);
-
-            var originalArticle = await articleService.GetByExternalId(externalId);
-            if (originalArticle == null)
+            try
             {
-                originalArticle = await SaveArticle(articleService, story, externalId);
-                await articleService.SetStatus(originalArticle, users, ArticleStatus.New);
-                await articleService.LinkWithTag(originalArticle, tag);
+                var externalId = GetId(story.Url);
+
+                var originalArticle = await articleService.GetByExternalId(externalId);
+                if (originalArticle == null)
+                {
+                    originalArticle = await SaveArticle(articleService, story, externalId);
+                    await articleService.SetStatus(originalArticle, users, ArticleStatus.New);
+                    await articleService.LinkWithTag(originalArticle, tag);
+                }
+                _logger.LogInformation("Story {story} was successfully saved.", story);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Can't save story {story} because of {exception}", story, e);
             }
         }
 
