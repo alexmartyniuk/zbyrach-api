@@ -98,7 +98,7 @@ namespace Zbyrach.Api.Articles
         {
             try
             {
-                var externalId = GetId(story.Url);
+                var externalId = GenerateId(story);
 
                 var originalArticle = await articleService.GetByExternalId(externalId);
                 if (originalArticle == null)
@@ -106,8 +106,12 @@ namespace Zbyrach.Api.Articles
                     originalArticle = await SaveArticle(articleService, story, externalId);
                     await articleService.SetStatus(originalArticle, users, ArticleStatus.New);
                     await articleService.LinkWithTag(originalArticle, tag);
+                    _logger.LogInformation("Story was successfully saved: {story}", story);
+                } 
+                else
+                {
+                    _logger.LogInformation("Story was previously saved: {story}", story);
                 }
-                _logger.LogInformation("Story {story} was successfully saved.", story);
             }
             catch (Exception e)
             {
@@ -160,9 +164,9 @@ namespace Zbyrach.Api.Articles
             return Path.GetFileName(uri.LocalPath);
         }
 
-        private string GetId(string url)
+        private string GenerateId(StoryDto story)
         {
-            return GetStringSha256Hash(url.ToLower());
+            return GetStringSha256Hash(story.Url.ToLower());
         }
 
         private string GetStringSha256Hash(string text)

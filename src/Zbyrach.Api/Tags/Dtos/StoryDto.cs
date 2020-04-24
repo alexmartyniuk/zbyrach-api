@@ -14,6 +14,6 @@ namespace Zbyrach.Api.Tags
         public long LikesCount { get; set; }
         public string ReadingTime { get; set; }
         
-        public override string ToString() => $"{Title} ({Url})";
+        public override string ToString() => $"{Title}";
     }
 }
