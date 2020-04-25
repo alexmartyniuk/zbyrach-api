@@ -1,3 +1,4 @@
+using System;
 using Zbyrach.Api.Account;
 
 namespace Zbyrach.Api.Articles
@@ -10,5 +11,8 @@ namespace Zbyrach.Api.Articles
         public long ArticleId { get; set; }
         public Article Article { get; set; }
         public ArticleStatus Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime SentAt { get; set; }
+        public DateTime ReadAt { get; set; }
     }
 }

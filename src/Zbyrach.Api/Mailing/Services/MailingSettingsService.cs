@@ -6,6 +6,7 @@ using Cronos;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
+using Zbyrach.Api.Articles;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -13,11 +14,13 @@ namespace Zbyrach.Api.Mailing
     {
         private readonly ApplicationContext _db;
         private readonly CronService _cronService;
+        private readonly ArticleService _articleService;
 
-        public MailingSettingsService(ApplicationContext db, CronService cronService)
+        public MailingSettingsService(ApplicationContext db, CronService cronService, ArticleService articleService)
         {
             _db = db;
             _cronService = cronService;
+            _articleService = articleService;
         }
 
         public async Task<MailingSettings> Get(User user)
@@ -64,7 +67,6 @@ namespace Zbyrach.Api.Mailing
                 existingSettings.NumberOfArticles = settings.NumberOfArticles;
                 existingSettings.Schedule = settings.Schedule;
                 existingSettings.UpdatedAt = DateTime.UtcNow;
-                existingSettings.LastSentAt = default;
                 _db.MailingSettings.Update(existingSettings);
             }
 
@@ -73,29 +75,22 @@ namespace Zbyrach.Api.Mailing
 
         public async Task<List<MailingSettings>> GetBySchedule(TimeSpan schedulePeriod)
         {
+            var lastMailSentByUsers = await _articleService.GetLastMailSentDateByUsers();
             return (await _db.MailingSettings
                 .Include(m => m.User)
                 .ToListAsync())
-                .Where(m => IsApplicable(m, schedulePeriod))
+                .Where(m => 
+                {
+                    var lastMailSentAt = lastMailSentByUsers[m.User];
+                    return IsApplicable(m, lastMailSentAt, schedulePeriod);
+                })
                 .ToList();
         }
 
-        public async Task<MailingSettings> UpdateSendDate(User user)
+        private bool IsApplicable(MailingSettings settings, DateTime lastMailSentAt, TimeSpan schedulePeriod)
         {
-            var mailingSettingsOriginal = await Get(user);
-
-            mailingSettingsOriginal.LastSentAt = DateTime.UtcNow;
-            _db.MailingSettings.Update(mailingSettingsOriginal);
-
-            await _db.SaveChangesAsync();
-
-            return await Get(user);
-        }
-
-        private bool IsApplicable(MailingSettings settings, TimeSpan schedulePeriod)
-        {
-            var dateFrom = settings.LastSentAt != default
-                ? settings.LastSentAt
+            var dateFrom = lastMailSentAt != default
+                ? lastMailSentAt
                 : settings.UpdatedAt;
             dateFrom = DateTime.SpecifyKind(dateFrom, DateTimeKind.Utc);
 

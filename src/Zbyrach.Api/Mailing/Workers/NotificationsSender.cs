@@ -63,26 +63,25 @@ namespace Zbyrach.Api.Mailing
                     break;
                 }
 
-                await SendEmail(articleService, mailingSettingsService, settings.User);
+                await SendEmail(articleService, settings);
             }
         }
 
-        private async Task SendEmail(ArticleService articleService, MailingSettingsService mailingSettingsService, User user)
+        private async Task SendEmail(ArticleService articleService, MailingSettings settings)
         {
-            var articles = await articleService.GetWithStatus(user, ArticleStatus.New);
+            var articles = await articleService.GetForSending(settings.User, settings.NumberOfArticles);
             if (articles.Count == 0)
             {
-                _logger.LogInformation("No articles to send for {email}", user.Email);
+                _logger.LogInformation("No articles to send for {email}", settings.User.Email);
                 return;
             }
 
             var subject = "Your articles from Zbyrach";
-            var body = GetMessageBody(user, articles);
-            await _mailService.SendMessage(user.Email, subject, body);
-            _logger.LogInformation("Message was sent to {email} with articles:\n {artcileTitles}", user.Email, articles.Select(a => a.Title + "\n"));
+            var body = GetMessageBody(settings.User, articles);
+            await _mailService.SendMessage(settings.User.Email, subject, body);
+            _logger.LogInformation("Message was sent to {email} with articles:\n {artcileTitles}", settings.User.Email, articles.Select(a => a.Title + "\n"));
 
-            await articleService.SetStatus(articles, user, ArticleStatus.Sent);
-            await mailingSettingsService.UpdateSendDate(user);
+            await articleService.MarkAsSent(articles, settings.User);
         }
 
         private string GetMessageBody(User user, List<Article> articles)

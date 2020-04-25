@@ -114,7 +114,10 @@ namespace Zbyrach.Api.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(nullable: false),
                     ArticleId = table.Column<long>(nullable: false),
-                    Status = table.Column<int>(nullable: false)
+                    Status = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    SentAt = table.Column<DateTime>(nullable: false),
+                    ReadAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,6 +143,7 @@ namespace Zbyrach.Api.Migrations
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Schedule = table.Column<string>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: false),
                     NumberOfArticles = table.Column<long>(nullable: false),
                     UserId = table.Column<long>(nullable: false)
                 },
@@ -199,12 +203,6 @@ namespace Zbyrach.Api.Migrations
                 name: "IX_ArticleTags_TagId",
                 table: "ArticleTags",
                 column: "TagId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ArticleUsers_Status",
-                table: "ArticleUsers",
-                column: "Status",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ArticleUsers_UserId",

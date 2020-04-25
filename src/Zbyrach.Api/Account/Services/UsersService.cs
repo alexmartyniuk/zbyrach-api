@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Zbyrach.Api.Migrations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Zbyrach.Api.Account
 {
@@ -47,6 +48,14 @@ namespace Zbyrach.Api.Account
             var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             return _db.Users.FindAsync(long.Parse(userId));
+        }
+
+        public Task<List<User>> GetUsersByIds(List<long> userIds)
+        {
+            return _db
+                .Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
         }
     }
 }

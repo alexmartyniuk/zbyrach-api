@@ -149,6 +149,15 @@ namespace Zbyrach.Api.Migrations
                     b.Property<long>("ArticleId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
@@ -169,9 +178,6 @@ namespace Zbyrach.Api.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastSentAt")
-                        .HasColumnType("TEXT");
 
                     b.Property<long>("NumberOfArticles")
                         .HasColumnType("INTEGER");

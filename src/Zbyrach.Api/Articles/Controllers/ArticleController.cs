@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Zbyrach.Api.Account;
+using Zbyrach.Api.Mailing;
 
 namespace Zbyrach.Api.Articles
 {
@@ -12,12 +13,14 @@ namespace Zbyrach.Api.Articles
         private readonly ArticleService _articleService;
         private readonly UsersService _userService;
         private readonly FileService _fileService;
+        private readonly MailingSettingsService _mailingSettingsService;
 
-        public ArticleController(ArticleService articleService, UsersService userService, FileService fileService)
+        public ArticleController(ArticleService articleService, UsersService userService, FileService fileService, MailingSettingsService mailingSettingsService)
         {
             _articleService = articleService;
             _userService = userService;
             _fileService = fileService;
+            _mailingSettingsService = mailingSettingsService;
         }
 
         [HttpGet]
@@ -25,7 +28,10 @@ namespace Zbyrach.Api.Articles
         public async Task<IActionResult> GetArticlesForRead()
         {
             var currentUser = await _userService.GetCurrentUser();
-            var articles = await _articleService.GetWithStatus(currentUser, ArticleStatus.New);
+            var mailingSettings = await _mailingSettingsService.Get(currentUser);
+            var noMoreThan = mailingSettings?.NumberOfArticles ?? 0;
+
+            var articles = await _articleService.GetForSending(currentUser, noMoreThan);
             var articlesDtos = articles.Select(a =>            
                 new ArticleDto
                 {

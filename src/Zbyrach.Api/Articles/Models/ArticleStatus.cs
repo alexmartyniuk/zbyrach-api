@@ -5,7 +5,6 @@ namespace Zbyrach.Api.Articles
         Undefined = 0,
         New = 1,
         Sent = 2,
-        Read = 3,
-        Removed = 4
+        Read = 3
     }
 }
