@@ -25,7 +25,7 @@ namespace Zbyrach.Api.Tags
             }
             catch (Exception e)
             {
-                throw new Exception($"Error during getting data from 'medium.com':\r\n {e}");
+                throw new Exception($"Error during getting data from 'medium.com' by tag '{tagName}':\r\n {e}");
             }
         }
 
@@ -40,7 +40,7 @@ namespace Zbyrach.Api.Tags
             }
             catch (Exception e)
             {
-                throw new Exception($"Error during getting data from 'medium.com':\r\n {e}");
+                throw new Exception($"Error during getting data from 'medium.com' by tag '{tagName}':\r\n {e}");
             }
         }
 
@@ -90,11 +90,8 @@ namespace Zbyrach.Api.Tags
         {
             var author = GetAuthor(article);
 
-            var title = article
-                .QuerySelector("h3")
-                .TextContent
-                .Trim();
-            string description = GetDescription(article);
+            var title = GetTitle(article);                
+            var description = GetDescription(article);
             var illustrationUrl = article
                 .QuerySelector("figure img")?
                 .Attributes["src"]
@@ -184,9 +181,21 @@ namespace Zbyrach.Api.Tags
             return match.Groups[group].Value;
         }
 
+        private string GetTitle(IElement article)
+        {
+            var titleNode = article.QuerySelector("h3") 
+                ?? article.QuerySelector("p.graf-after--figure");                
+
+            return titleNode?
+                .TextContent
+                .Trim();
+        }
+
         private string GetDescription(IElement article)
         {
-            var descriptionNode = article.QuerySelector("h4") ?? article.QuerySelector("p.graf");
+            var descriptionNode = article.QuerySelector("h4") 
+                ?? article.QuerySelector("p.graf-after--h3")
+                ?? article.QuerySelector("p.graf-after--p");
 
             return descriptionNode?
                 .TextContent
