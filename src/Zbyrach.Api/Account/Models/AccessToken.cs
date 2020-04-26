@@ -2,9 +2,8 @@ using System;
 
 namespace Zbyrach.Api.Account
 {
-    public class AccessToken
+    public class AccessToken : Entity
     {
-        public long Id { get; set; }
         public string Token { get; set; }
         public DateTime ExpiredAt { get; set; }
         public long UserId { get; set; }

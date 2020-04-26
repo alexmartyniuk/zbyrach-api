@@ -3,9 +3,8 @@ using System;
 
 namespace Zbyrach.Api.Mailing
 {
-    public class MailingSettings
+    public class MailingSettings : Entity
     {
-        public long Id { get; set; }
         public string Schedule { get; set; }
         public DateTime UpdatedAt { get; set; }
         public long NumberOfArticles { get; set; }

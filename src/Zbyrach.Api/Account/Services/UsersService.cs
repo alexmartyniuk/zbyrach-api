@@ -29,12 +29,12 @@ namespace Zbyrach.Api.Account
         {
             if (user.Id != default)
             {
-                throw new System.Exception("A new user should not have an Id.");
+                throw new Exception("A new user should not have an Id.");
             }
 
             if (string.IsNullOrWhiteSpace(user.Email))
             {
-                throw new System.Exception("A new user should have not empty email.");
+                throw new Exception("A new user should have not empty email.");
             }
 
             _db.Users.Add(user);

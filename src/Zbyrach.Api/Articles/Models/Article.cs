@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Zbyrach.Api.Tags;
 
 namespace Zbyrach.Api.Articles
 {
-    public class Article
+    public class Article : Entity
     {
-        public long Id { get; set; }
         public string ExternalId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }

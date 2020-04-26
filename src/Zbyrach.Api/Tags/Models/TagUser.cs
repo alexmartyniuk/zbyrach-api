@@ -1,4 +1,3 @@
-using System;
 using Zbyrach.Api.Account;
 
 namespace Zbyrach.Api.Tags

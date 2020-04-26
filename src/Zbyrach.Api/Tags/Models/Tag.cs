@@ -3,9 +3,8 @@ using Zbyrach.Api.Articles;
 
 namespace Zbyrach.Api.Tags
 {
-    public class Tag
+    public class Tag : Entity
     {
-        public long Id { get; set; }
         public string Name { get; set; }
         public ICollection<TagUser> TagUsers { get; set; }
         public ICollection<ArticleTag> ArticleTags { get; set; }

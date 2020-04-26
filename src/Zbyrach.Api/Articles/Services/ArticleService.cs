@@ -6,7 +6,6 @@ using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Tags;
-using Zbyrach.Api.Mailing;
 
 namespace Zbyrach.Api.Articles
 {
@@ -89,12 +88,12 @@ namespace Zbyrach.Api.Articles
 
         public async Task<Dictionary<User, DateTime>> GetLastMailSentDateByUsers()
         {
-            var groupedUsers = await _db
-                .ArticleUsers
+            var groupedUsers = await _db.ArticleUsers
+                .Where(au => au.Status == ArticleStatus.Sent)
                 .GroupBy(c => c.User.Id)
                 .Select(g => new
                 {
-                    userId = g.Key,
+                    userId = g.Key,                    
                     maxSentAt = g.Max(x => x.SentAt)
                 })
                 .ToListAsync();
@@ -103,9 +102,9 @@ namespace Zbyrach.Api.Articles
                 .Select(gu => gu.userId)
                 .ToList();
 
-            var users = (await _usersService
-                .GetUsersByIds(userIds))
-                .ToDictionary(u => u.Id, u => u);
+            var users = await _db.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u);
 
             return groupedUsers.ToDictionary(g => users[g.userId], g => g.maxSentAt);
         }
@@ -140,30 +139,10 @@ namespace Zbyrach.Api.Articles
             return _db.Articles.FindAsync(articleId);
         }
 
-        public async Task<Article> GetByExternalId(string extenalId)
+        public Task<Article> GetByExternalId(string extenalId)
         {
-            return await _db.Articles
+            return _db.Articles
                 .SingleOrDefaultAsync(a => a.ExternalId == extenalId);
-        }
-
-        public async Task UpdateOne(Article originalArticle)
-        {
-            _db.Articles.Update(originalArticle);
-            await _db.SaveChangesAsync();
-        }
-
-        public async Task<List<Article>> GetAllForUserByTags(User user)
-        {
-            var tagIds = await _db.Tags
-                .Where(t => t.TagUsers.Any(tu => tu.UserId == user.Id))
-                .Select(t => t.Id)
-                .ToListAsync();
-
-            var result = await _db.Articles
-                .Where(a => a.ArticleTags.Any(at => tagIds.Contains(at.TagId)))
-                .ToListAsync();
-
-            return result;
         }
 
         public async Task LinkWithTag(Article article, Tag tag)
@@ -172,15 +151,17 @@ namespace Zbyrach.Api.Articles
                 .ArticleTags
                 .AnyAsync(at => at.ArticleId == article.Id && at.TagId == tag.Id);
 
-            if (!isAlreadyLinked)
+            if (isAlreadyLinked)
             {
-                _db.ArticleTags.Add(new ArticleTag
-                {
-                    ArticleId = article.Id,
-                    TagId = tag.Id,
-                });
-                await _db.SaveChangesAsync();
+                return;
             }
+
+            _db.ArticleTags.Add(new ArticleTag
+            {
+                ArticleId = article.Id,
+                TagId = tag.Id,
+            });
+            await _db.SaveChangesAsync();
         }
 
         public async Task<List<Article>> GetForSending(User user, long noMoreThan)

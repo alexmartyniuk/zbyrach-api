@@ -14,7 +14,6 @@ namespace Zbyrach.Api.Tests
         {
             Connection = new SqliteConnection("DataSource=:memory:");
             Connection.Open();
-
             SaveAndRecreateContext();
         }
 

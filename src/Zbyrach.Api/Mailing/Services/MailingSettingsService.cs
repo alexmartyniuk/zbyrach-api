@@ -75,16 +75,21 @@ namespace Zbyrach.Api.Mailing
 
         public async Task<List<MailingSettings>> GetBySchedule(TimeSpan schedulePeriod)
         {
-            var lastMailSentByUsers = await _articleService.GetLastMailSentDateByUsers();
-            return (await _db.MailingSettings
+            var lastMailSentDates = await _articleService.GetLastMailSentDateByUsers();
+            
+            var mailingSettings = await _db.MailingSettings
                 .Include(m => m.User)
-                .ToListAsync())
+                .ToListAsync();
+            
+            var filteredMailingSettings = mailingSettings
                 .Where(m => 
                 {
-                    var lastMailSentAt = lastMailSentByUsers[m.User];
+                    var lastMailSentAt = lastMailSentDates[m.User];
                     return IsApplicable(m, lastMailSentAt, schedulePeriod);
                 })
-                .ToList();
+                .ToList();    
+
+            return filteredMailingSettings;                
         }
 
         private bool IsApplicable(MailingSettings settings, DateTime lastMailSentAt, TimeSpan schedulePeriod)

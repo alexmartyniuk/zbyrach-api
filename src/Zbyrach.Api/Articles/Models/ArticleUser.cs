@@ -3,9 +3,8 @@ using Zbyrach.Api.Account;
 
 namespace Zbyrach.Api.Articles
 {
-    public class ArticleUser
+    public class ArticleUser : Entity
     {
-        public long Id { get; set; }
         public long UserId { get; set; }
         public User User { get; set; }
         public long ArticleId { get; set; }
