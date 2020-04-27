@@ -31,7 +31,7 @@ namespace Zbyrach.Api.Articles
             var mailingSettings = await _mailingSettingsService.Get(currentUser);
             var noMoreThan = mailingSettings?.NumberOfArticles ?? 0;
 
-            var articles = await _articleService.GetForSending(currentUser, noMoreThan);
+            var articles = await _articleService.GetForReading(currentUser);
             var articlesDtos = articles.Select(a =>            
                 new ArticleDto
                 {

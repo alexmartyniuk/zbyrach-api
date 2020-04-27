@@ -173,5 +173,20 @@ namespace Zbyrach.Api.Articles
 
             return result;
         }
+
+        public async Task<List<Article>> GetForReading(User user)
+        {
+            var lastSentDate = await _db.ArticleUsers
+                .Where(au => au.UserId == user.Id && au.Status == ArticleStatus.Sent)
+                .Select(au => au.SentAt)
+                .MaxAsync();
+            var result = await _db.ArticleUsers
+                .Include(au => au.Article)
+                .Where(au => au.UserId == user.Id && au.Status == ArticleStatus.Sent && au.SentAt == lastSentDate)
+                .Select(au => au.Article)
+                .ToListAsync();
+
+            return result;
+        }
     }
 }
