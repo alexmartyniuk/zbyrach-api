@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Zbyrach.Api.Account;
+using Zbyrach.Api.Migrations;
 using Zbyrach.Api.Tags;
 
 namespace Zbyrach.Api.Articles
@@ -55,9 +55,9 @@ namespace Zbyrach.Api.Articles
                 .ArticleUsers
                 .Where(au => articleIds.Contains(au.ArticleId) && userIds.Contains(au.UserId))
                 .ToListAsync();
-            existingReading.ForEach((reading) =>
-            {
-                UpdateStatus(reading, newStatus);
+            existingReading.ForEach(reading => 
+            { 
+                UpdateStatus(reading, newStatus); 
             });
             _db.ArticleUsers.UpdateRange(existingReading);
 
@@ -67,7 +67,7 @@ namespace Zbyrach.Api.Articles
                     a => true,
                     u => true,
                     (articleId, userId) => new { articleId, userId }
-                    )
+                )
                 .Where(au => !existingReading.Any(r => r.ArticleId == au.articleId && r.UserId == au.userId));
             var newReadings = newArticleUserPairs
                 .Select(p => new ArticleUser
@@ -76,28 +76,28 @@ namespace Zbyrach.Api.Articles
                     UserId = p.userId
                 })
                 .ToList();
-            newReadings.ForEach((reading) =>
-            {
-                UpdateStatus(reading, newStatus);
+            newReadings.ForEach(reading => 
+            { 
+                UpdateStatus(reading, newStatus); 
             });
-            _db.ArticleUsers.AddRange(newReadings);
+            await _db.ArticleUsers.AddRangeAsync(newReadings);
 
             // 3. Save changes
             await _db.SaveChangesAsync();
         }
 
-        public async Task<Dictionary<User, DateTime>> GetLastMailSentDateByUsers()
+        public virtual async Task<Dictionary<User, DateTime>> GetLastMailSentDateByUsers()
         {
             var groupedUsers = await _db.ArticleUsers
                 .Where(au => au.Status == ArticleStatus.Sent)
                 .GroupBy(c => c.User.Id)
                 .Select(g => new
                 {
-                    userId = g.Key,                    
+                    userId = g.Key,
                     maxSentAt = g.Max(x => x.SentAt)
                 })
                 .ToListAsync();
-            
+
             var userIds = groupedUsers
                 .Select(gu => gu.userId)
                 .ToList();
@@ -112,10 +112,8 @@ namespace Zbyrach.Api.Articles
         private void UpdateStatus(ArticleUser reading, ArticleStatus newStatus)
         {
             if (reading.Status >= newStatus)
-            {
                 // cant downgrade status
                 return;
-            }
 
             switch (newStatus)
             {
@@ -151,25 +149,19 @@ namespace Zbyrach.Api.Articles
                 .ArticleTags
                 .AnyAsync(at => at.ArticleId == article.Id && at.TagId == tag.Id);
 
-            if (isAlreadyLinked)
-            {
-                return;
-            }
+            if (isAlreadyLinked) return;
 
             _db.ArticleTags.Add(new ArticleTag
             {
                 ArticleId = article.Id,
-                TagId = tag.Id,
+                TagId = tag.Id
             });
             await _db.SaveChangesAsync();
         }
 
         public async Task<List<Article>> GetForSending(User user, long noMoreThan)
         {
-            if (noMoreThan == 0)
-            {
-                return new List<Article>();
-            }
+            if (noMoreThan == 0) return new List<Article>();
 
             var result = await _db.ArticleUsers
                 .Include(au => au.Article)

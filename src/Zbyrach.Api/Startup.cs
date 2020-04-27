@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Zbyrach.Api.Common;
 
 namespace Zbyrach.Api
 {
@@ -47,6 +48,7 @@ namespace Zbyrach.Api
             });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<DateTimeService>();
             services.AddSingleton<PdfService>();
             services.AddSingleton<FileService>();
             services.AddSingleton<MailService>();

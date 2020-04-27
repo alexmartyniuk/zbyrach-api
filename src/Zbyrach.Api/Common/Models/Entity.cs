@@ -1,6 +1,10 @@
-﻿namespace Zbyrach.Api
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Zbyrach.Api
 {
-    public class Entity
+    public class Entity : IEquatable<Entity>
     {
         public long Id { get; set; }
 
@@ -23,6 +27,16 @@
         public override string ToString()
         {
             return $"{GetType().Name} [{Id}]";
+        }
+
+        public bool Equals([AllowNull] Entity other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Id == this.Id;
         }
     }
 }
