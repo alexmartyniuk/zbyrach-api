@@ -15,21 +15,15 @@ namespace Zbyrach.Api.Articles
     public class ArticlesSearcher : BackgroundService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly FileService _fileService;
-        private readonly PdfService _pdfService;
         private readonly MediumTagsService _mediumTagsService;
         private readonly ILogger<ArticlesSearcher> _logger;
 
         public ArticlesSearcher(
             IServiceScopeFactory serviceScopeFactory,
-            FileService fileService,
-            PdfService pdfService,
             MediumTagsService mediumTagsService,
             ILogger<ArticlesSearcher> logger)
         {
             _serviceScopeFactory = serviceScopeFactory;
-            _fileService = fileService;
-            _pdfService = pdfService;
             _mediumTagsService = mediumTagsService;
             _logger = logger;
         }
@@ -52,7 +46,6 @@ namespace Zbyrach.Api.Articles
         private async Task CollectArticles(CancellationToken stoppingToken)
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            var userService = scope.ServiceProvider.GetRequiredService<UsersService>();
             var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
             var tagService = scope.ServiceProvider.GetRequiredService<TagService>();
 
@@ -74,7 +67,7 @@ namespace Zbyrach.Api.Articles
         private async Task FindAndSaveArticles(ArticleService articleService, Tag tag, List<User> users, CancellationToken stoppingToken)
         {
             var result = await _mediumTagsService.GetFullTagInfoByName(tag.Name);
-            if (result.TopStories.Count() == 0)
+            if (!result.TopStories.Any())
             {
                 _logger.LogWarning("No stories found by tag '{tagName}'", tag.Name);
             }
@@ -121,12 +114,10 @@ namespace Zbyrach.Api.Articles
 
         private async Task<Article> SaveArticle(ArticleService articleService, StoryDto story, string externalId)
         {
-            var fileName = await SavePdf(story.Url);
             var newArticle = new Article
             {
                 FoundAt = DateTime.UtcNow,
                 ExternalId = externalId,
-                FileName = fileName,
                 PublicatedAt = story.PublicatedAt,
                 IllustrationUrl = story.IllustrationUrl,
                 Description = story.Description,
@@ -140,28 +131,6 @@ namespace Zbyrach.Api.Articles
             };
 
             return await articleService.SaveOne(newArticle);
-        }
-
-        private async Task<string> SavePdf(string url)
-        {
-            var fileName = GetFileName(url);
-            fileName = Path.ChangeExtension(fileName, ".pdf");
-
-            if (_fileService.IsFileExists(fileName))
-            {
-                throw new Exception($"File already exists: {fileName}");
-            }
-
-            var stream = await _pdfService.ConvertUrlToPdf(url);
-            await _fileService.PutFile(fileName, stream);
-
-            return fileName;
-        }
-
-        private string GetFileName(string url)
-        {
-            var uri = new Uri(url.ToLower());
-            return Path.GetFileName(uri.LocalPath);
         }
 
         private string GenerateId(StoryDto story)

@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -12,14 +14,14 @@ namespace Zbyrach.Api.Articles
     {
         private readonly ArticleService _articleService;
         private readonly UsersService _userService;
-        private readonly FileService _fileService;
+        private readonly PdfService _pdfService;
         private readonly MailingSettingsService _mailingSettingsService;
 
-        public ArticleController(ArticleService articleService, UsersService userService, FileService fileService, MailingSettingsService mailingSettingsService)
+        public ArticleController(ArticleService articleService, UsersService userService, PdfService pdfService, MailingSettingsService mailingSettingsService)
         {
             _articleService = articleService;
             _userService = userService;
-            _fileService = fileService;
+            _pdfService = pdfService;
             _mailingSettingsService = mailingSettingsService;
         }
 
@@ -61,8 +63,15 @@ namespace Zbyrach.Api.Articles
                 return NotFound();
             }
 
-            var stream = await _fileService.GetFile(article.FileName);
-            return File(stream, "application/pdf", article.FileName);                    
+            var stream = await _pdfService.ConvertUrlToPdf(article.Url);
+            var fileName = GetPdfFileName(article.Url);
+            return File(stream, "application/pdf", fileName);                    
+        }
+
+        private string GetPdfFileName(string url)
+        {
+            var uri = new Uri(url.ToLower());
+            return Path.GetFileName(uri.LocalPath) + ".pdf";
         }
     }
 }

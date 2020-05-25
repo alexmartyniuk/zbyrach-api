@@ -50,7 +50,6 @@ namespace Zbyrach.Api
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<DateTimeService>();
             services.AddSingleton<PdfService>();
-            services.AddSingleton<FileService>();
             services.AddSingleton<MailService>();
             services.AddSingleton<MediumTagsService>();
             services.AddSingleton<CronService>();

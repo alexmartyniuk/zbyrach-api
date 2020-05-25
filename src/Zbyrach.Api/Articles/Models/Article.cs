@@ -10,7 +10,6 @@ namespace Zbyrach.Api.Articles
         public string Description { get; set; }
         public DateTime PublicatedAt { get; set; }
         public DateTime FoundAt { get; set; }
-        public string FileName { get; set; }
         public string Url { get; set; }
         public string IllustrationUrl { get; set; }
         public string AuthorName { get; set; }
