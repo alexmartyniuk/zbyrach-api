@@ -1,3 +1,3 @@
 build:
   docker:
-    worker: ./src/Zbyrach.Api/Dockerfile
+    web: ./src/Zbyrach.Api/Dockerfile
