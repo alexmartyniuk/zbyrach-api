@@ -55,9 +55,8 @@ namespace Zbyrach.Api
             services.AddSingleton<CronService>();
 
             services.AddDbContext<ApplicationContext>(options =>
-            {
-                // TODO: temporaty solution, need to be replaced with SQL database
-                options.UseSqlite($"Data Source={Configuration["Database"]}");
+            {                
+                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
             });
 
             services.AddScoped<UsersService>();
