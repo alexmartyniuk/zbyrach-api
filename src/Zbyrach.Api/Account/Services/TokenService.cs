@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace Zbyrach.Api.Account
 {
@@ -20,7 +21,7 @@ namespace Zbyrach.Api.Account
             _http = new HttpClient();
         }
 
-        public async Task<AccessToken> GetTokenWithUserByValue(string token)
+        public async Task<AccessToken> GetTokenWithUser(string token)
         {
             var accessToken = await _db.AccessTokens
                 .Include(t => t.User)
@@ -32,6 +33,12 @@ namespace Zbyrach.Api.Account
             }
 
             return null;
+        }
+
+        public Task<AccessToken> GetTokenByGoogleToken(string googleToken)
+        {
+            var token = GetTokenHash(googleToken);
+            return GetTokenWithUser(token);
         }
 
         public Task<AccessToken> GetTokenByUser(User user)
@@ -72,7 +79,7 @@ namespace Zbyrach.Api.Account
             return new AccessToken
             {
                 ExpiredAt = UnixTimestampToDateTime(googleToken.exp),
-                Token = authToken
+                Token = GetTokenHash(authToken)
             };
         }
 
@@ -96,6 +103,26 @@ namespace Zbyrach.Api.Account
             await _db.SaveChangesAsync();
 
             return validToken;
+        }
+
+        public string GetTokenHash(string token)
+        {
+            using var md5 = System.Security.Cryptography.MD5.Create();
+            var encoding = Encoding.ASCII;
+            var data = encoding.GetBytes(token);
+
+            Span<byte> hashBytes = stackalloc byte[16];
+            md5.TryComputeHash(data, hashBytes, out int written);
+            if (written != hashBytes.Length)
+                throw new OverflowException();
+
+
+            Span<char> stringBuffer = stackalloc char[32];
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                hashBytes[i].TryFormat(stringBuffer.Slice(2 * i), out _, "x2");
+            }
+            return new string(stringBuffer);
         }
     }
 }

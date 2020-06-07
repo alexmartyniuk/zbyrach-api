@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace Zbyrach.Api
 {
@@ -24,7 +25,7 @@ namespace Zbyrach.Api
             try
             {
                 var context = services.GetRequiredService<ApplicationContext>();
-                context.Database.EnsureCreated();
+                context.Database.Migrate();
             }
             catch (Exception ex)
             {

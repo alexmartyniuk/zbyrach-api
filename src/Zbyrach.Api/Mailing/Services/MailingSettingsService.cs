@@ -84,8 +84,14 @@ namespace Zbyrach.Api.Mailing
             var filteredMailingSettings = mailingSettings
                 .Where(m => 
                 {
-                    var lastMailSentAt = lastMailSentDates[m.User];
-                    return IsApplicable(m, lastMailSentAt, schedulePeriod);
+                    if (lastMailSentDates.TryGetValue(m.User, out DateTime lastMailSentAt))
+                    {
+                        return IsApplicable(m, lastMailSentAt, schedulePeriod);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 })
                 .ToList();    
 

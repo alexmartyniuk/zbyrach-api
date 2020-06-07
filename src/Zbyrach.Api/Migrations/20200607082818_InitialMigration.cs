@@ -1,9 +1,10 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Zbyrach.Api.Migrations
 {
-    public partial class Initial : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,13 +13,12 @@ namespace Zbyrach.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ExternalId = table.Column<string>(nullable: false),
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     PublicatedAt = table.Column<DateTime>(nullable: false),
                     FoundAt = table.Column<DateTime>(nullable: false),
-                    FileName = table.Column<string>(nullable: true),
                     Url = table.Column<string>(nullable: false),
                     IllustrationUrl = table.Column<string>(nullable: true),
                     AuthorName = table.Column<string>(nullable: true),
@@ -38,7 +38,7 @@ namespace Zbyrach.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
@@ -51,7 +51,7 @@ namespace Zbyrach.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: false),
                     Email = table.Column<string>(nullable: false),
                     PictureUrl = table.Column<string>(nullable: true)
@@ -90,7 +90,7 @@ namespace Zbyrach.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Token = table.Column<string>(nullable: false),
                     ExpiredAt = table.Column<DateTime>(nullable: false),
                     UserId = table.Column<long>(nullable: false)
@@ -111,7 +111,7 @@ namespace Zbyrach.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<long>(nullable: false),
                     ArticleId = table.Column<long>(nullable: false),
                     Status = table.Column<int>(nullable: false),
@@ -141,7 +141,7 @@ namespace Zbyrach.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Schedule = table.Column<string>(nullable: false),
                     UpdatedAt = table.Column<DateTime>(nullable: false),
                     NumberOfArticles = table.Column<long>(nullable: false),

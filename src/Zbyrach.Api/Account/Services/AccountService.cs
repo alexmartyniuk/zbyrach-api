@@ -14,15 +14,15 @@ namespace Zbyrach.Api.Account
             _usersService = userService;
         }
 
-        public async Task<AccessToken> Login(string idToken)
+        public async Task<AccessToken> Login(string googleIdToken)
         {
-            var existingToken = await _tokenService.GetTokenWithUserByValue(idToken);
+            var existingToken = await _tokenService.GetTokenByGoogleToken(googleIdToken);
             if (existingToken != null)
             {
                 return existingToken;
             }
 
-            var googleToken = await _tokenService.ValidateGoogleToken(idToken);
+            var googleToken = await _tokenService.ValidateGoogleToken(googleIdToken);
             if (googleToken == null)
             {
                 return null;
@@ -39,7 +39,7 @@ namespace Zbyrach.Api.Account
                 });
             }
 
-            var newToken = _tokenService.CreateFromGoogleToken(googleToken, idToken);
+            var newToken = _tokenService.CreateFromGoogleToken(googleToken, googleIdToken);
             return await _tokenService.SaveToken(user, newToken);
         }
 
