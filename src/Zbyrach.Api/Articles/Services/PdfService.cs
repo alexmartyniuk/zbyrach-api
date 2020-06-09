@@ -11,7 +11,7 @@ namespace Zbyrach.Api.Articles
         private readonly string _chromiumDownloadDirectory;
         public PdfService(IConfiguration configuration)
         {
-            _chromiumDownloadDirectory = configuration["ChromiumDownloadDirectory"];
+            _chromiumDownloadDirectory = configuration["PUPPETEER_EXECUTABLE_PATH"];
         }
         public async Task<Stream> ConvertUrlToPdf(string url)
         {
@@ -19,12 +19,6 @@ namespace Zbyrach.Api.Articles
             {
                 return null;
             }
-
-            var browserFetcher = Puppeteer.CreateBrowserFetcher(new BrowserFetcherOptions
-            {
-                Path = _chromiumDownloadDirectory
-            });
-            await browserFetcher.DownloadAsync(BrowserFetcher.DefaultRevision);
 
             var options = new LaunchOptions
             {
@@ -55,7 +49,7 @@ namespace Zbyrach.Api.Articles
                     "--disable-3d-apis",
                     "--disable-bundled-ppapi-flash",
                  },
-                ExecutablePath = browserFetcher.GetExecutablePath(BrowserFetcher.DefaultRevision),
+               ExecutablePath = _chromiumDownloadDirectory
             };
 
             using var browser = await Puppeteer.LaunchAsync(options);
