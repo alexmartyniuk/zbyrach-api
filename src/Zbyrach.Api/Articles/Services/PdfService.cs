@@ -49,14 +49,49 @@ namespace Zbyrach.Api.Articles
                     "--disable-3d-apis",
                     "--disable-bundled-ppapi-flash",
                  },
-               ExecutablePath = _chromiumDownloadDirectory
+                ExecutablePath = _chromiumDownloadDirectory
             };
 
             using var browser = await Puppeteer.LaunchAsync(options);
             using var page = await browser.NewPageAsync();
 
+            page.Console += async (sender, args) =>
+            {
+                switch (args.Message.Type)
+                {
+                    case ConsoleType.Error:
+                        try
+                        {
+                            var errorArgs = await Task.WhenAll(args.Message.Args.Select(arg => arg.ExecutionContext.EvaluateFunctionAsync("(arg) => arg instanceof Error ? arg.message : arg", arg)));
+                            System.Console.WriteLine($"{args.Message.Text} args: [{string.Join<object>(", ", errorArgs)}]");
+                        }
+                        catch { }
+                        break;
+                    case ConsoleType.Warning:
+                        System.Console.WriteLine(args.Message.Text);
+                        break;
+                    default:
+                        System.Console.WriteLine(args.Message.Text);
+                        break;
+                }
+            };
+
             await page.SetJavaScriptEnabledAsync(false);
             await page.GoToAsync(url);
+
+            var script = @"()=> {
+                const list = document.querySelectorAll('.gd');
+                for (let item of list) {
+                    item.style.display = 'none';
+                }
+
+                const article = document.querySelectorAll('article')[0];
+                const parent = article.parentNode;
+                parent.innerHTML = '';
+                parent.append(article);
+            }";
+
+            await page.EvaluateFunctionAsync(script);
 
             return await page.PdfStreamAsync();
         }
