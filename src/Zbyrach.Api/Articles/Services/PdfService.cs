@@ -80,9 +80,18 @@ namespace Zbyrach.Api.Articles
             await page.GoToAsync(url);
 
             var script = @"()=> {
-                const list = document.querySelectorAll('.gd');
-                for (let item of list) {
-                    item.style.display = 'none';
+                const links = document.querySelectorAll('a');
+                for (let link of links) {
+                    if (link.textContent.includes('Follow')) {
+                        link.style.display = 'none';
+                    }
+                }
+
+                const images = document.querySelectorAll('.paragraph-image');
+                for (let image of images) {
+                    image.style.breakInside = 'avoid';
+                    image.style.breakBefore = 'auto';
+                    image.style.breakAfter = 'auto';
                 }
 
                 const article = document.querySelectorAll('article')[0];
@@ -93,7 +102,14 @@ namespace Zbyrach.Api.Articles
 
             await page.EvaluateFunctionAsync(script);
 
-            return await page.PdfStreamAsync();
+            return await page.PdfStreamAsync(new PdfOptions
+            {
+                MarginOptions = new PuppeteerSharp.Media.MarginOptions
+                {
+                    Top = "40px",
+                    Bottom = "40px"
+                }
+            });
         }
     }
 }
