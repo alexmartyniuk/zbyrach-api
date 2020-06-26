@@ -53,6 +53,7 @@ namespace Zbyrach.Api
             services.AddSingleton<MailService>();
             services.AddSingleton<MediumTagsService>();
             services.AddSingleton<CronService>();
+            services.AddSingleton<TranslationService>();
 
             services.AddDbContext<ApplicationContext>(options =>
             {                

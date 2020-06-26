@@ -45,9 +45,8 @@ namespace Zbyrach.Api.Articles
 
         private async Task CollectArticles(CancellationToken stoppingToken)
         {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
-            var tagService = scope.ServiceProvider.GetRequiredService<TagService>();
+            using var serviceScope = _serviceScopeFactory.CreateScope();
+            var tagService = serviceScope.ServiceProvider.GetRequiredService<TagService>();
 
             var tagsForSearch = await tagService.GetTagsWithUsers();
             foreach (var pair in tagsForSearch)
@@ -60,11 +59,11 @@ namespace Zbyrach.Api.Articles
                 var tag = pair.Key;
                 var users = pair.Value;
 
-                await FindAndSaveArticles(articleService, tag, users, stoppingToken);
+                await FindAndSaveArticles(serviceScope, tag, users, stoppingToken);
             }
         }
 
-        private async Task FindAndSaveArticles(ArticleService articleService, Tag tag, List<User> users, CancellationToken stoppingToken)
+        private async Task FindAndSaveArticles(IServiceScope serviceScope, Tag tag, List<User> users, CancellationToken stoppingToken)
         {
             var result = await _mediumTagsService.GetFullTagInfoByName(tag.Name);
             if (!result.TopStories.Any())
@@ -83,20 +82,20 @@ namespace Zbyrach.Api.Articles
                     break;
                 }
 
-                await SaveArticleIfNeeded(articleService, story, tag, users);
+                await SaveArticleIfNeeded(serviceScope, story, tag, users);
             }
         }
 
-        private async Task SaveArticleIfNeeded(ArticleService articleService, StoryDto story, Tag tag, List<User> users)
+        private async Task SaveArticleIfNeeded(IServiceScope serviceScope, StoryDto story, Tag tag, List<User> users)
         {
             try
             {
                 var externalId = GenerateId(story);
-
+                var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
                 var originalArticle = await articleService.GetByExternalId(externalId);
                 if (originalArticle == null)
                 {
-                    originalArticle = await SaveArticle(articleService, story, externalId);
+                    originalArticle = await SaveArticle(serviceScope, story, externalId);
                     await articleService.SetStatus(originalArticle, users, ArticleStatus.New);
                     await articleService.LinkWithTag(originalArticle, tag);
                     _logger.LogInformation("Story was successfully saved: {story}", story);
@@ -112,8 +111,14 @@ namespace Zbyrach.Api.Articles
             }
         }
 
-        private async Task<Article> SaveArticle(ArticleService articleService, StoryDto story, string externalId)
+        private async Task<Article> SaveArticle(IServiceScope serviceScope, StoryDto story, string externalId)
         {
+            var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
+            var translationService = serviceScope.ServiceProvider.GetRequiredService<TranslationService>();
+
+            var textToDetect = story.Description ?? story.Title;
+            var language = await translationService.DetectLanguage(textToDetect);
+
             var newArticle = new Article
             {
                 FoundAt = DateTime.UtcNow,
@@ -123,6 +128,7 @@ namespace Zbyrach.Api.Articles
                 Description = story.Description,
                 ReadTime = story.ReadingTime,
                 Title = story.Title,
+                Language = language,
                 Url = story.Url,
                 LikesCount = story.LikesCount,
                 CommentsCount = story.CommentsCount,

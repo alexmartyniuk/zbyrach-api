@@ -177,10 +177,13 @@ namespace Zbyrach.Api.Articles
 
         public async Task<List<Article>> GetForReading(User user)
         {
+            var supportedLanguages = new List<string>{"English", "Ukrainian", "Russian"};
+
             var result = await _db.ArticleUsers
                 .Include(au => au.Article)
                 .Where(au => au.UserId == user.Id)
                 .Select(au => au.Article)
+                .Where(a => supportedLanguages.Contains(a.Language))
                 .OrderByDescending(a => a.PublicatedAt)
                 .Take(20)
                 .ToListAsync();

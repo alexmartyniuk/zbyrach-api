@@ -99,6 +99,9 @@ namespace Zbyrach.Api.Migrations
                     b.Property<string>("IllustrationUrl")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Language")
+                        .HasColumnType("longtext");
+
                     b.Property<long>("LikesCount")
                         .HasColumnType("bigint");
 
