@@ -8,10 +8,10 @@ namespace Zbyrach.Api.Articles
 {
     public class PdfService
     {
-        private readonly string _chromiumDownloadDirectory;
+        private readonly string _chromiumExecutablePath;
         public PdfService(IConfiguration configuration)
         {
-            _chromiumDownloadDirectory = configuration["PUPPETEER_EXECUTABLE_PATH"];
+            _chromiumExecutablePath = configuration["PUPPETEER_EXECUTABLE_PATH"];
         }
         public async Task<Stream> ConvertUrlToPdf(string url)
         {
@@ -49,7 +49,7 @@ namespace Zbyrach.Api.Articles
                     "--disable-3d-apis",
                     "--disable-bundled-ppapi-flash",
                  },
-                ExecutablePath = _chromiumDownloadDirectory
+                ExecutablePath = _chromiumExecutablePath
             };
 
             using var browser = await Puppeteer.LaunchAsync(options);
@@ -87,12 +87,24 @@ namespace Zbyrach.Api.Articles
                     }
                 }
 
-                const images = document.querySelectorAll('.paragraph-image');
-                for (let image of images) {
-                    image.style.breakInside = 'avoid';
-                    image.style.breakBefore = 'auto';
-                    image.style.breakAfter = 'auto';
-                }
+                var style = document.createElement('style');
+                style.innerHTML = `
+                    h1, h2 {
+                        page-break-inside: avoid;
+                    }
+                    h1::after, h2::after {
+                        content: '';
+                        display: block;
+                        height: 100px;
+                        margin-bottom: -100px;
+                    }
+                    .paragraph-image {
+                        page-break-inside: avoid;
+                        page-break-before: auto;
+                        page-break-after: auto;
+                    }
+                    `;
+                document.head.appendChild(style);
 
                 const article = document.querySelectorAll('article')[0];
                 const parent = article.parentNode;
