@@ -80,7 +80,7 @@ namespace Zbyrach.Api.Articles
             await page.GoToAsync(url);
 
             var script = @"()=> {
-                const links = document.querySelectorAll('a');
+                const links = document.querySelectorAll('a, button');
                 for (let link of links) {
                     if (link.textContent.includes('Follow')) {
                         link.style.display = 'none';
