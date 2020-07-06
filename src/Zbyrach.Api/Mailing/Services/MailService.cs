@@ -21,7 +21,7 @@ namespace Zbyrach.Api.Mailing
             _sendMails = bool.TrueString.Equals(configuration["SendMails"], StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task SendMessage(string to, string subject, string body)
+        public void SendMessage(string to, string subject, string body)
         {
             if (!_sendMails)
             {

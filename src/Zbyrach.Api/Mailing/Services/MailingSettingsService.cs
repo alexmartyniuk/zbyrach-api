@@ -82,16 +82,11 @@ namespace Zbyrach.Api.Mailing
                 .ToListAsync();
             
             var filteredMailingSettings = mailingSettings
-                .Where(m => 
+                .Where(m =>
                 {
-                    if (lastMailSentDates.TryGetValue(m.User, out DateTime lastMailSentAt))
-                    {
-                        return IsApplicable(m, lastMailSentAt, schedulePeriod);
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    lastMailSentDates.TryGetValue(m.User, out var lastMailSentAt);
+
+                    return IsApplicable(m, lastMailSentAt, schedulePeriod);
                 })
                 .ToList();    
 

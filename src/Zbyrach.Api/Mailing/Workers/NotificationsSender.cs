@@ -78,7 +78,7 @@ namespace Zbyrach.Api.Mailing
 
             var subject = "Your articles from Zbyrach";
             var body = GetMessageBody(settings.User, articles);
-            await _mailService.SendMessage(settings.User.Email, subject, body);
+            _mailService.SendMessage(settings.User.Email, subject, body);
             _logger.LogInformation("Message was sent to {email} with articles:\n {artcileTitles}", settings.User.Email, articles.Select(a => a.Title + "\n"));
 
             await articleService.MarkAsSent(articles, settings.User);

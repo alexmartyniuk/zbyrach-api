@@ -141,7 +141,9 @@ namespace Zbyrach.Api.Articles
 
         private string GenerateId(StoryDto story)
         {
-            return GetStringSha256Hash(story.Url.ToLower());
+            var uri = new Uri(story.Url.ToLower());
+            var path = uri.GetLeftPart(UriPartial.Path);
+            return GetStringSha256Hash(path);
         }
 
         private string GetStringSha256Hash(string text)
