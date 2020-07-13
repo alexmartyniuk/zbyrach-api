@@ -1,15 +1,11 @@
-﻿using Zbyrach.Api.Account;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Zbyrach.Api.Articles;
-using System.Text;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -76,28 +72,8 @@ namespace Zbyrach.Api.Mailing
                 return;
             }
 
-            var subject = "Your articles from Zbyrach";
-            var body = GetMessageBody(settings.User, articles);
-            _mailService.SendMessage(settings.User.Email, subject, body);
-            _logger.LogInformation("Message was sent to {email} with articles:\n {artcileTitles}", settings.User.Email, articles.Select(a => a.Title + "\n"));
-
+            await _mailService.SendArticleList(settings.User, articles);
             await articleService.MarkAsSent(articles, settings.User);
-        }
-
-        private string GetMessageBody(User user, List<Article> articles)
-        {
-            var body = new StringBuilder();
-            body.AppendLine($"Hello {user.Name},");
-            body.AppendLine();
-
-            foreach (var article in articles)
-            {
-                body.AppendLine($"{article.Title} ({article.ReadTime})");
-                body.AppendLine($"{article.Url}");
-                body.AppendLine();
-            }
-
-            return body.ToString();
         }
     }
 }
