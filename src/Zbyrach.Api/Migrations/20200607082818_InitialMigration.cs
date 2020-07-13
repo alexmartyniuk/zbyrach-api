@@ -8,6 +8,8 @@ namespace Zbyrach.Api.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("alter database character set utf8mb4 collate utf8mb4_unicode_ci");
+
             migrationBuilder.CreateTable(
                 name: "Articles",
                 columns: table => new
