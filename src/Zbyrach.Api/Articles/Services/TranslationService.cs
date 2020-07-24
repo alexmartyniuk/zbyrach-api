@@ -17,10 +17,10 @@ namespace Zbyrach.Api.Articles
             var webClient = new WebClient
             {
                 Encoding = System.Text.Encoding.UTF8
-            };
-            var result = webClient.DownloadString(url);
+            };            
             try
             {
+                var result = webClient.DownloadString(url);
                 var obj = JArray.Parse(result);
                 var probText = obj[8][2][0].ToString();
                 var probability = double.Parse(probText, CultureInfo.InvariantCulture);
@@ -42,7 +42,7 @@ namespace Zbyrach.Api.Articles
 
                 return null;
 
-            }
+            }            
             catch (Exception e)
             {
                 return null;

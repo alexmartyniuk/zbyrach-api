@@ -56,8 +56,8 @@ namespace Zbyrach.Api
             services.AddSingleton<TranslationService>();
 
             services.AddDbContext<ApplicationContext>(options =>
-            {                
-                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+            {                                     
+                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
             });
 
             services.AddScoped<UsersService>();
