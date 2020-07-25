@@ -117,7 +117,7 @@ namespace Zbyrach.Api.Articles
             var translationService = serviceScope.ServiceProvider.GetRequiredService<TranslationService>();
 
             var textToDetect = story.Description ?? story.Title;
-            var language = await translationService.DetectLanguage(textToDetect);
+            var language = translationService.DetectLanguage(textToDetect);
 
             var newArticle = new Article
             {

@@ -177,7 +177,7 @@ namespace Zbyrach.Api.Articles
 
         public async Task<List<Article>> GetForReading(User user)
         {
-            var supportedLanguages = new List<string>{"English", "Ukrainian", "Russian"};
+            var supportedLanguages = new List<string>{"English", "Ukrainian", "Russian", "en", "uk", "ru"};
 
             var result = await _db.ArticleUsers
                 .Include(au => au.Article)
