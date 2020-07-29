@@ -25,11 +25,15 @@
     <PackageReference Include="LanguageDetection" Version="1.2.0" />    
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="Mailing\Templates\Articles.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
+  <Target Name="PublishTemplate" AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <DistFiles Include="Mailing\Templates\*.cshtml" />
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>%(DistFiles.Identity)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 
 </Project>
