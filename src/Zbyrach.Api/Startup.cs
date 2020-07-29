@@ -57,7 +57,7 @@ namespace Zbyrach.Api
 
             services.AddDbContext<ApplicationContext>(options =>
             {                                     
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(Configuration.GetConnectionString());
             });
 
             services.AddScoped<UsersService>();
