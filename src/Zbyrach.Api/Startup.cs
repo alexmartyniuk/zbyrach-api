@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Zbyrach.Api.Common;
+using Wangkanai.Detection;
 
 namespace Zbyrach.Api
 {
@@ -47,23 +48,26 @@ namespace Zbyrach.Api
                 });
             });
 
+            services.AddDetection();
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<DateTimeService>();
-            services.AddSingleton<PdfService>();
             services.AddSingleton<MailService>();
             services.AddSingleton<MediumTagsService>();
             services.AddSingleton<CronService>();
             services.AddSingleton<TranslationService>();
 
+            services.AddScoped<PdfService>();
+
             services.AddDbContext<ApplicationContext>(options =>
-            {                                     
+            {
                 options.UseNpgsql(Configuration.GetConnectionString());
             });
 
             services.AddScoped<UsersService>();
             services.AddScoped<TokenService>();
-            services.AddScoped<AccountService>();            
-            services.AddScoped<TagService>();            
+            services.AddScoped<AccountService>();
+            services.AddScoped<TagService>();
             services.AddScoped<MailingSettingsService>();
             services.AddScoped<ArticleService>();
         }
@@ -76,6 +80,8 @@ namespace Zbyrach.Api
                 app.UseDeveloperExceptionPage();
                 loggerFactory.AddFile("Logs/{Date}.txt");
             }
+
+            app.UseDetection();
 
             app.UseCors(builder => builder
                 .AllowAnyOrigin()

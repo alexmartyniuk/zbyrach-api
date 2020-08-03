@@ -3,15 +3,21 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using PuppeteerSharp;
+using PuppeteerSharp.Media;
+using Wangkanai.Detection.Services;
+using Wangkanai.Detection.Models;
 
 namespace Zbyrach.Api.Articles
 {
     public class PdfService
     {
         private readonly string _chromiumExecutablePath;
-        public PdfService(IConfiguration configuration)
+        private readonly IDetectionService _detectionService;
+
+        public PdfService(IConfiguration configuration, IDetectionService detectionService)
         {
             _chromiumExecutablePath = configuration["PUPPETEER_EXECUTABLE_PATH"];
+            _detectionService = detectionService;
         }
         public async Task<Stream> ConvertUrlToPdf(string url)
         {
@@ -115,9 +121,10 @@ namespace Zbyrach.Api.Articles
             await page.EvaluateFunctionAsync(script);
 
             return await page.PdfStreamAsync(new PdfOptions
-            {
+            {                
+                Format = _detectionService.Device.Type == Device.Mobile ? PaperFormat.A5 : PaperFormat.A4,
                 MarginOptions = new PuppeteerSharp.Media.MarginOptions
-                {
+                {                    
                     Top = "40px",
                     Bottom = "40px"
                 }

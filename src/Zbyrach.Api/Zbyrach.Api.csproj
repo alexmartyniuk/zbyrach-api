@@ -22,7 +22,8 @@
     <PackageReference Include="RazorLight.NetCore3" Version="3.0.2" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
-    <PackageReference Include="LanguageDetection" Version="1.2.0" />    
+    <PackageReference Include="LanguageDetection" Version="1.2.0" />
+    <PackageReference Include="Wangkanai.Detection" Version="3.0.0-alpha10" />    
   </ItemGroup>
 
   <Target Name="PublishTemplate" AfterTargets="ComputeFilesToPublish">
