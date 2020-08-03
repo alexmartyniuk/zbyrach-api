@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Zbyrach.Api.Articles
 {
@@ -14,6 +15,7 @@ namespace Zbyrach.Api.Articles
         public string AuthorPhoto { get; set; }
         public long CommentsCount { get; set; }
         public long LikesCount { get; set; }
-        public string ReadTime { get; set; }                
+        public string ReadTime { get; set; }  
+        public List<string> Tags {get; set; }              
     }
 }

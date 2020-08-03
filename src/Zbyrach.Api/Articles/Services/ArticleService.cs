@@ -56,9 +56,9 @@ namespace Zbyrach.Api.Articles
                 .ArticleUsers
                 .Where(au => articleIds.Contains(au.ArticleId) && userIds.Contains(au.UserId))
                 .ToListAsync();
-            existingReading.ForEach(reading => 
-            { 
-                UpdateStatus(reading, newStatus); 
+            existingReading.ForEach(reading =>
+            {
+                UpdateStatus(reading, newStatus);
             });
             _db.ArticleUsers.UpdateRange(existingReading);
 
@@ -77,9 +77,9 @@ namespace Zbyrach.Api.Articles
                     UserId = p.userId
                 })
                 .ToList();
-            newReadings.ForEach(reading => 
-            { 
-                UpdateStatus(reading, newStatus); 
+            newReadings.ForEach(reading =>
+            {
+                UpdateStatus(reading, newStatus);
             });
             await _db.ArticleUsers.AddRangeAsync(newReadings);
 
@@ -175,20 +175,25 @@ namespace Zbyrach.Api.Articles
             return result;
         }
 
-        public async Task<List<Article>> GetForReading(User user)
+        public async Task<List<ArticleTag>> GetForReading(User user)
         {
-            var supportedLanguages = new List<string>{"English", "Ukrainian", "Russian", "en", "uk", "ru"};
+            var tags = await _db.TagUsers
+                .Where(tu => tu.UserId == user.Id)
+                .Select(tu => tu.TagId)
+                .ToListAsync();
 
-            var result = await _db.ArticleUsers
-                .Include(au => au.Article)
-                .Where(au => au.UserId == user.Id)
-                .Select(au => au.Article)
-                .Where(a => supportedLanguages.Contains(a.Language))
-                .OrderByDescending(a => a.PublicatedAt)
+            var supportedLanguages = new List<string> { "English", "Ukrainian", "Russian", "en", "uk", "ru" };
+
+            var articleTags = await _db.ArticleTags
+                .Include(at => at.Tag)
+                .Include(t => t.Article)                
+                .Where(at => tags.Contains(at.TagId))
+                .Where(at => supportedLanguages.Contains(at.Article.Language))
+                .OrderByDescending(at => at.Article.PublicatedAt)
                 .Take(20)
                 .ToListAsync();
 
-            return result;
+            return articleTags;
         }
     }
 }

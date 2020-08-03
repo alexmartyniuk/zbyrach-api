@@ -33,21 +33,24 @@ namespace Zbyrach.Api.Articles
             var mailingSettings = await _mailingSettingsService.Get(currentUser);
             var noMoreThan = mailingSettings?.NumberOfArticles ?? 0;
 
-            var articles = await _articleService.GetForReading(currentUser);
-            var articlesDtos = articles.Select(a =>            
+            var articleTags = await _articleService.GetForReading(currentUser);
+            var articlesDtos = articleTags
+                .GroupBy(at => at.Article)
+                .Select(g =>            
                 new ArticleDto
                 {
-                    Id = a.Id,
-                    Title = a.Title,
-                    Description = a.Description,
-                    PublicatedAt = a.PublicatedAt,
-                    IllustrationUrl = a.IllustrationUrl,
-                    OriginalUrl = a.Url,
-                    AuthorName = a.AuthorName,
-                    AuthorPhoto = a.AuthorPhoto,
-                    CommentsCount = a.CommentsCount,
-                    LikesCount = a.LikesCount,
-                    ReadTime = a.ReadTime
+                    Id = g.Key.Id,
+                    Title = g.Key.Title,
+                    Description = g.Key.Description,
+                    PublicatedAt = g.Key.PublicatedAt,
+                    IllustrationUrl = g.Key.IllustrationUrl,
+                    OriginalUrl = g.Key.Url,
+                    AuthorName = g.Key.AuthorName,
+                    AuthorPhoto = g.Key.AuthorPhoto,
+                    CommentsCount = g.Key.CommentsCount,
+                    LikesCount = g.Key.LikesCount,
+                    ReadTime = g.Key.ReadTime,
+                    Tags = g.Select(at => at.Tag.Name).ToList()
                 });
             return Ok(articlesDtos);
         }
