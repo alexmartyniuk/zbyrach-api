@@ -120,9 +120,16 @@ namespace Zbyrach.Api.Articles
 
             await page.EvaluateFunctionAsync(script);
 
+            var format = _detectionService.Device.Type switch
+            {
+                Device.Mobile => PaperFormat.A6,
+                Device.Tablet => PaperFormat.A5,
+                _ => PaperFormat.A4
+            };
+
             return await page.PdfStreamAsync(new PdfOptions
             {                
-                Format = _detectionService.Device.Type == Device.Mobile ? PaperFormat.A5 : PaperFormat.A4,
+                Format = format,
                 MarginOptions = new PuppeteerSharp.Media.MarginOptions
                 {                    
                     Top = "40px",
