@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -21,6 +22,8 @@ namespace Zbyrach.Api.Mailing
         private readonly string _smtpPassword;
         private readonly string _smtpHost;
         private readonly bool _sendMails;
+        private readonly string _apiBasePath;
+        private readonly string _uiBasePath;
 
         public MailService(IConfiguration configuration, ILogger<MailService> logger)
         {
@@ -29,34 +32,36 @@ namespace Zbyrach.Api.Mailing
             _smtpPassword = configuration["SMTP_PASSWORD"];
             _smtpHost = configuration["SMTP_HOST"];
             _sendMails = bool.TrueString.Equals(configuration["SendMails"], StringComparison.OrdinalIgnoreCase);
+            _apiBasePath = configuration["ApiBasePath"];
+            _uiBasePath = configuration["UiBasePath"];
         }
 
-        public async Task SendArticleList(User user, List<Article> articles)
+        public async Task SendArticleList(User user, string unsubscribeToken, List<Article> articles)
         {
-            var subject = "Нові статті від Збирача";
-            var body = await GetHtmlMessageBody(user, articles);
+            var subject = "Cтатті від Збирача за " + GetCurrentDateInUkrainian();
+            var body = await GetHtmlMessageBody(user, unsubscribeToken, articles);
             SendMessage(user.Email, subject, body);
             _logger.LogInformation("Message was sent to {email} with articles:\n {artcileTitles}", user.Email, articles.Select(a => a.Title + "\n"));
         }
         
-        private async Task<string> GetHtmlMessageBody(User user, List<Article> articles)
+        private async Task<string> GetHtmlMessageBody(User user, string unsubscribeToken, List<Article> articles)
         {
             var baseTemplatesDirectory = Path.Combine(AppContext.BaseDirectory, "Mailing", "Templates");
+            unsubscribeToken = WebUtility.UrlEncode(unsubscribeToken);
                 
             var model = new ArticlesModel
             {
                 UserName = user.Name,
                 UserEmail = user.Email,
-                DateTime = "5 травня 2020р.", // TODO: implement this
-                UnsubscribeUrl = "", // TODO: implement this
-                ViewOnSiteUrl = "", // TODO: implement this
+                DateTime = GetCurrentDateInUkrainian(),
+                UnsubscribeUrl = $"{_uiBasePath}/unsubscribe/{unsubscribeToken}",
+                ViewOnSiteUrl =  $"{_uiBasePath}/articles",
                 Articles = articles.Select(a => new ArticleModel
                 {
                     Title = a.Title,
                     Description = a.Description,
                     Url = a.Url,
-                    // TODO: extract domain to configuration
-                    PdfUrl = $"http://zbyrach-api.herokuapp.com/articles/pdf/{a.Id}",
+                    PdfUrl = $"{_apiBasePath}/articles/pdf/{a.Id}",
                     AuthorEmail = a.AuthorEmail,
                     AuthorName = a.AuthorName,
                     AuthorPhoto = a.AuthorPhoto
@@ -70,6 +75,12 @@ namespace Zbyrach.Api.Mailing
                 .Build();
 
             return await engine.CompileRenderAsync("Articles.cshtml", model);
+        }
+
+        private string GetCurrentDateInUkrainian()
+        {
+            var culture = new CultureInfo("uk-UA");
+            return DateTime.UtcNow.ToString("m", culture);
         }
 
         private void SendMessage(string to, string subject, string htmlBody)

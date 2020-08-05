@@ -63,5 +63,33 @@ namespace Zbyrach.Api.Mailing
                 NumberOfArticles = savedSettings.NumberOfArticles
             });
         }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("/mailing/unsubscribe/{token}")]
+        public async Task<IActionResult> Unsubscribe([FromRoute] string token)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.First().Errors;
+                return BadRequest(new JsonResult(errors));
+            }
+
+            var currentUser = await _userService.GetUserByUnsubscribeToken(token);
+            if (currentUser == null)
+            {
+                return BadRequest("Invalid token");
+            }
+
+            await _mailingSettingService.UnsubscribeUser(currentUser);
+
+            return Ok(new UserDto
+            {
+                Id = currentUser.Id,
+                Email = currentUser.Email,
+                Name = currentUser.Name,
+                PictureUrl = currentUser.PictureUrl
+            });
+        }
     }
 }

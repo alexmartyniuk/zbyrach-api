@@ -56,10 +56,10 @@ namespace Zbyrach.Api.Articles
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("/articles/pdf/{articleId}")]
         public async Task<IActionResult> GetPdf(long articleId)
         {            
-            // TODO: check that article belongs to user
             var article = await _articleService.GetById(articleId);
             if (article == null)
             {

@@ -26,6 +26,12 @@
     <PackageReference Include="Wangkanai.Detection" Version="3.0.0-alpha10" />    
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Mailing\Templates\Articles.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <Target Name="PublishTemplate" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
       <DistFiles Include="Mailing\Templates\*.cshtml" />

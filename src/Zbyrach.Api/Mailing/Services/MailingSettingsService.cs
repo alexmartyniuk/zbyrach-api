@@ -93,14 +93,25 @@ namespace Zbyrach.Api.Mailing
             return filteredMailingSettings;                
         }
 
+        public async Task UnsubscribeUser(User user)
+        {
+            await CreateOrUpdate(user, new MailingSettings
+            {
+                NumberOfArticles = 0,
+                Schedule = _cronService.ScheduleToExpression(ScheduleType.Never)
+            });
+        }
+
         private bool IsApplicable(MailingSettings settings, DateTime lastMailSentAt, TimeSpan schedulePeriod)
         {
-            var dateFrom = lastMailSentAt != default
-                ? lastMailSentAt
-                : settings.UpdatedAt;
-            dateFrom = DateTime.SpecifyKind(dateFrom, DateTimeKind.Utc);
+            var dateFrom = DateTime.SpecifyKind(lastMailSentAt, DateTimeKind.Utc);
 
             return _cronService.HasTimeCome(dateFrom, schedulePeriod, settings.Schedule);
+        }
+
+        private bool IsDateOfCurrentCentury(DateTime date)
+        {
+            return date.Year > 2000;
         }
     }
 }

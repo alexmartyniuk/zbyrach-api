@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Zbyrach.Api.Articles;
 using Microsoft.Extensions.Logging;
+using Zbyrach.Api.Account;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -50,7 +51,6 @@ namespace Zbyrach.Api.Mailing
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var mailingSettingsService = scope.ServiceProvider.GetRequiredService<MailingSettingsService>();
-            var articleService = scope.ServiceProvider.GetRequiredService<ArticleService>();
 
             foreach (var settings in await mailingSettingsService.GetBySchedule(TimeSpan.FromMinutes(_sendMailsBeforeInMinutes)))
             {
@@ -59,12 +59,13 @@ namespace Zbyrach.Api.Mailing
                     break;
                 }
 
-                await SendEmail(articleService, settings);
+                await SendEmail(scope, settings);
             }
         }
 
-        private async Task SendEmail(ArticleService articleService, MailingSettings settings)
+        private async Task SendEmail(IServiceScope serviceScope, MailingSettings settings)
         {
+            var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
             var articles = await articleService.GetForSending(settings.User, settings.NumberOfArticles);
             if (articles.Count == 0)
             {
@@ -72,7 +73,10 @@ namespace Zbyrach.Api.Mailing
                 return;
             }
 
-            await _mailService.SendArticleList(settings.User, articles);
+            var usersService = serviceScope.ServiceProvider.GetRequiredService<UsersService>();
+            var unsubscribeToken = usersService.GetUnsubscribeTokenByUser(settings.User);
+
+            await _mailService.SendArticleList(settings.User, unsubscribeToken, articles);
             await articleService.MarkAsSent(articles, settings.User);
         }
     }
