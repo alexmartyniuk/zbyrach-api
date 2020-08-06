@@ -76,7 +76,8 @@ namespace Zbyrach.Api.Mailing
             var usersService = serviceScope.ServiceProvider.GetRequiredService<UsersService>();
             var unsubscribeToken = usersService.GetUnsubscribeTokenByUser(settings.User);
 
-            await _mailService.SendArticleList(settings.User, unsubscribeToken, articles);
+            _mailService.SendArticleList(settings.User, unsubscribeToken, articles);
+            
             await articleService.MarkAsSent(articles, settings.User);
         }
     }

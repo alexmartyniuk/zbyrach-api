@@ -8,7 +8,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using RazorLight;
+using Scriban;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Articles;
 using Zbyrach.Api.Mailing.Templates;
@@ -24,6 +24,7 @@ namespace Zbyrach.Api.Mailing
         private readonly bool _sendMails;
         private readonly string _apiBasePath;
         private readonly string _uiBasePath;
+        private readonly Template _articlesEmailTemplate;
 
         public MailService(IConfiguration configuration, ILogger<MailService> logger)
         {
@@ -34,17 +35,20 @@ namespace Zbyrach.Api.Mailing
             _sendMails = bool.TrueString.Equals(configuration["SendMails"], StringComparison.OrdinalIgnoreCase);
             _apiBasePath = configuration["ApiBasePath"];
             _uiBasePath = configuration["UiBasePath"];
+
+            var templateFileName = Path.Combine(AppContext.BaseDirectory, "Mailing", "Templates", "Articles.cshtml");                        
+            _articlesEmailTemplate = Template.Parse(File.ReadAllText(templateFileName));            
         }
 
-        public async Task SendArticleList(User user, string unsubscribeToken, List<Article> articles)
+        public void SendArticleList(User user, string unsubscribeToken, List<Article> articles)
         {
             var subject = "Cтатті від Збирача за " + GetCurrentDateInUkrainian();
-            var body = await GetHtmlMessageBody(user, unsubscribeToken, articles);
+            var body = GetHtmlMessageBody(user, unsubscribeToken, articles);
             SendMessage(user.Email, subject, body);
             _logger.LogInformation("Message was sent to {email} with articles:\n {artcileTitles}", user.Email, articles.Select(a => a.Title + "\n"));
         }
         
-        private async Task<string> GetHtmlMessageBody(User user, string unsubscribeToken, List<Article> articles)
+        private string GetHtmlMessageBody(User user, string unsubscribeToken, List<Article> articles)
         {
             var baseTemplatesDirectory = Path.Combine(AppContext.BaseDirectory, "Mailing", "Templates");
             unsubscribeToken = WebUtility.UrlEncode(unsubscribeToken);
@@ -68,13 +72,7 @@ namespace Zbyrach.Api.Mailing
                 }).ToList()
             };
 
-            // TODO: optimize this with cache
-            var engine = new RazorLightEngineBuilder()
-                .UseFileSystemProject(baseTemplatesDirectory)
-                .UseMemoryCachingProvider()
-                .Build();
-
-            return await engine.CompileRenderAsync("Articles.cshtml", model);
+            return _articlesEmailTemplate.Render(new { Model = model });
         }
 
         private string GetCurrentDateInUkrainian()
