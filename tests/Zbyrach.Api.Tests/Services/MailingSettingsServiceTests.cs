@@ -22,15 +22,15 @@ namespace Zbyrach.Api.Tests.Services
         {
             ("User1", ScheduleType.EveryDay, "2020-04-27 09:00"),
             ("User2", ScheduleType.EveryDay, "2020-04-28 09:00"),
-            ("User3", ScheduleType.EveryDay, default),
+            ("User3", ScheduleType.EveryDay, "0001-01-01 00:00"),
             ("User4", ScheduleType.EveryWeek, "2020-04-24 09:00"),
             ("User5", ScheduleType.EveryWeek, "2020-05-01 09:00"),
-            ("User6", ScheduleType.EveryWeek, default),
+            ("User6", ScheduleType.EveryWeek, "0001-01-01 00:00"),
             ("User7", ScheduleType.EveryMonth, "2020-03-31 09:00"),
             ("User8", ScheduleType.EveryMonth, "2020-04-30 09:00"),
-            ("User9", ScheduleType.EveryMonth, default),
+            ("User9", ScheduleType.EveryMonth, "0001-01-01 00:00"),
             ("User10", ScheduleType.Never, "2020-04-27 09:00"),
-            ("User11", ScheduleType.Never, default)
+            ("User11", ScheduleType.Never, "0001-01-01 00:00")
         };
 
         public MailingSettingsServiceTests()
@@ -59,13 +59,13 @@ namespace Zbyrach.Api.Tests.Services
         }
 
         [Theory]
-        [InlineData("2020-04-27 09:00", "User3")]
-        [InlineData("2020-04-28 09:00", "User1,User3")]
-        [InlineData("2020-04-29 09:00", "User1,User2,User3")]
-        [InlineData("2020-04-30 09:00", "User1,User2,User3,User7,User9")]
-        [InlineData("2020-05-01 09:00", "User1,User2,User3,User4,User6,User7,User9")]
-        [InlineData("2020-05-02 09:00", "User1,User2,User3,User4,User6,User7,User9")]
-        [InlineData("2020-05-03 09:00", "User1,User2,User3,User4,User6,User7,User9")]
+        [InlineData("2020-04-27 09:00", "User3,User6,User9")]                         // Monday
+        [InlineData("2020-04-28 09:00", "User1,User3,User6,User9")]                   // Thuesday
+        [InlineData("2020-04-29 09:00", "User1,User2,User3,User6,User9")]             // Wednesday
+        [InlineData("2020-04-30 09:00", "User1,User2,User3,User6,User7,User9")]       // Thursday
+        [InlineData("2020-05-01 09:00", "User1,User2,User3,User4,User6,User7,User9")] // Friday
+        [InlineData("2020-05-02 09:00", "User1,User2,User3,User4,User6,User7,User9")] // Saturday
+        [InlineData("2020-05-03 09:00", "User1,User2,User3,User4,User6,User7,User9")] // Sunday
         public async Task GetBySchedule_ForParticularDay_ShouldReturnCorrectMailSettings(string now, string users)
         {
             var datetime = ParseDateTime(now);
