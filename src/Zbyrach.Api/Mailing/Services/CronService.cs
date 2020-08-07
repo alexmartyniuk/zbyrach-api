@@ -52,13 +52,13 @@ namespace Zbyrach.Api.Mailing
                 return false;
             }
 
-            var nextUtc = CronExpression.Parse(expression).GetNextOccurrence(dateFrom);
+            var nextUtc = CronExpression.Parse(expression).GetNextOccurrence(dateFrom + schedulePeriod);
             if (!nextUtc.HasValue)
             {
                 return false;
             }
 
-            return (nextUtc < _dateTimeService.Now() + schedulePeriod);
+            return nextUtc < _dateTimeService.Now();
         }
     }
 }

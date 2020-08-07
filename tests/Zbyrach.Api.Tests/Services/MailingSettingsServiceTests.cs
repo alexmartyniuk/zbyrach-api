@@ -59,13 +59,13 @@ namespace Zbyrach.Api.Tests.Services
         }
 
         [Theory]
-        [InlineData("2020-04-27 09:00", "User3,User6,User9")]                         // Monday
-        [InlineData("2020-04-28 09:00", "User1,User3,User6,User9")]                   // Thuesday
-        [InlineData("2020-04-29 09:00", "User1,User2,User3,User6,User9")]             // Wednesday
-        [InlineData("2020-04-30 09:00", "User1,User2,User3,User6,User7,User9")]       // Thursday
-        [InlineData("2020-05-01 09:00", "User1,User2,User3,User4,User6,User7,User9")] // Friday
-        [InlineData("2020-05-02 09:00", "User1,User2,User3,User4,User6,User7,User9")] // Saturday
-        [InlineData("2020-05-03 09:00", "User1,User2,User3,User4,User6,User7,User9")] // Sunday
+        [InlineData("2020-04-27 09:01", "User3,User6,User9")]                         // Monday
+        [InlineData("2020-04-28 09:01", "User1,User3,User6,User9")]                   // Thuesday
+        [InlineData("2020-04-29 09:01", "User1,User2,User3,User6,User9")]             // Wednesday
+        [InlineData("2020-04-30 09:01", "User1,User2,User3,User6,User7,User9")]       // Thursday
+        [InlineData("2020-05-01 09:01", "User1,User2,User3,User4,User6,User7,User9")] // Friday
+        [InlineData("2020-05-02 09:01", "User1,User2,User3,User4,User6,User7,User9")] // Saturday
+        [InlineData("2020-05-03 09:01", "User1,User2,User3,User4,User6,User7,User9")] // Sunday
         public async Task GetBySchedule_ForParticularDay_ShouldReturnCorrectMailSettings(string now, string users)
         {
             var datetime = ParseDateTime(now);
