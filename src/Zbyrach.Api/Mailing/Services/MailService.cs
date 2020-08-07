@@ -21,8 +21,7 @@ namespace Zbyrach.Api.Mailing
         private readonly ILogger<MailService> _logger;
         private readonly string _sendGridApiKey;
         private readonly bool _sendMails;
-        private readonly string _apiBasePath;
-        private readonly string _uiBasePath;
+        private readonly string _webUiBasePath;
         private readonly Template _articlesEmailTemplate;
 
         public MailService(IConfiguration configuration, ILogger<MailService> logger)
@@ -30,8 +29,7 @@ namespace Zbyrach.Api.Mailing
             _logger = logger;
             _sendGridApiKey = configuration["SENDGRID_APIKEY"];
             _sendMails = bool.TrueString.Equals(configuration["SendMails"], StringComparison.OrdinalIgnoreCase);
-            _apiBasePath = configuration["ApiBasePath"];
-            _uiBasePath = configuration["UiBasePath"];
+            _webUiBasePath = configuration["WebUiBasePath"];
 
             var templateFileName = Path.Combine(AppContext.BaseDirectory, "Mailing", "Templates", "Articles.cshtml");
             _articlesEmailTemplate = Template.Parse(File.ReadAllText(templateFileName));
@@ -57,14 +55,14 @@ namespace Zbyrach.Api.Mailing
                 UserName = user.Name,
                 UserEmail = user.Email,
                 DateTime = GetCurrentDateInUkrainian(),
-                UnsubscribeUrl = $"{_uiBasePath}/unsubscribe/{unsubscribeToken}",
-                ViewOnSiteUrl = $"{_uiBasePath}/articles",
+                UnsubscribeUrl = $"{_webUiBasePath}/unsubscribe/{unsubscribeToken}",
+                ViewOnSiteUrl = $"{_webUiBasePath}/articles",
                 Articles = articles.Select(a => new ArticleModel
                 {
                     Title = a.Title,
                     Description = a.Description,
                     Url = a.Url,
-                    PdfUrl = $"{_apiBasePath}/articles/pdf/{a.Id}",
+                    PdfUrl = $"{_webUiBasePath}/articles/{a.Id}",
                     AuthorEmail = a.AuthorEmail,
                     AuthorName = a.AuthorName,
                     AuthorPhoto = a.AuthorPhoto

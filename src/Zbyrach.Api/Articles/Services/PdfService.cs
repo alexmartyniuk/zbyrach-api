@@ -19,7 +19,7 @@ namespace Zbyrach.Api.Articles
             _chromiumExecutablePath = configuration["PUPPETEER_EXECUTABLE_PATH"];
             _detectionService = detectionService;
         }
-        public async Task<Stream> ConvertUrlToPdf(string url)
+        public async Task<Stream> ConvertUrlToPdf(string url, bool removeMargins = false)
         {
             if (string.IsNullOrEmpty(url))
             {
@@ -132,8 +132,8 @@ namespace Zbyrach.Api.Articles
                 Format = format,
                 MarginOptions = new PuppeteerSharp.Media.MarginOptions
                 {                    
-                    Top = "40px",
-                    Bottom = "40px"
+                    Top = removeMargins ? "0px" : "40px",
+                    Bottom = removeMargins? "0px" : "40px"
                 }
             });
         }

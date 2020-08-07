@@ -2,10 +2,13 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Mime;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Mailing;
+using System.Net;
 
 namespace Zbyrach.Api.Articles
 {
@@ -36,7 +39,7 @@ namespace Zbyrach.Api.Articles
             var articleTags = await _articleService.GetForReading(currentUser);
             var articlesDtos = articleTags
                 .GroupBy(at => at.Article)
-                .Select(g =>            
+                .Select(g =>
                 new ArticleDto
                 {
                     Id = g.Key.Id,
@@ -57,24 +60,30 @@ namespace Zbyrach.Api.Articles
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("/articles/pdf/{articleId}")]
-        public async Task<IActionResult> GetPdf(long articleId)
-        {            
+        [Route("/articles/{articleId}/pdf")]
+        public async Task<IActionResult> GetPdf(long articleId, [FromQuery] bool inline = false)
+        {
             var article = await _articleService.GetById(articleId);
             if (article == null)
             {
                 return NotFound();
             }
 
-            var stream = await _pdfService.ConvertUrlToPdf(article.Url);
-            var fileName = GetPdfFileName(article.Url);
-            return File(stream, "application/pdf", fileName);                    
+            var stream = await _pdfService.ConvertUrlToPdf(article.Url, inline);
+            Response.Headers[HeaderNames.ContentDisposition] = new ContentDisposition
+            {
+                FileName = GetPdfFileName(article.Url),
+                DispositionType = inline ? DispositionTypeNames.Inline : DispositionTypeNames.Attachment 
+            }.ToString();
+
+            return File(stream, "application/pdf");
         }
 
         private string GetPdfFileName(string url)
         {
             var uri = new Uri(url.ToLower());
-            return Path.GetFileName(uri.LocalPath) + ".pdf";
+            var fileName = Path.GetFileName(uri.LocalPath) + ".pdf";
+            return WebUtility.UrlEncode(fileName);
         }
     }
 }
