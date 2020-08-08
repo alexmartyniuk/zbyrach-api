@@ -13,13 +13,57 @@ namespace Zbyrach.Api.Articles
     {
         private readonly string _chromiumExecutablePath;
         private readonly IDetectionService _detectionService;
+        private readonly string _removeFolowLinkScript;
+        private readonly string _removePageBreaksScript;
+        private readonly string _leftOnlyArticleNodeScript;
 
         public PdfService(IConfiguration configuration, IDetectionService detectionService)
         {
             _chromiumExecutablePath = configuration["PUPPETEER_EXECUTABLE_PATH"];
             _detectionService = detectionService;
+
+            _removeFolowLinkScript = @"()=> {
+                    const links = document.querySelectorAll('a, button');
+                    for (let link of links) {
+                        if (link.textContent.includes('Follow')) {
+                            link.style.display = 'none';
+                        }
+                        if (link.getAttribute('target') !== '_blank') {
+                            link.removeAttribute('href');              
+                        } 
+                    }
+                }";
+
+            _removePageBreaksScript = @"()=> {
+                    var style = document.createElement('style');
+                    style.innerHTML = `
+                        h1, h2 {
+                            page-break-inside: avoid;
+                        }
+                        h1::after, h2::after {
+                            content: '';
+                            display: block;
+                            height: 100px;
+                            margin-bottom: -100px;
+                        }
+                        .paragraph-image {
+                            page-break-inside: avoid;
+                            page-break-before: auto;
+                            page-break-after: auto;
+                        }
+                        `;
+                    document.head.appendChild(style);
+                }";
+
+            _leftOnlyArticleNodeScript = @"()=> {
+                const article = document.querySelectorAll('article')[0];
+                const parent = article.parentNode;
+                parent.innerHTML = '';
+                parent.append(article);
+            }";
         }
-        public async Task<Stream> ConvertUrlToPdf(string url, bool removeMargins = false)
+
+        public async Task<Stream> ConvertUrlToPdf(string url, bool inline = false)
         {
             if (string.IsNullOrEmpty(url))
             {
@@ -83,47 +127,19 @@ namespace Zbyrach.Api.Articles
             };
 
             await page.SetJavaScriptEnabledAsync(false);
-            await page.GoToAsync(url);
+            await page.GoToAsync(url);            
 
-            var script = @"()=> {
-                const links = document.querySelectorAll('a, button');
-                for (let link of links) {
-                    if (link.textContent.includes('Follow')) {
-                        link.style.display = 'none';
-                    }
-                }
-
-                var style = document.createElement('style');
-                style.innerHTML = `
-                    h1, h2 {
-                        page-break-inside: avoid;
-                    }
-                    h1::after, h2::after {
-                        content: '';
-                        display: block;
-                        height: 100px;
-                        margin-bottom: -100px;
-                    }
-                    .paragraph-image {
-                        page-break-inside: avoid;
-                        page-break-before: auto;
-                        page-break-after: auto;
-                    }
-                    `;
-                document.head.appendChild(style);
-
-                const article = document.querySelectorAll('article')[0];
-                const parent = article.parentNode;
-                parent.innerHTML = '';
-                parent.append(article);
-            }";
-
-            await page.EvaluateFunctionAsync(script);
+            await page.EvaluateFunctionAsync(_removeFolowLinkScript);            
+            await page.EvaluateFunctionAsync(_leftOnlyArticleNodeScript);
+            if (!inline)
+            {
+                await page.EvaluateFunctionAsync(_removePageBreaksScript);
+            }
 
             var format = _detectionService.Device.Type switch
             {
                 Device.Mobile => PaperFormat.A6,
-                Device.Tablet => PaperFormat.A5,
+                Device.Tablet => inline ? PaperFormat.A4 : PaperFormat.A5,
                 _ => PaperFormat.A4
             };
 
@@ -132,8 +148,8 @@ namespace Zbyrach.Api.Articles
                 Format = format,
                 MarginOptions = new PuppeteerSharp.Media.MarginOptions
                 {                    
-                    Top = removeMargins ? "0px" : "40px",
-                    Bottom = removeMargins? "0px" : "40px"
+                    Top = inline ? "0px" : "40px",
+                    Bottom = inline? "0px" : "40px"
                 }
             });
         }
