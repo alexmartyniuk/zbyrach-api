@@ -94,10 +94,6 @@ namespace Zbyrach.Api.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<string>("ExternalId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("FoundAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -124,9 +120,6 @@ namespace Zbyrach.Api.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ExternalId")
-                        .IsUnique();
 
                     b.ToTable("Articles");
                 });

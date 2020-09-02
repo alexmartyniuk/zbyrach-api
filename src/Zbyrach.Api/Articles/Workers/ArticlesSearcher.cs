@@ -90,12 +90,11 @@ namespace Zbyrach.Api.Articles
         {
             try
             {
-                var externalId = GenerateId(story);
                 var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
-                var originalArticle = await articleService.GetByExternalId(externalId);
+                var originalArticle = await articleService.GetByTitleAndAuthorName(story.Title, story.Author.Name);
                 if (originalArticle == null)
                 {
-                    originalArticle = await SaveArticle(serviceScope, story, externalId);
+                    originalArticle = await SaveArticle(serviceScope, story);
                     await articleService.SetStatus(originalArticle, users, ArticleStatus.New);
                     await articleService.LinkWithTag(originalArticle, tag);
                     _logger.LogInformation("Story was successfully saved: {story}", story);
@@ -111,7 +110,7 @@ namespace Zbyrach.Api.Articles
             }
         }
 
-        private async Task<Article> SaveArticle(IServiceScope serviceScope, StoryDto story, string externalId)
+        private async Task<Article> SaveArticle(IServiceScope serviceScope, StoryDto story)
         {
             var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
             var translationService = serviceScope.ServiceProvider.GetRequiredService<TranslationService>();
@@ -122,7 +121,6 @@ namespace Zbyrach.Api.Articles
             var newArticle = new Article
             {
                 FoundAt = DateTime.UtcNow,
-                ExternalId = externalId,
                 PublicatedAt = story.PublicatedAt,
                 IllustrationUrl = story.IllustrationUrl,
                 Description = story.Description,
@@ -137,26 +135,6 @@ namespace Zbyrach.Api.Articles
             };
 
             return await articleService.SaveOne(newArticle);
-        }
-
-        private string GenerateId(StoryDto story)
-        {
-            var uri = new Uri(story.Url.ToLower());
-            var path = uri.GetLeftPart(UriPartial.Path);
-            return GetStringSha256Hash(path);
-        }
-
-        private string GetStringSha256Hash(string text)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                return string.Empty;
-            }
-
-            using var sha = new System.Security.Cryptography.SHA256Managed();
-            byte[] textData = System.Text.Encoding.UTF8.GetBytes(text);
-            byte[] hash = sha.ComputeHash(textData);
-            return BitConverter.ToString(hash).Replace("-", String.Empty);
         }
     }
 }

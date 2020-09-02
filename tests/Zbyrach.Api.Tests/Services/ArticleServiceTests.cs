@@ -50,7 +50,7 @@ namespace Zbyrach.Api.Tests
 
             var user1 = Context.Users.Single(u => u.Email == USER1_EMAIL);
             var user2 = Context.Users.Single(u => u.Email == USER2_EMAIL);
-            var article = Context.Articles.Single(a => a.ExternalId == originalArticle.ExternalId);
+            var article = Context.Articles.Single(a => a.Title == originalArticle.Title);
 
             var service = new ArticleService(Context, _usersServiceMock.Object);
 
@@ -64,7 +64,7 @@ namespace Zbyrach.Api.Tests
                 .Articles
                 .Include(a => a.ArticleUsers)
                 .ThenInclude(au => au.User)
-                .Single(a => a.ExternalId == originalArticle.ExternalId);
+                .Single(a => a.Title == originalArticle.Title);
             
             savedArticle.Should().NotBeNull();
             savedArticle.ArticleUsers.Should().NotBeNull();
@@ -210,7 +210,7 @@ namespace Zbyrach.Api.Tests
         {
             return new Article
             {
-                ExternalId = Guid.NewGuid().ToString(),
+                Title = Guid.NewGuid().ToString(),
                 Url = "http://domain.com/article"
             };
         }

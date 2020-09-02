@@ -138,10 +138,10 @@ namespace Zbyrach.Api.Articles
             return _db.Articles.FindAsync(articleId);
         }
 
-        public Task<Article> GetByExternalId(string extenalId)
+        public Task<Article> GetByTitleAndAuthorName(string title, string authorName)
         {
             return _db.Articles
-                .SingleOrDefaultAsync(a => a.ExternalId == extenalId);
+                .SingleOrDefaultAsync(a => a.Title == title && a.AuthorName == authorName);
         }
 
         public async Task LinkWithTag(Article article, Tag tag)

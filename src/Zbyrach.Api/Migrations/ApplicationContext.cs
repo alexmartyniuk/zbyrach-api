@@ -91,12 +91,6 @@ namespace Zbyrach.Api.Migrations
                .Property(a => a.Id)
                .IsRequired();
             modelBuilder.Entity<Article>()
-               .Property(a => a.ExternalId)
-               .IsRequired();
-            modelBuilder.Entity<Article>()
-               .HasIndex(a => a.ExternalId)
-               .IsUnique();
-            modelBuilder.Entity<Article>()
                .Property(m => m.Url)
                .IsRequired();            
 

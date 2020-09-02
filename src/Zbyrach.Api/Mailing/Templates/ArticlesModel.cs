@@ -15,7 +15,6 @@ namespace Zbyrach.Api.Mailing.Templates
 
     public class ArticleModel
     {
-        public string ExternalId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime PublicatedAt { get; set; }
