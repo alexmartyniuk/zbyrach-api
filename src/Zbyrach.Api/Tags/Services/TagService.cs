@@ -71,6 +71,15 @@ namespace Zbyrach.Api.Tags
             await _db.SaveChangesAsync();
         }
 
+        public async Task<long> GetTagsCountByUser(User user)
+        {
+            var originalUser = _db.Users.Find(user.Id);
+            return await _db.Tags
+                .Include(t => t.TagUsers)
+                .Where(t => t.TagUsers.Any(tu => tu.UserId == originalUser.Id))
+                .CountAsync();
+        }
+
         public async Task<Dictionary<Tag, List<User>>> GetTagsWithUsers()
         {
             // TODO: take into account schedule settings for users        

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Zbyrach.Api.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Zbyrach.Api.Tags;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -12,16 +13,20 @@ namespace Zbyrach.Api.Mailing
         private readonly UsersService _userService;
         private readonly MailingSettingsService _mailingSettingService;
         private readonly CronService _cronService;
+        private readonly TagService _tagsService;
 
         public MailingSettingsController(
             UsersService userService,
             MailingSettingsService mailingSettingService,
-            CronService cronService)
+            CronService cronService,
+            TagService tagsService)
         {
             _userService = userService;
             _mailingSettingService = mailingSettingService;
             _cronService = cronService;
+            _tagsService = tagsService;
         }
+
 
         [HttpGet]
         [Route("/mailing/settings/my")]
@@ -34,6 +39,21 @@ namespace Zbyrach.Api.Mailing
             {
                 ScheduleType = _cronService.ExpressionToSchedule(settings.Schedule),
                 NumberOfArticles = settings.NumberOfArticles
+            });
+        }
+
+        [HttpGet]
+        [Route("/mailing/settings/summary")]
+        public async Task<IActionResult> GetSettingsSummary()
+        {
+            var currentUser = await _userService.GetCurrentUser();
+
+            var mailSettings = await _mailingSettingService.Get(currentUser);
+            var tagsCount = await _tagsService.GetTagsCountByUser(currentUser);
+            return Ok(new SettingsSummaryDto
+            {
+                ScheduleType = _cronService.ExpressionToSchedule(mailSettings.Schedule),
+                NumberOfTags = tagsCount
             });
         }
 
