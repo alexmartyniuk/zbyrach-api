@@ -30,6 +30,11 @@ namespace Zbyrach.Api.Account
             return _db.Users.SingleOrDefaultAsync(u => u.Email == email);
         }
 
+        public async Task<User> GetById(long userId)
+        {
+            return await _db.Users.FindAsync(userId);
+        }
+
         public async Task<User> AddNewUser(User user)
         {
             if (user.Id != default)
@@ -132,7 +137,7 @@ namespace Zbyrach.Api.Account
             catch (Exception)
             {
                 return null;
-            }            
+            }
         }
     }
 }

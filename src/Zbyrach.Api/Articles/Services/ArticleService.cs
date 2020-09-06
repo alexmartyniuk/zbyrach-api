@@ -110,6 +110,11 @@ namespace Zbyrach.Api.Articles
             return groupedUsers.ToDictionary(g => users[g.userId], g => g.maxSentAt);
         }
 
+        public Task MarkAsRead(Article article, User user)
+        {
+            return SetStatus(new List<Article>{ article }, new List<User> { user }, ArticleStatus.Read);
+        }
+
         private void UpdateStatus(ArticleUser reading, ArticleStatus newStatus)
         {
             if (reading.Status >= newStatus)

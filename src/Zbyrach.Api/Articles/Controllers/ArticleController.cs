@@ -61,7 +61,7 @@ namespace Zbyrach.Api.Articles
         [HttpGet]
         [AllowAnonymous]
         [Route("/articles/{articleId}/pdf")]
-        public async Task<IActionResult> GetPdf(long articleId, [FromQuery] bool inline = false)
+        public async Task<IActionResult> GetPdf(long articleId, [FromQuery] long userId = 0, [FromQuery] bool inline = false)
         {
             var article = await _articleService.GetById(articleId);
             if (article == null)
@@ -75,6 +75,12 @@ namespace Zbyrach.Api.Articles
                 FileName = GetPdfFileName(article.Url),
                 DispositionType = inline ? DispositionTypeNames.Inline : DispositionTypeNames.Attachment 
             }.ToString();
+
+            var user = await _userService.GetById(userId);
+            if (user != null)
+            {
+                await _articleService.MarkAsRead(article, user);
+            }
 
             return File(stream, "application/pdf");
         }
