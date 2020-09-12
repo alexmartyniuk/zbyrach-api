@@ -171,10 +171,12 @@ namespace Zbyrach.Api.Articles
 
             var result = await _db.ArticleUsers
                 .Include(au => au.Article)
-                .Where(au => au.UserId == user.Id && au.Status == ArticleStatus.New)
-                .OrderByDescending(au => au.CreatedAt)
-                .Take((int)noMoreThan)
+                .Where(au => au.UserId == user.Id && au.Status == ArticleStatus.New)                
                 .Select(au => au.Article)
+                .OrderByDescending(a => a.LikesCount)
+                .ThenByDescending(a => a.CommentsCount)
+                .ThenByDescending(a => a.PublicatedAt)
+                .Take((int)noMoreThan)
                 .ToListAsync();
 
             return result;

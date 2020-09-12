@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Zbyrach.Api.Migrations;
 
 namespace Zbyrach.Api.Tests
@@ -9,6 +10,11 @@ namespace Zbyrach.Api.Tests
     {
         protected ApplicationContext Context { get; private set; }
         protected SqliteConnection Connection { get; private set; }
+
+        public static readonly Microsoft.Extensions.Logging.LoggerFactory _consoleLogger =
+            new LoggerFactory(new[] {
+                new Microsoft.Extensions.Logging.Debug.DebugLoggerProvider()
+            });
 
         public DatabaseTests()
         {
@@ -29,6 +35,7 @@ namespace Zbyrach.Api.Tests
             finally
             {
                 var options = new DbContextOptionsBuilder<ApplicationContext>()
+                    .UseLoggerFactory(_consoleLogger)
                     .UseSqlite(Connection)
                     .Options;
 

@@ -55,8 +55,8 @@ namespace Zbyrach.Api.Tests
             var service = new ArticleService(Context, _usersServiceMock.Object);
 
             await service.SetStatus(
-                article, 
-                new List<User> { user1, user2 }, 
+                article,
+                new List<User> { user1, user2 },
                 ArticleStatus.Read);
             SaveAndRecreateContext();
 
@@ -65,7 +65,7 @@ namespace Zbyrach.Api.Tests
                 .Include(a => a.ArticleUsers)
                 .ThenInclude(au => au.User)
                 .Single(a => a.Title == originalArticle.Title);
-            
+
             savedArticle.Should().NotBeNull();
             savedArticle.ArticleUsers.Should().NotBeNull();
             savedArticle.ArticleUsers.Should().HaveCount(2);
@@ -106,7 +106,7 @@ namespace Zbyrach.Api.Tests
                 });
 
             SaveAndRecreateContext();
-            
+
             var service = new ArticleService(Context, _usersServiceMock.Object);
 
             var result = await service.GetLastMailSentDateByUsers();
@@ -143,7 +143,7 @@ namespace Zbyrach.Api.Tests
             };
             Context.Users.Add(originalUser1);
 
-            Context.ArticleUsers.AddRange(               
+            Context.ArticleUsers.AddRange(
                 new ArticleUser
                 {
                     // This is a reading with max sent date for user 1
@@ -160,7 +160,7 @@ namespace Zbyrach.Api.Tests
                      SentAt = originalSentDate1,
                  },
                  new ArticleUser
-                 {                     
+                 {
                      User = originalUser1,
                      Article = CreateArticle(),
                      Status = ArticleStatus.New,
@@ -204,6 +204,61 @@ namespace Zbyrach.Api.Tests
 
             var dateTime2 = result[originalUser2];
             dateTime2.Should().Be(originalSentDate6);
+        }
+
+        [Fact]
+        public async Task GetForSending_ForListOfArticles_ShouldReturnArticlesInRightOrder()
+        {
+            var user = new User
+            {
+                Email = USER1_EMAIL,
+                Name = "User1"
+            };
+            Context.Users.Add(user);
+
+            var article1 = CreateArticle();
+            article1.PublicatedAt = new DateTime(2020, 09, 12);
+            article1.CommentsCount = 10;
+            article1.LikesCount = 100;
+
+            var article2 = CreateArticle();
+            article2.PublicatedAt = new DateTime(2020, 09, 13);
+            article2.CommentsCount = 30;
+            article2.LikesCount = 300;
+
+            var article3 = CreateArticle();
+            article3.PublicatedAt = new DateTime(2020, 09, 14);
+            article3.CommentsCount = 20;
+            article3.LikesCount = 200;
+
+            var articles = new List<Article> { article1, article2, article3 };
+            Context.Articles.AddRange(articles);
+
+            Context.ArticleUsers.AddRange(
+                articles.Select(a =>
+                    new ArticleUser
+                    {
+                        User = user,
+                        Article = a,
+                        Status = ArticleStatus.New,
+                    }));
+            SaveAndRecreateContext();
+
+            var service = new ArticleService(Context, _usersServiceMock.Object);
+
+            var result = await service.GetForSending(user, 10);
+
+            result.Should().NotBeNull();
+            result.Should().HaveCount(3);            
+
+            var art1 = result.ElementAt(0);
+            art1.Id.Should().Be(article2.Id);
+
+            var art2 = result.ElementAt(1);
+            art2.Id.Should().Be(article3.Id);
+
+            var art3 = result.ElementAt(2);
+            art3.Id.Should().Be(article1.Id);
         }
 
         private Article CreateArticle()
