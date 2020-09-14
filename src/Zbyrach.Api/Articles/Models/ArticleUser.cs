@@ -13,5 +13,7 @@ namespace Zbyrach.Api.Articles
         public DateTime CreatedAt { get; set; }
         public DateTime SentAt { get; set; }
         public DateTime ReadAt { get; set; }
+        public bool Favorite { get; set; }
+        public bool ReadLater { get; set; }
     }
 }

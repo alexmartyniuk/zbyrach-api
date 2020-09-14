@@ -15,7 +15,9 @@ namespace Zbyrach.Api.Articles
         public string AuthorPhoto { get; set; }
         public long CommentsCount { get; set; }
         public long LikesCount { get; set; }
-        public string ReadTime { get; set; }  
+        public string ReadTime { get; set; } 
+        public bool Favorite { get; set; } 
+        public bool ReadLater { get; set; } 
         public List<string> Tags {get; set; }              
     }
 }

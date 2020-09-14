@@ -30,32 +30,61 @@ namespace Zbyrach.Api.Articles
 
         [HttpGet]
         [Route("/articles/status/read")]
-        public async Task<IActionResult> GetArticlesForRead()
+        public async Task<IActionResult> GetArticlesForReading()
         {
-            var currentUser = await _userService.GetCurrentUser();
-            var mailingSettings = await _mailingSettingsService.Get(currentUser);
-            var noMoreThan = mailingSettings?.NumberOfArticles ?? 0;
-
-            var articleTags = await _articleService.GetForReading(currentUser);
-            var articlesDtos = articleTags
-                .GroupBy(at => at.Article)
-                .Select(g =>
+            var currentUser = await _userService.GetCurrentUser();           
+            var articles = await _articleService.GetForReading(currentUser);
+            var articleUsers = await _articleService.GetArticleUsers(currentUser, articles);
+            
+            var articlesDtos = articles                
+                .Select(a =>
                 new ArticleDto
                 {
-                    Id = g.Key.Id,
-                    Title = g.Key.Title,
-                    Description = g.Key.Description,
-                    PublicatedAt = g.Key.PublicatedAt,
-                    IllustrationUrl = g.Key.IllustrationUrl,
-                    OriginalUrl = g.Key.Url,
-                    AuthorName = g.Key.AuthorName,
-                    AuthorPhoto = g.Key.AuthorPhoto,
-                    CommentsCount = g.Key.CommentsCount,
-                    LikesCount = g.Key.LikesCount,
-                    ReadTime = g.Key.ReadTime,
-                    Tags = g.Select(at => at.Tag.Name).ToList()
+                    Id = a.Id,
+                    Title = a.Title,
+                    Description = a.Description,
+                    PublicatedAt = a.PublicatedAt,
+                    IllustrationUrl = a.IllustrationUrl,
+                    OriginalUrl = a.Url,
+                    AuthorName = a.AuthorName,
+                    AuthorPhoto = a.AuthorPhoto,
+                    CommentsCount = a.CommentsCount,
+                    LikesCount = a.LikesCount,
+                    ReadTime = a.ReadTime,
+                    Favorite = articleUsers.Single(au => au.ArticleId == a.Id).Favorite,
+                    ReadLater = articleUsers.Single(au => au.ArticleId == a.Id).ReadLater,
+                    Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList()
                 });
             return Ok(articlesDtos);
+        }
+
+        [HttpPost]
+        [Route("/articles/{articleId}/favorite/{favorite}")]
+        public async Task<IActionResult> SetFavorite(long articleId, bool favorite)
+        {
+            var currentUser = await _userService.GetCurrentUser();           
+            var article = await _articleService.GetById(articleId);
+            var newArticle = await _articleService.SetFavorite(currentUser, article, favorite);
+            var articleUser = await _articleService.GetArticleUser(currentUser, article);
+            
+            var articlesDto = new ArticleDto
+            {
+                Id = article.Id,
+                Title = article.Title,
+                Description = article.Description,
+                PublicatedAt = article.PublicatedAt,
+                IllustrationUrl = article.IllustrationUrl,
+                OriginalUrl = article.Url,
+                AuthorName = article.AuthorName,
+                AuthorPhoto = article.AuthorPhoto,
+                CommentsCount = article.CommentsCount,
+                LikesCount = article.LikesCount,
+                ReadTime = article.ReadTime,
+                Favorite = articleUser.Favorite,
+                ReadLater = articleUser.ReadLater,
+                Tags = article.ArticleTags.Select(at => at.Tag.Name).ToList()
+            };
+            return Ok(articlesDto);
         }
 
         [HttpGet]
