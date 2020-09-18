@@ -28,14 +28,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Mailing\Templates\Articles.cshtml">
+    <Content Update="Mailing\Templates\Articles.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <Target Name="PublishTemplate" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
-      <DistFiles Include="Mailing\Templates\*.cshtml" />
+      <DistFiles Include="Mailing\Templates\*.html" />
       <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
         <RelativePath>%(DistFiles.Identity)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

@@ -17,7 +17,7 @@ namespace Zbyrach.Api.Mailing.Templates
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public DateTime PublicatedAt { get; set; }
+        public string PublicatedAt { get; set; }
         public string Url { get; set; }
         public string PdfUrl { get; set; }
         public string AuthorName { get; set; }

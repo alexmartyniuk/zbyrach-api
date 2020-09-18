@@ -13,8 +13,8 @@
         box-sizing: border-box;
     }
     a {
-        cursor: pointer;
-        color: #a64f05;
+        cursor: pointer !important;
+        color: #a64f05 !important;
     }
     p, div {
         cursor: default;
@@ -169,7 +169,7 @@
 
             <div class="container__body">
                 <div class="greetings">
-                    <p><span id="user_name">{{model.user_name}}</span>, ваші статті за {{model.date_time}}</p> 
+                    <p><span id="user_name">{{model.user_name}}</span>, ваші статті за {{model.period}}</p> 
                 </div>
                 <div class="list">
 
@@ -184,7 +184,7 @@
                                     <tr>
                                         <td>
                                             <div class="article__info__title">
-                                                {{article.title}}
+                                                <a href="{{article.url}}">{{article.title}}</a>
                                             </div>
                                         </td>
                                     </tr>

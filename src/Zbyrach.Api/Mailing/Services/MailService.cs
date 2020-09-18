@@ -31,7 +31,7 @@ namespace Zbyrach.Api.Mailing
             _sendMails = bool.TrueString.Equals(configuration["SendMails"], StringComparison.OrdinalIgnoreCase);
             _webUiBasePath = configuration["WebUiBasePath"];
 
-            var templateFileName = Path.Combine(AppContext.BaseDirectory, "Mailing", "Templates", "Articles.cshtml");
+            var templateFileName = Path.Combine(AppContext.BaseDirectory, "Mailing", "Templates", "Articles.html");
             _articlesEmailTemplate = Template.Parse(File.ReadAllText(templateFileName));
         }
 
@@ -61,7 +61,9 @@ namespace Zbyrach.Api.Mailing
                 {
                     Title = a.Title,
                     Description = a.Description,
-                    Url = a.Url,
+                    Url =  $"{_webUiBasePath}/articles/{a.Id}/user/{user.Id}",
+                    PublicatedAt = GetDateInUkrainian(a.PublicatedAt),
+                    ReadTime = a.ReadTime,
                     PdfUrl = $"{_webUiBasePath}/articles/{a.Id}",
                     AuthorEmail = a.AuthorEmail,
                     AuthorName = a.AuthorName,
@@ -76,16 +78,21 @@ namespace Zbyrach.Api.Mailing
         {
             switch (scheduleType)
             {
-                case ScheduleType.EveryDay:
-                    var culture = new CultureInfo("uk-UA");
-                    return DateTime.UtcNow.ToString("m", culture);
-                case ScheduleType.EveryMonth:
-                    return "минулий місяць";
+                case ScheduleType.EveryDay:                    
+                    return GetDateInUkrainian(DateTime.UtcNow);
                 case ScheduleType.EveryWeek:
                     return "минулий тиждень";
+                case ScheduleType.EveryMonth:
+                    return "минулий місяць";
                 default:
                     throw new ArgumentException(nameof(scheduleType));
             }
+        }
+
+        private string GetDateInUkrainian(DateTime date)
+        {
+            var culture = new CultureInfo("uk-UA");
+            return date.ToString("m", culture);
         }
 
         private async Task SendMessage(User user, string subject, string htmlBody)
