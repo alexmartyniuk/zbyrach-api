@@ -7,7 +7,7 @@ namespace Zbyrach.Api.Mailing.Templates
     {
         public string UserName { get; set; }
         public string UserEmail { get; set; }
-        public string DateTime { get; set; }
+        public string Period { get; set; }
         public string ViewOnSiteUrl { get; set; }
         public string UnsubscribeUrl { get; set; }
         public List<ArticleModel> Articles { get; set; }

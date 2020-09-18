@@ -14,15 +14,18 @@ namespace Zbyrach.Api.Mailing
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly MailService _mailService;
+        private readonly CronService _cronService;
         private readonly ILogger<NotificationsSender> _logger;
         private readonly int _sendMailsBeforeInMinutes;
 
         public NotificationsSender(IServiceScopeFactory serviceScopeFactory,
             IConfiguration configuration,
             MailService mailService,
+            CronService cronService,
             ILogger<NotificationsSender> logger)
         {
             _mailService = mailService;
+            _cronService = cronService;
             _logger = logger;
             _serviceScopeFactory = serviceScopeFactory;
             if (!int.TryParse(configuration["SendMailsBeforeInMinutes"], out _sendMailsBeforeInMinutes))
@@ -76,7 +79,7 @@ namespace Zbyrach.Api.Mailing
             var usersService = serviceScope.ServiceProvider.GetRequiredService<UsersService>();
             var unsubscribeToken = usersService.GetUnsubscribeTokenByUser(settings.User);
 
-            await _mailService.SendArticleList(settings.User, unsubscribeToken, articles);            
+            await _mailService.SendArticleList(settings.User, unsubscribeToken, articles, _cronService.ExpressionToSchedule(settings.Schedule));            
             await articleService.MarkAsSent(articles, settings.User);
         }
     }

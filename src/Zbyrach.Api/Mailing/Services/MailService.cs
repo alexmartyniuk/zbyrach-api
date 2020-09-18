@@ -35,17 +35,17 @@ namespace Zbyrach.Api.Mailing
             _articlesEmailTemplate = Template.Parse(File.ReadAllText(templateFileName));
         }
 
-        public async Task SendArticleList(User user, string unsubscribeToken, List<Article> articles)
+        public async Task SendArticleList(User user, string unsubscribeToken, List<Article> articles, ScheduleType scheduleType)
         {
-            var subject = "Cтатті від Збирача за " + GetCurrentDateInUkrainian();
-            var body = GetHtmlMessageBody(user, unsubscribeToken, articles);
+            var subject = "Cтатті за " + GetPeriodInUkrainian(scheduleType);
+            var body = GetHtmlMessageBody(user, unsubscribeToken, articles, scheduleType);
 
             await SendMessage(user, subject, body);
 
             _logger.LogInformation("Message was sent to {email} with articles:\n {artcileTitles}", user.Email, articles.Select(a => a.Title + "\n"));
         }
 
-        private string GetHtmlMessageBody(User user, string unsubscribeToken, List<Article> articles)
+        private string GetHtmlMessageBody(User user, string unsubscribeToken, List<Article> articles, ScheduleType scheduleType)
         {
             var baseTemplatesDirectory = Path.Combine(AppContext.BaseDirectory, "Mailing", "Templates");
             unsubscribeToken = WebUtility.UrlEncode(unsubscribeToken);
@@ -54,7 +54,7 @@ namespace Zbyrach.Api.Mailing
             {
                 UserName = user.Name,
                 UserEmail = user.Email,
-                DateTime = GetCurrentDateInUkrainian(),
+                Period = GetPeriodInUkrainian(scheduleType),
                 UnsubscribeUrl = $"{_webUiBasePath}/unsubscribe/{unsubscribeToken}",
                 ViewOnSiteUrl = $"{_webUiBasePath}/articles",
                 Articles = articles.Select(a => new ArticleModel
@@ -72,10 +72,20 @@ namespace Zbyrach.Api.Mailing
             return _articlesEmailTemplate.Render(new { Model = model });
         }
 
-        private string GetCurrentDateInUkrainian()
+        private string GetPeriodInUkrainian(ScheduleType scheduleType)
         {
-            var culture = new CultureInfo("uk-UA");
-            return DateTime.UtcNow.ToString("m", culture);
+            switch (scheduleType)
+            {
+                case ScheduleType.EveryDay:
+                    var culture = new CultureInfo("uk-UA");
+                    return DateTime.UtcNow.ToString("m", culture);
+                case ScheduleType.EveryMonth:
+                    return "минулий місяць";
+                case ScheduleType.EveryWeek:
+                    return "минулий тиждень";
+                default:
+                    throw new ArgumentException(nameof(scheduleType));
+            }
         }
 
         private async Task SendMessage(User user, string subject, string htmlBody)
