@@ -152,8 +152,14 @@ namespace Zbyrach.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<bool>("Favorite")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("ReadAt")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("ReadLater")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("SentAt")
                         .HasColumnType("timestamp without time zone");
