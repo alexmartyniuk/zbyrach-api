@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
@@ -16,6 +17,9 @@ namespace Zbyrach.Api.Articles
         private readonly string _removeFolowLinkScript;
         private readonly string _removePageBreaksScript;
         private readonly string _leftOnlyArticleNodeScript;
+        private readonly string _scrollPageToBottomScript;
+        private readonly string _removeBannerTopScript;
+        private string _lastLogMessage;
 
         public PdfService(IConfiguration configuration, IDetectionService detectionService)
         {
@@ -32,6 +36,7 @@ namespace Zbyrach.Api.Articles
                             link.removeAttribute('href');              
                         } 
                     }
+                    console.log('Follow links were removed.'); 
                 }";
 
             _removePageBreaksScript = @"()=> {
@@ -46,13 +51,14 @@ namespace Zbyrach.Api.Articles
                             height: 100px;
                             margin-bottom: -100px;
                         }
-                        .paragraph-image {
+                        .paragraph-image, figure {
                             page-break-inside: avoid;
                             page-break-before: auto;
                             page-break-after: auto;
                         }
                         `;
                     document.head.appendChild(style);
+                    console.log('Page breaks were removed.'); 
                 }";
 
             _leftOnlyArticleNodeScript = @"()=> {
@@ -60,7 +66,51 @@ namespace Zbyrach.Api.Articles
                 const parent = article.parentNode;
                 parent.innerHTML = '';
                 parent.append(article);
+                console.log('All elements except the article were removed.'); 
             }";
+
+            _scrollPageToBottomScript = @"()=> {                
+                var currentScroll = 0;
+                var scrollStep = 200;
+                var scrollInterval = 100;
+
+                function scrool() {
+                    if (currentScroll > document.body.scrollHeight) {
+                        console.log('Scrolling to the bottom was finished.'); 
+                        return;
+                    }
+                    currentScroll += scrollStep;
+                    window.scrollBy(0, scrollStep);   
+                    setTimeout(scrool, scrollInterval);
+                };
+                
+                scrool();            
+            }";
+
+            _removeBannerTopScript = @"()=> {
+                var banner = document.querySelector('.branch-journeys-top');
+                var parent = banner.parentElement;
+                while (parent) {
+                    if (parent.parentElement == document.body) {
+                      break;
+                    }
+                    parent = parent.parentElement;
+                } 
+                document.body.removeChild(parent);
+                console.log('The top banner was removed.'); 
+            }";
+        }
+
+        public async Task WaitUntil(Func<bool> condition, int frequency = 100, int timeout = 15000)
+        {
+            var waitTask = Task.Run(async () =>
+            {
+                while (!condition()) await Task.Delay(frequency);
+            });
+
+            if (waitTask != await Task.WhenAny(waitTask,
+                    Task.Delay(timeout)))
+                throw new TimeoutException();
         }
 
         public async Task<Stream> ConvertUrlToPdf(string url, bool inline = false)
@@ -121,19 +171,30 @@ namespace Zbyrach.Api.Articles
                         System.Console.WriteLine(args.Message.Text);
                         break;
                     default:
+                        _lastLogMessage = args.Message.Text;
                         System.Console.WriteLine(args.Message.Text);
                         break;
                 }
             };
 
-            await page.SetJavaScriptEnabledAsync(false);
-            await page.GoToAsync(url);            
+            await page.GoToAsync(url);
 
-            await page.EvaluateFunctionAsync(_removeFolowLinkScript);            
             await page.EvaluateFunctionAsync(_leftOnlyArticleNodeScript);
+            await WaitUntil(() => _lastLogMessage == "All elements except the article were removed.");
+
+            await page.EvaluateFunctionAsync(_scrollPageToBottomScript);
+            await WaitUntil(() => _lastLogMessage == "Scrolling to the bottom was finished.");
+
+            await page.EvaluateFunctionAsync(_removeBannerTopScript);
+            await WaitUntil(() => _lastLogMessage == "The top banner was removed.");
+
+            await page.EvaluateFunctionAsync(_removeFolowLinkScript);
+            await WaitUntil(() => _lastLogMessage == "Follow links were removed.");
+            
             if (!inline)
             {
                 await page.EvaluateFunctionAsync(_removePageBreaksScript);
+                await WaitUntil(() => _lastLogMessage == "Page breaks were removed.");
             }
 
             var format = _detectionService.Device.Type switch
@@ -144,12 +205,12 @@ namespace Zbyrach.Api.Articles
             };
 
             return await page.PdfStreamAsync(new PdfOptions
-            {                
+            {
                 Format = format,
                 MarginOptions = new PuppeteerSharp.Media.MarginOptions
-                {                    
+                {
                     Top = inline ? "0px" : "40px",
-                    Bottom = inline? "0px" : "40px"
+                    Bottom = inline ? "0px" : "40px"
                 }
             });
         }

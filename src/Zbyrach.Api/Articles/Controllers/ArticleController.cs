@@ -32,11 +32,11 @@ namespace Zbyrach.Api.Articles
         [Route("/articles/status/read")]
         public async Task<IActionResult> GetArticlesForReading()
         {
-            var currentUser = await _userService.GetCurrentUser();           
+            var currentUser = await _userService.GetCurrentUser();
             var articles = await _articleService.GetForReading(currentUser);
             var articleUsers = await _articleService.GetArticleUsers(currentUser, articles);
-            
-            var articlesDtos = articles                
+
+            var articlesDtos = articles
                 .Select(a =>
                 new ArticleDto
                 {
@@ -62,11 +62,11 @@ namespace Zbyrach.Api.Articles
         [Route("/articles/{articleId}/favorite/{favorite}")]
         public async Task<IActionResult> SetFavorite(long articleId, bool favorite)
         {
-            var currentUser = await _userService.GetCurrentUser();           
+            var currentUser = await _userService.GetCurrentUser();
             var article = await _articleService.GetById(articleId);
             var newArticle = await _articleService.SetFavorite(currentUser, article, favorite);
             var articleUser = await _articleService.GetArticleUser(currentUser, article);
-            
+
             var articlesDto = new ArticleDto
             {
                 Id = article.Id,
@@ -102,7 +102,7 @@ namespace Zbyrach.Api.Articles
             Response.Headers[HeaderNames.ContentDisposition] = new ContentDisposition
             {
                 FileName = GetPdfFileName(article.Url),
-                DispositionType = inline ? DispositionTypeNames.Inline : DispositionTypeNames.Attachment 
+                DispositionType = inline ? DispositionTypeNames.Inline : DispositionTypeNames.Attachment
             }.ToString();
 
             var user = await _userService.GetById(userId);
