@@ -76,11 +76,11 @@ namespace Zbyrach.Api
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
+            {                
                 loggerFactory.AddFile("Logs/{Date}.txt");
             }
 
+            app.UseDeveloperExceptionPage();
             app.UseDetection();
 
             app.UseCors(builder => builder
