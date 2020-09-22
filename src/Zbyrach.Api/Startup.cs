@@ -76,7 +76,7 @@ namespace Zbyrach.Api
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
-            {                
+            {
                 loggerFactory.AddFile("Logs/{Date}.txt");
             }
 
