@@ -20,8 +20,7 @@
                 "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development",
-                "PUPPETEER_EXECUTABLE_PATH": "d:\\Projects\\__Zbyrach\\chromium\\Win64-706915\\chrome-win\\chrome.exe" 
+                "ASPNETCORE_ENVIRONMENT": "Development"                
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
