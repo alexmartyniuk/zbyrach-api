@@ -12,23 +12,21 @@ namespace Zbyrach.Api.Articles
 {
     public class PdfService
     {
-        private readonly IDetectionService _detectionService;
         private readonly string _pdfServiceUrl;
 
-        public PdfService(IConfiguration configuration, IDetectionService detectionService)
-        {
-            _detectionService = detectionService;
+        public PdfService(IConfiguration configuration)
+        {            
             _pdfServiceUrl = configuration["PdfServiceUrl"];
         }
 
-        public async Task<Stream> ConvertUrlToPdf(string url, bool inline = false)
+        public async Task<Stream> ConvertUrlToPdf(string url, Device device, bool inline = false)
         {
             if (string.IsNullOrEmpty(url))
             {
                 return null;
             }
 
-            var deviceType = _detectionService.Device.Type switch
+            var deviceType = device switch
             {
                 Device.Mobile => DeviceType.Mobile,
                 Device.Tablet => DeviceType.Tablet,
@@ -45,17 +43,42 @@ namespace Zbyrach.Api.Articles
                 };
 
                 var response = await client.PostAsync($"{_pdfServiceUrl}/pdf", new StringContent(
-
                     JsonConvert.SerializeObject(request),
                     Encoding.UTF8,
                     "application/json"));
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");    
+                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
                 }
 
                 return await response.Content.ReadAsStreamAsync();
+            }
+        }
+
+        public async Task QueueArticle(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                return;
+            }           
+
+            using (var client = new HttpClient())
+            {
+                var request = new QueueArticleRequest
+                {
+                    ArticleUrl = url
+                };
+
+                var response = await client.PostAsync($"{_pdfServiceUrl}/queue", new StringContent(
+                    JsonConvert.SerializeObject(request),
+                    Encoding.UTF8,
+                    "application/json"));
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
+                }
             }
         }
     }
@@ -65,6 +88,11 @@ namespace Zbyrach.Api.Articles
         public string ArticleUrl { get; set; }
         public DeviceType DeviceType { get; set; }
         public bool Inline { get; set; }
+    }
+
+    public class QueueArticleRequest
+    {
+        public string ArticleUrl { get; set; }
     }
 
     public enum DeviceType

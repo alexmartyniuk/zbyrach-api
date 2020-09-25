@@ -59,7 +59,14 @@ namespace Zbyrach.Api.Articles
                 var tag = pair.Key;
                 var users = pair.Value;
 
-                await FindAndSaveArticles(serviceScope, tag, users, stoppingToken);
+                try
+                {
+                    await FindAndSaveArticles(serviceScope, tag, users, stoppingToken);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"Unexpected error during searching for tag {tag}");
+                }
             }
         }
 
@@ -91,14 +98,16 @@ namespace Zbyrach.Api.Articles
             try
             {
                 var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
+                var pdfService = serviceScope.ServiceProvider.GetRequiredService<PdfService>();
                 var originalArticle = await articleService.GetByTitleAndAuthorName(story.Title, story.Author.Name);
                 if (originalArticle == null)
                 {
                     originalArticle = await SaveArticle(serviceScope, story);
                     await articleService.SetStatus(originalArticle, users, ArticleStatus.New);
                     await articleService.LinkWithTag(originalArticle, tag);
+                    await pdfService.QueueArticle(originalArticle.Url);
                     _logger.LogInformation("Story was successfully saved: {story}", story);
-                } 
+                }
                 else
                 {
                     _logger.LogInformation("Story was previously saved: {story}", story);

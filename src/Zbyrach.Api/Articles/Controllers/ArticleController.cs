@@ -9,6 +9,7 @@ using Microsoft.Net.Http.Headers;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Mailing;
 using System.Net;
+using Wangkanai.Detection.Services;
 
 namespace Zbyrach.Api.Articles
 {
@@ -19,13 +20,19 @@ namespace Zbyrach.Api.Articles
         private readonly UsersService _userService;
         private readonly PdfService _pdfService;
         private readonly MailingSettingsService _mailingSettingsService;
+        private readonly IDetectionService _detectionService;
 
-        public ArticleController(ArticleService articleService, UsersService userService, PdfService pdfService, MailingSettingsService mailingSettingsService)
+        public ArticleController(ArticleService articleService, 
+            UsersService userService, 
+            PdfService pdfService, 
+            MailingSettingsService mailingSettingsService,
+            IDetectionService detectionService)
         {
             _articleService = articleService;
             _userService = userService;
             _pdfService = pdfService;
             _mailingSettingsService = mailingSettingsService;
+            _detectionService = detectionService;
         }
 
         [HttpGet]
@@ -98,7 +105,7 @@ namespace Zbyrach.Api.Articles
                 return NotFound();
             }
 
-            var stream = await _pdfService.ConvertUrlToPdf(article.Url, inline);
+            var stream = await _pdfService.ConvertUrlToPdf(article.Url, _detectionService.Device.Type, inline);
             Response.Headers[HeaderNames.ContentDisposition] = new ContentDisposition
             {
                 FileName = GetPdfFileName(article.Url),
