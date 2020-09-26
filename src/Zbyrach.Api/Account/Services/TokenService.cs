@@ -1,23 +1,26 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace Zbyrach.Api.Account
 {
     public class TokenService
     {
         private readonly ApplicationContext _db;
+        private readonly ILogger<TokenService> _logger;
+
         public HttpClient _http { get; set; }
 
-        public TokenService(ApplicationContext db)
+        public TokenService(ApplicationContext db, ILogger<TokenService> logger)
         {
             _db = db;
+            _logger = logger;
             _http = new HttpClient();
         }
 
@@ -59,7 +62,6 @@ namespace Zbyrach.Api.Account
             return await _db.SaveChangesAsync() > 0;
         }
 
-
         public async Task<GoogleToken> ValidateGoogleToken(string idToken)
         {
             try
@@ -69,7 +71,7 @@ namespace Zbyrach.Api.Account
             }
             catch (HttpRequestException e)
             {
-                Debug.WriteLine(e);
+                _logger.LogError(e, "Google token could not be validated.");
                 return null;
             }
         }
@@ -78,15 +80,9 @@ namespace Zbyrach.Api.Account
         {
             return new AccessToken
             {
-                ExpiredAt = UnixTimestampToDateTime(googleToken.exp),
+                ExpiredAt = DateTime.UtcNow + TimeSpan.FromDays(30),
                 Token = GetTokenHash(authToken)
             };
-        }
-
-        private DateTime UnixTimestampToDateTime(string unixTimeStamp)
-        {
-            var dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            return dtDateTime.AddSeconds(int.Parse(unixTimeStamp)).ToUniversalTime();
         }
 
         public async Task<AccessToken> SaveToken(User user, AccessToken validToken)
