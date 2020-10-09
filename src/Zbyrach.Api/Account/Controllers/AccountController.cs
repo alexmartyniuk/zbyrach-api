@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,12 +19,6 @@ namespace Zbyrach.Api.Account
         [Route("/account/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginData)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.First().Errors;
-                return BadRequest(new JsonResult(errors));
-            }
-
             var token = await _accountService.Login(loginData.Token);
             if (token == null)
             {

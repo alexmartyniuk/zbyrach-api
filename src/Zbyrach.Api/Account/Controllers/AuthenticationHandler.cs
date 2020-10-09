@@ -11,6 +11,7 @@ namespace Zbyrach.Api.Account
 {
     public class AuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
+        private const string AUTH_TOKEN_HEADER_NAME = "AuthToken";        
         private readonly TokenService _tokenService;
 
         public AuthenticationHandler(
@@ -32,16 +33,16 @@ namespace Zbyrach.Api.Account
                 return AuthenticateResult.NoResult();
             }
 
-            if (!Request.Headers.ContainsKey("AuthToken"))
+            if (!Request.Headers.ContainsKey(AUTH_TOKEN_HEADER_NAME))
             {
                 return AuthenticateResult.Fail("Missing AuthToken Header");
             }
 
-            var authHeader = Request.Headers["AuthToken"];
-            var tokenWithUser = await _tokenService.GetTokenWithUser(authHeader);
+            var authHeader = Request.Headers[AUTH_TOKEN_HEADER_NAME];
+            var tokenWithUser = await _tokenService.FindTokenWithUser(authHeader);
             if (tokenWithUser == null)
             {
-                return AuthenticateResult.Fail("Invalid Username or Password");
+                return AuthenticateResult.Fail("Invalid authentication token");
             }
 
             var user = tokenWithUser.User;
@@ -49,7 +50,7 @@ namespace Zbyrach.Api.Account
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Expired, tokenWithUser.ExpiredAt.ToLongDateString()),
+                new Claim(ClaimTypes.Expired, tokenWithUser.ExpiredAt().ToLongDateString()),
             };
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
