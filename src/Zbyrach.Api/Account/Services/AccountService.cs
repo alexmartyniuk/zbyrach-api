@@ -14,39 +14,32 @@ namespace Zbyrach.Api.Account
             _usersService = userService;
         }
 
-        public async Task<AccessToken> Login(string googleIdToken)
-        {
-            var existingToken = await _tokenService.GetTokenByGoogleToken(googleIdToken);
-            if (existingToken != null)
-            {
-                return existingToken;
-            }
-
-            var googleToken = await _tokenService.ValidateGoogleToken(googleIdToken);
-            if (googleToken == null)
+        public async Task<AccessToken> Login(string googleToken)
+        {                       
+            var googleTokenInfo = await _tokenService.ValidateGoogleToken(googleToken);
+            if (googleTokenInfo == null)
             {
                 return null;
             }
 
-            var user = await _usersService.GetUserByEmail(googleToken.email);
+            var user = await _usersService.FindUserByEmail(googleTokenInfo.email);
             if (user == null)
             {
                 user = await _usersService.AddNewUser(new User
                 {
-                    Email = googleToken.email,
-                    Name = $"{googleToken.given_name} {googleToken.family_name}",
-                    PictureUrl = googleToken.picture
+                    Email = googleTokenInfo.email,
+                    Name = $"{googleTokenInfo.given_name} {googleTokenInfo.family_name}",
+                    PictureUrl = googleTokenInfo.picture
                 });
             }
 
-            var newToken = _tokenService.CreateFromGoogleToken(googleToken, googleIdToken);
-            return await _tokenService.SaveToken(user, newToken);
+            return await _tokenService.CreateAndSaveNewToken(user);
         }
 
         public async Task Logout()
         {
             var user = await _usersService.GetCurrentUser();
-            var token = await _tokenService.GetTokenByUser(user);
+            var token = await _tokenService.FindTokenForUser(user);
             if (token == null)
             {
                 throw new Exception("Token was not found for current user.");

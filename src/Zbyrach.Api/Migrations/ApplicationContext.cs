@@ -3,6 +3,8 @@ using Zbyrach.Api.Articles;
 using Zbyrach.Api.Mailing;
 using Zbyrach.Api.Tags;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace Zbyrach.Api.Migrations
 {
@@ -20,6 +22,21 @@ namespace Zbyrach.Api.Migrations
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
             
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", false, true)
+                    .AddJsonFile("appsettings.Development.json", true)
+                    .AddEnvironmentVariables()
+                    .Build();
+
+                optionsBuilder.UseNpgsql(config.GetConnectionString());
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -47,7 +64,7 @@ namespace Zbyrach.Api.Migrations
                .HasIndex(p => p.Token)
                .IsUnique();
             modelBuilder.Entity<AccessToken>()
-               .Property(p => p.ExpiredAt)
+               .Property(p => p.CreatedAt)
                .IsRequired();
             modelBuilder.Entity<AccessToken>()
                .Property(p => p.UserId)
@@ -55,6 +72,10 @@ namespace Zbyrach.Api.Migrations
             modelBuilder.Entity<AccessToken>()
                .HasOne(m => m.User)
                .WithMany(u => u.AccessTokens);
+            modelBuilder.Entity<AccessToken>()
+               .HasIndex(p => p.ClientIp);
+            modelBuilder.Entity<AccessToken>()
+               .HasIndex(p => p.ClientUserAgent);
 
             modelBuilder.Entity<Tag>()
                .Property(p => p.Id)

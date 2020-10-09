@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Zbyrach.Api.Migrations;
@@ -9,9 +10,10 @@ using Zbyrach.Api.Migrations;
 namespace Zbyrach.Api.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20201009213344_ClientInfoInToken")]
+    partial class ClientInfoInToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,7 +34,7 @@ namespace Zbyrach.Api.Migrations
                     b.Property<string>("ClientUserAgent")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Token")
@@ -43,10 +45,6 @@ namespace Zbyrach.Api.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClientIp");
-
-                    b.HasIndex("ClientUserAgent");
 
                     b.HasIndex("Token")
                         .IsUnique();

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Zbyrach.Api
 {
@@ -25,7 +26,19 @@ namespace Zbyrach.Api
             try
             {
                 var context = services.GetRequiredService<ApplicationContext>();
+                var logger = services.GetRequiredService<ILogger<Program>>();
+
+                var migrations = context.Database.GetPendingMigrations().ToList();
+                if (migrations.Any())
+                {
+                    logger.LogInformation("Service is going to run migrations: {migrations}.", string.Join(", ", migrations));
+                }
+                else
+                {
+                    logger.LogInformation("There are no pending migrations");
+                }
                 context.Database.Migrate();
+                logger.LogInformation("The database has been successfully migrated.");
             }
             catch (Exception ex)
             {

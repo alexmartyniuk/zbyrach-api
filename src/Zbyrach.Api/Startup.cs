@@ -14,7 +14,6 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Zbyrach.Api.Common;
-using Wangkanai.Detection;
 
 namespace Zbyrach.Api
 {
@@ -38,7 +37,9 @@ namespace Zbyrach.Api
 
             services.AddHostedService<ArticlesSearcher>();
             services.AddHostedService<NotificationsSender>();
-            services.AddControllers();
+            services.AddControllers(options => {
+                options.Filters.Add(typeof(ModelStateValidatorAttribute));            
+            });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -77,10 +78,9 @@ namespace Zbyrach.Api
         {
             if (env.IsDevelopment())
             {
-                loggerFactory.AddFile("Logs/{Date}.txt");
+                app.UseDeveloperExceptionPage();
             }
 
-            app.UseDeveloperExceptionPage();
             app.UseDetection();
 
             app.UseCors(builder => builder

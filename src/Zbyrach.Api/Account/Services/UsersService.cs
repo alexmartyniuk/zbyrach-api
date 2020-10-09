@@ -25,7 +25,7 @@ namespace Zbyrach.Api.Account
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Task<User> GetUserByEmail(string email)
+        public Task<User> FindUserByEmail(string email)
         {
             return _db.Users.SingleOrDefaultAsync(u => u.Email == email);
         }

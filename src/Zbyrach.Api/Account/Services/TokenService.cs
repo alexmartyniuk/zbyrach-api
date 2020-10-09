@@ -1,36 +1,38 @@
 using System;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
 
 namespace Zbyrach.Api.Account
 {
     public class TokenService
     {
         private readonly ApplicationContext _db;
+        private readonly IHttpContextAccessor _accessor;
         private readonly ILogger<TokenService> _logger;
 
         public HttpClient _http { get; set; }
 
-        public TokenService(ApplicationContext db, ILogger<TokenService> logger)
+        public TokenService(ApplicationContext db, IHttpContextAccessor accessor, ILogger<TokenService> logger)
         {
             _db = db;
+            _accessor = accessor;
             _logger = logger;
             _http = new HttpClient();
         }
 
-        public async Task<AccessToken> GetTokenWithUser(string token)
+        public async Task<AccessToken> FindTokenWithUser(string token)
         {
             var accessToken = await _db.AccessTokens
                 .Include(t => t.User)
                 .SingleOrDefaultAsync(t => t.Token == token);
 
-            if (accessToken != null && accessToken.ExpiredAt > DateTime.UtcNow)
+            if (accessToken != null && accessToken.ExpiredAt() > DateTime.UtcNow)
             {
                 return accessToken;
             }
@@ -38,16 +40,23 @@ namespace Zbyrach.Api.Account
             return null;
         }
 
-        public Task<AccessToken> GetTokenByGoogleToken(string googleToken)
+        public async Task<AccessToken> FindTokenForUser(User user)
         {
-            var token = GetTokenHash(googleToken);
-            return GetTokenWithUser(token);
+            return await _db.AccessTokens                
+                .SingleOrDefaultAsync(token => 
+                    token.UserId == user.Id &&
+                    token.ClientIp == GetClientIP() && 
+                    token.ClientUserAgent == GetClientUserAgent());            
         }
 
-        public Task<AccessToken> GetTokenByUser(User user)
+        private string GetClientIP()
         {
-            return _db.AccessTokens
-                .SingleOrDefaultAsync(t => t.UserId == user.Id);
+            return _accessor.HttpContext.Connection.RemoteIpAddress.ToString();
+        }
+
+        private string GetClientUserAgent()
+        {
+            return _accessor.HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
         }
 
         public async Task<bool> RemoveToken(AccessToken token)
@@ -76,49 +85,27 @@ namespace Zbyrach.Api.Account
             }
         }
 
-        public AccessToken CreateFromGoogleToken(GoogleToken googleToken, string authToken)
+        public async Task<AccessToken> CreateAndSaveNewToken(User user)
         {
-            return new AccessToken
-            {
-                ExpiredAt = DateTime.UtcNow + TimeSpan.FromDays(30),
-                Token = GetTokenHash(authToken)
-            };
-        }
-
-        public async Task<AccessToken> SaveToken(User user, AccessToken validToken)
-        {
-            var existingToken = await _db.AccessTokens
-                .SingleOrDefaultAsync(t => t.UserId == user.Id);
+            var existingToken = await FindTokenForUser(user);
             if (existingToken != null)
             {
-                _db.Remove(existingToken);
+                await RemoveToken(existingToken);
             }
+           
+            var newToken = new AccessToken
+            {
+                Token = Guid.NewGuid().ToString(),
+                ClientIp = GetClientIP(),
+                ClientUserAgent = GetClientUserAgent(),
+                User = user,
+                CreatedAt = DateTime.UtcNow                
+            };
 
-            validToken.User = user;
-            _db.AccessTokens.Add(validToken);
+            _db.AccessTokens.Add(newToken);
             await _db.SaveChangesAsync();
 
-            return validToken;
-        }
-
-        public string GetTokenHash(string token)
-        {
-            using var md5 = System.Security.Cryptography.MD5.Create();
-            var encoding = Encoding.ASCII;
-            var data = encoding.GetBytes(token);
-
-            Span<byte> hashBytes = stackalloc byte[16];
-            md5.TryComputeHash(data, hashBytes, out int written);
-            if (written != hashBytes.Length)
-                throw new OverflowException();
-
-
-            Span<char> stringBuffer = stackalloc char[32];
-            for (int i = 0; i < hashBytes.Length; i++)
-            {
-                hashBytes[i].TryFormat(stringBuffer.Slice(2 * i), out _, "x2");
-            }
-            return new string(stringBuffer);
+            return newToken;
         }
     }
 }
