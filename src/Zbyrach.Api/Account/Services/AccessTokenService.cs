@@ -34,19 +34,24 @@ namespace Zbyrach.Api.Account
 
             if (accessToken != null && accessToken.ExpiredAt() > DateTime.UtcNow)
             {
+                _logger.LogTrace($"AccessToken was found by token {token}");
                 return accessToken;
             }
 
+            _logger.LogTrace($"AccessToken was not found by token {token}");
             return null;
         }
 
         public async Task<AccessToken> FindByUser(User user)
         {
-            return await _db.AccessTokens                
+            var accessToken = await _db.AccessTokens                
                 .SingleOrDefaultAsync(token => 
                     token.UserId == user.Id &&
                     token.ClientIp == GetClientIP() && 
                     token.ClientUserAgent == GetClientUserAgent());            
+                    
+            _logger.LogTrace($"AccessToken was found by user: {accessToken.ClientIp} {accessToken.CreatedAt.ToLongDateString()}");
+            return accessToken;
         }
 
         private string GetClientIP()
@@ -67,6 +72,7 @@ namespace Zbyrach.Api.Account
                 return false;
             }
 
+            _logger.LogTrace($"AccessToken was removed: {token.ClientIp} {token.CreatedAt.ToLongDateString()}");
             _db.AccessTokens.Remove(existingToken);
             return await _db.SaveChangesAsync() > 0;
         }
@@ -101,7 +107,8 @@ namespace Zbyrach.Api.Account
                 User = user,
                 CreatedAt = DateTime.UtcNow                
             };
-
+                
+            _logger.LogTrace($"AccessToken was removed: {newToken.ClientIp} {newToken.CreatedAt.ToLongDateString()}");
             _db.AccessTokens.Add(newToken);
             await _db.SaveChangesAsync();
 

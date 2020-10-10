@@ -74,12 +74,12 @@ namespace Zbyrach.Api.Articles
             return groupedUsers.ToDictionary(g => users[g.userId], g => g.maxSentAt);
         }        
 
-        public ValueTask<Article> GetById(long articleId)
+        public ValueTask<Article> FindById(long articleId)
         {
             return _db.Articles.FindAsync(articleId);
         } 
 
-        public Task<Article> GetByTitleAndAuthorName(string title, string authorName)
+        public Task<Article> FindByTitleAndAuthorName(string title, string authorName)
         {
             return _db.Articles
                 .SingleOrDefaultAsync(a => a.Title == title && a.AuthorName == authorName);

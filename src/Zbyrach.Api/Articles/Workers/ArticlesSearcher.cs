@@ -99,7 +99,7 @@ namespace Zbyrach.Api.Articles
             {
                 var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
                 var pdfService = serviceScope.ServiceProvider.GetRequiredService<PdfService>();
-                var originalArticle = await articleService.GetByTitleAndAuthorName(story.Title, story.Author.Name);
+                var originalArticle = await articleService.FindByTitleAndAuthorName(story.Title, story.Author.Name);
                 if (originalArticle == null)
                 {
                     originalArticle = await SaveArticle(serviceScope, story);

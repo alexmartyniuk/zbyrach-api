@@ -70,7 +70,7 @@ namespace Zbyrach.Api.Articles
         public async Task<IActionResult> SetFavorite(long articleId, bool favorite)
         {
             var currentUser = await _userService.GetCurrent();
-            var article = await _articleService.GetById(articleId);
+            var article = await _articleService.FindById(articleId);
             var newArticle = await _articleService.SetFavorite(currentUser, article, favorite);
             var articleUser = await _articleService.GetArticleUser(currentUser, article);
 
@@ -99,7 +99,7 @@ namespace Zbyrach.Api.Articles
         [Route("/articles/{articleId}/pdf")]
         public async Task<IActionResult> GetPdf(long articleId, [FromQuery] long userId = 0, [FromQuery] bool inline = false)
         {
-            var article = await _articleService.GetById(articleId);
+            var article = await _articleService.FindById(articleId);
             if (article == null)
             {
                 return NotFound();
