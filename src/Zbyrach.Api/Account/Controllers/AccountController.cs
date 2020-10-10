@@ -22,11 +22,9 @@ namespace Zbyrach.Api.Account
         [Route("/account/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginData)
         {
-            _logger.LogInformation("Started login");
             var token = await _accountService.Login(loginData.Token);
             if (token == null)
             {
-                _logger.LogInformation("Google Id Token is invalid");
                 return Unauthorized("Token is invalid");
             }
 
@@ -42,7 +40,6 @@ namespace Zbyrach.Api.Account
                 }
             };
 
-            _logger.LogInformation("Login OK");
             return Ok(response);
         }
 
@@ -50,9 +47,7 @@ namespace Zbyrach.Api.Account
         [Route("/account/logout")]
         public async Task<IActionResult> Logout()
         {
-            _logger.LogInformation("Started logout");
             await _accountService.Logout();
-            _logger.LogInformation("Logout OK");
             return Ok();
         }
     }

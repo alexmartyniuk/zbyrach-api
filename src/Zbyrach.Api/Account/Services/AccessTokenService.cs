@@ -35,11 +35,9 @@ namespace Zbyrach.Api.Account
 
             if (accessToken != null && accessToken.ExpiredAt() > DateTime.UtcNow)
             {
-                _logger.LogInformation($"AccessToken was found by token {token}");
                 return accessToken;
             }
 
-            _logger.LogInformation($"AccessToken was not found by token {token}");
             return null;
         }
 
@@ -61,9 +59,12 @@ namespace Zbyrach.Api.Account
                 return false;
             }
 
-            _logger.LogInformation($"AccessToken was removed: {token.ClientIp} {token.CreatedAt.ToLongDateString()}");
             _db.AccessTokens.Remove(existingToken);
-            return await _db.SaveChangesAsync() > 0;
+            var entriesWritten = await _db.SaveChangesAsync();
+
+            _logger.LogInformation($"AccessToken removed: Id='{token.Id}' ClientIp='{token.ClientIp}' CreateAt='{token.CreatedAt.ToLongDateString()}'");
+
+            return entriesWritten > 0;
         }
 
         public async Task<GoogleToken> FindGoogleToken(string idToken)
@@ -87,19 +88,20 @@ namespace Zbyrach.Api.Account
             {
                 await Remove(existingToken);
             }
-           
+
             var newToken = new AccessToken
             {
                 Token = Guid.NewGuid().ToString(),
                 ClientIp = GetClientIP(),
                 ClientUserAgent = GetClientUserAgent(),
                 User = user,
-                CreatedAt = DateTime.UtcNow                
+                CreatedAt = DateTime.UtcNow
             };
-                
-            _logger.LogInformation($"AccessToken was removed: {newToken.ClientIp} {newToken.CreatedAt.ToLongDateString()}");
+
             _db.AccessTokens.Add(newToken);
             await _db.SaveChangesAsync();
+
+            _logger.LogInformation($"AccessToken created: Id='{newToken.Id}' ClientIp='{newToken.ClientIp}' CreateAt='{newToken.CreatedAt.ToLongDateString()}'");
 
             return newToken;
         }
