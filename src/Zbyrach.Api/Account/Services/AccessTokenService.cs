@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Zbyrach.Api.Account
 {
@@ -40,18 +41,6 @@ namespace Zbyrach.Api.Account
 
             _logger.LogInformation($"AccessToken was not found by token {token}");
             return null;
-        }
-
-        public async Task<AccessToken> FindByUser(User user)
-        {
-            var accessToken = await _db.AccessTokens                
-                .SingleOrDefaultAsync(token => 
-                    token.UserId == user.Id &&
-                    token.ClientIp == GetClientIP() && 
-                    token.ClientUserAgent == GetClientUserAgent());            
-                    
-            _logger.LogInformation($"AccessToken was found by user: {accessToken?.ClientIp} {accessToken?.CreatedAt.ToLongDateString()}");
-            return accessToken;
         }
 
         private string GetClientIP()
@@ -93,7 +82,7 @@ namespace Zbyrach.Api.Account
 
         public async Task<AccessToken> CreateAndSaveNewToken(User user)
         {
-            var existingToken = await FindByUser(user);
+            var existingToken = await GetCurrentToken();
             if (existingToken != null)
             {
                 await Remove(existingToken);
@@ -113,6 +102,17 @@ namespace Zbyrach.Api.Account
             await _db.SaveChangesAsync();
 
             return newToken;
+        }
+
+        public async Task<AccessToken> GetCurrentToken()
+        {
+            var token = _accessor.HttpContext.User.FindFirstValue(ClaimTypes.Authentication);
+            if (token == null)
+            {
+                return null;
+            }
+
+            return await FindByToken(token);
         }
     }
 }

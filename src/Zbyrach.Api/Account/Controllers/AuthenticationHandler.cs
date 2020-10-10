@@ -50,6 +50,7 @@ namespace Zbyrach.Api.Account
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Authentication, tokenWithUser.Token),
                 new Claim(ClaimTypes.Expired, tokenWithUser.ExpiredAt().ToLongDateString()),
             };
             var identity = new ClaimsIdentity(claims, Scheme.Name);

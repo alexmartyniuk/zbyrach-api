@@ -38,8 +38,7 @@ namespace Zbyrach.Api.Account
 
         public async Task Logout()
         {
-            var user = await _usersService.GetCurrent();
-            var token = await _tokenService.FindByUser(user);
+            var token = await _tokenService.GetCurrentToken();
             if (token == null)
             {
                 throw new Exception("Token was not found for current user.");
