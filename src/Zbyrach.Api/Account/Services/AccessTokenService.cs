@@ -10,15 +10,15 @@ using System.Linq;
 
 namespace Zbyrach.Api.Account
 {
-    public class TokenService
+    public class AccessTokenService
     {
         private readonly ApplicationContext _db;
         private readonly IHttpContextAccessor _accessor;
-        private readonly ILogger<TokenService> _logger;
+        private readonly ILogger<AccessTokenService> _logger;
 
         public HttpClient _http { get; set; }
 
-        public TokenService(ApplicationContext db, IHttpContextAccessor accessor, ILogger<TokenService> logger)
+        public AccessTokenService(ApplicationContext db, IHttpContextAccessor accessor, ILogger<AccessTokenService> logger)
         {
             _db = db;
             _accessor = accessor;
@@ -26,7 +26,7 @@ namespace Zbyrach.Api.Account
             _http = new HttpClient();
         }
 
-        public async Task<AccessToken> FindTokenWithUser(string token)
+        public async Task<AccessToken> FindByToken(string token)
         {
             var accessToken = await _db.AccessTokens
                 .Include(t => t.User)
@@ -40,7 +40,7 @@ namespace Zbyrach.Api.Account
             return null;
         }
 
-        public async Task<AccessToken> FindTokenForUser(User user)
+        public async Task<AccessToken> FindByUser(User user)
         {
             return await _db.AccessTokens                
                 .SingleOrDefaultAsync(token => 
@@ -59,7 +59,7 @@ namespace Zbyrach.Api.Account
             return _accessor.HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
         }
 
-        public async Task<bool> RemoveToken(AccessToken token)
+        public async Task<bool> Remove(AccessToken token)
         {
             var existingToken = await _db.AccessTokens.FindAsync(token.Id);
             if (existingToken == null)
@@ -71,7 +71,7 @@ namespace Zbyrach.Api.Account
             return await _db.SaveChangesAsync() > 0;
         }
 
-        public async Task<GoogleToken> ValidateGoogleToken(string idToken)
+        public async Task<GoogleToken> FindGoogleToken(string idToken)
         {
             try
             {
@@ -87,10 +87,10 @@ namespace Zbyrach.Api.Account
 
         public async Task<AccessToken> CreateAndSaveNewToken(User user)
         {
-            var existingToken = await FindTokenForUser(user);
+            var existingToken = await FindByUser(user);
             if (existingToken != null)
             {
-                await RemoveToken(existingToken);
+                await Remove(existingToken);
             }
            
             var newToken = new AccessToken

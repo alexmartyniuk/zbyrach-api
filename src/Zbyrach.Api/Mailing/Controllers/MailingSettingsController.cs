@@ -32,7 +32,7 @@ namespace Zbyrach.Api.Mailing
         [Route("/mailing/settings/my")]
         public async Task<IActionResult> GetMySettings()
         {
-            var currentUser = await _userService.GetCurrentUser();
+            var currentUser = await _userService.GetCurrent();
 
             var settings = await _mailingSettingService.Get(currentUser);
             return Ok(new MailingSettingsDto
@@ -46,7 +46,7 @@ namespace Zbyrach.Api.Mailing
         [Route("/mailing/settings/summary")]
         public async Task<IActionResult> GetSettingsSummary()
         {
-            var currentUser = await _userService.GetCurrentUser();
+            var currentUser = await _userService.GetCurrent();
 
             var mailSettings = await _mailingSettingService.Get(currentUser);
             var tagsCount = await _tagsService.GetTagsCountByUser(currentUser);
@@ -67,7 +67,7 @@ namespace Zbyrach.Api.Mailing
                 return BadRequest(new JsonResult(errors));
             }
 
-            var currentUser = await _userService.GetCurrentUser();
+            var currentUser = await _userService.GetCurrent();
 
             await _mailingSettingService.CreateOrUpdate(currentUser, new MailingSettings
             {

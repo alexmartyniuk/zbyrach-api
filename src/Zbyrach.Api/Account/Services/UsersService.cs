@@ -25,17 +25,17 @@ namespace Zbyrach.Api.Account
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Task<User> FindUserByEmail(string email)
+        public Task<User> FindByEmail(string email)
         {
             return _db.Users.SingleOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<User> GetById(long userId)
+        public async Task<User> FindById(long userId)
         {
             return await _db.Users.FindAsync(userId);
         }
 
-        public async Task<User> AddNewUser(User user)
+        public async Task<User> AddNew(User user)
         {
             if (user.Id != default)
             {
@@ -53,14 +53,14 @@ namespace Zbyrach.Api.Account
             return user;
         }
 
-        public ValueTask<User> GetCurrentUser()
+        public ValueTask<User> GetCurrent()
         {
             var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             return _db.Users.FindAsync(long.Parse(userId));
         }
 
-        public Task<List<User>> GetUsersByIds(List<long> userIds)
+        public Task<List<User>> GetManyByIds(List<long> userIds)
         {
             return _db
                 .Users

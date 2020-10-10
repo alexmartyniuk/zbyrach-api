@@ -66,7 +66,7 @@ namespace Zbyrach.Api
             });
 
             services.AddScoped<UsersService>();
-            services.AddScoped<TokenService>();
+            services.AddScoped<AccessTokenService>();
             services.AddScoped<AccountService>();
             services.AddScoped<TagService>();
             services.AddScoped<MailingSettingsService>();

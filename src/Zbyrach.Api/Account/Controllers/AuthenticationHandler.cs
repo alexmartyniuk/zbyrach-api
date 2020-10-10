@@ -12,14 +12,14 @@ namespace Zbyrach.Api.Account
     public class AuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         private const string AUTH_TOKEN_HEADER_NAME = "AuthToken";        
-        private readonly TokenService _tokenService;
+        private readonly AccessTokenService _tokenService;
 
         public AuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            TokenService tokenService)
+            AccessTokenService tokenService)
             : base(options, logger, encoder, clock)
         {
             _tokenService = tokenService;
@@ -39,7 +39,7 @@ namespace Zbyrach.Api.Account
             }
 
             var authHeader = Request.Headers[AUTH_TOKEN_HEADER_NAME];
-            var tokenWithUser = await _tokenService.FindTokenWithUser(authHeader);
+            var tokenWithUser = await _tokenService.FindByToken(authHeader);
             if (tokenWithUser == null)
             {
                 return AuthenticateResult.Fail("Invalid authentication token");

@@ -53,7 +53,7 @@ namespace Zbyrach.Api.Tags
         [Route("/tags/my")]
         public async Task<IActionResult> GetMyTags()
         {
-            var currentUser = await _userService.GetCurrentUser();
+            var currentUser = await _userService.GetCurrent();
             var myTags = await _tagService.GetByUser(currentUser);
             return Ok(myTags.Select(t => new TagDto { Name = t.Name }));
         }
@@ -62,7 +62,7 @@ namespace Zbyrach.Api.Tags
         [Route("/tags/my")]
         public async Task<IActionResult> SetMyTags([FromBody] List<string> values)
         {
-            var currentUser = await _userService.GetCurrentUser();
+            var currentUser = await _userService.GetCurrent();
             var tags = values.Select(v => new Tag
             {
                 Name = v
