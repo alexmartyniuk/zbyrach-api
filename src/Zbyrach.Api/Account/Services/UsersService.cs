@@ -90,6 +90,13 @@ namespace Zbyrach.Api.Account
             return await _db.Users.FindAsync(userId);
         }
 
+        public async Task<User> GetUserByEmail(string email)
+        {
+            return await _db
+                .Users
+                .SingleOrDefaultAsync(u => u.Email == email);
+        }
+
         private string Encrypt(string clearText)
         {
             byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);

@@ -4,6 +4,7 @@ using Zbyrach.Api.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Zbyrach.Api.Tags;
+using Zbyrach.Api.Articles;
 
 namespace Zbyrach.Api.Mailing
 {
@@ -14,19 +15,24 @@ namespace Zbyrach.Api.Mailing
         private readonly MailingSettingsService _mailingSettingService;
         private readonly CronService _cronService;
         private readonly TagService _tagsService;
+        private readonly MailService _mailService;
+        private readonly ArticleService _articleService;
 
         public MailingSettingsController(
             UsersService userService,
             MailingSettingsService mailingSettingService,
             CronService cronService,
-            TagService tagsService)
+            TagService tagsService,
+            MailService mailService,
+            ArticleService articleService)
         {
             _userService = userService;
             _mailingSettingService = mailingSettingService;
             _cronService = cronService;
             _tagsService = tagsService;
+            _mailService = mailService;
+            _articleService = articleService;
         }
-
 
         [HttpGet]
         [Route("/mailing/settings/my")]
@@ -109,6 +115,29 @@ namespace Zbyrach.Api.Mailing
                 Email = currentUser.Email,
                 Name = currentUser.Name,
                 PictureUrl = currentUser.PictureUrl
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("/mailing/test/{email}")]
+        public async Task<IActionResult> Test([FromRoute] string email)
+        {
+            var user = await _userService.GetUserByEmail(email);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var articles = await _articleService.GetForReading(user);
+            await _mailService.SendArticleList(user, string.Empty, articles, ScheduleType.EveryMonth);
+
+            return Ok(new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Name = user.Name,
+                PictureUrl = user.PictureUrl
             });
         }
     }
