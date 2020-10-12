@@ -65,6 +65,36 @@ namespace Zbyrach.Api.Articles
             return Ok(articlesDtos);
         }
 
+        [HttpGet]
+        [Route("/articles/status/sent")]
+        public async Task<IActionResult> GetLastSentArticles()
+        {
+            var currentUser = await _userService.GetCurrent();            
+            var articles = await _articleService.GetLastSent(currentUser);
+            var articleUsers = await _articleService.GetArticleUsers(currentUser, articles);
+
+            var articlesDtos = articles
+                .Select(a =>
+                new ArticleDto
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    Description = a.Description,
+                    PublicatedAt = a.PublicatedAt,
+                    IllustrationUrl = a.IllustrationUrl,
+                    OriginalUrl = a.Url,
+                    AuthorName = a.AuthorName,
+                    AuthorPhoto = a.AuthorPhoto,
+                    CommentsCount = a.CommentsCount,
+                    LikesCount = a.LikesCount,
+                    ReadTime = a.ReadTime,
+                    Favorite = articleUsers.Single(au => au.ArticleId == a.Id).Favorite,
+                    ReadLater = articleUsers.Single(au => au.ArticleId == a.Id).ReadLater,
+                    Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList()
+                });
+            return Ok(articlesDtos);
+        }
+
         [HttpPost]
         [Route("/articles/{articleId}/favorite/{favorite}")]
         public async Task<IActionResult> SetFavorite(long articleId, bool favorite)

@@ -56,7 +56,7 @@ namespace Zbyrach.Api.Mailing
                 UserEmail = user.Email,
                 Period = GetPeriodInUkrainian(scheduleType),
                 UnsubscribeUrl = $"{_webUiBasePath}/unsubscribe/{unsubscribeToken}",
-                ViewOnSiteUrl = $"{_webUiBasePath}/articles",
+                ViewOnSiteUrl = $"{_webUiBasePath}/articles/sent",
                 Articles = articles.Select(a => new ArticleModel
                 {
                     Title = a.Title,

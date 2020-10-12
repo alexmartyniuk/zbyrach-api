@@ -99,11 +99,33 @@ namespace Zbyrach.Api.Articles
                 TagId = tag.Id
             });
             await _db.SaveChangesAsync();
-        }        
+        }
+
+        public async Task<List<Article>> GetLastSent(User user)
+        {
+            var lastSentAt = await _db.ArticleUsers
+                .Where(au => au.Status == ArticleStatus.Sent)
+                .Where(au => au.UserId == user.Id)                
+                .MaxAsync(au => au.SentAt);
+
+            var result = await _db.ArticleUsers
+                .Include(au => au.Article)
+                .Where(au => au.UserId == user.Id && au.Status == ArticleStatus.Sent && au.SentAt == lastSentAt)
+                .Select(au => au.Article)
+                .OrderByDescending(a => a.LikesCount)
+                .ThenByDescending(a => a.CommentsCount)
+                .ThenByDescending(a => a.PublicatedAt)                
+                .ToListAsync();
+
+            return result;
+        }
 
         public async Task<List<Article>> GetForSending(User user, long noMoreThan)
         {
-            if (noMoreThan == 0) return new List<Article>();
+            if (noMoreThan == 0) 
+            {
+                return new List<Article>();
+            }
 
             var result = await _db.ArticleUsers
                 .Include(au => au.Article)
