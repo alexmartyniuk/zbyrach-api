@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Zbyrach.Api.Articles;
 
 namespace Zbyrach.Api.Tags
@@ -8,7 +10,19 @@ namespace Zbyrach.Api.Tags
         public string Name { get; set; }
         public ICollection<TagUser> TagUsers { get; set; }
         public ICollection<ArticleTag> ArticleTags { get; set; }
-
         public override string ToString() => Name;
+    }
+
+    public class TagConfiguration : IEntityTypeConfiguration<Tag>
+    {
+        public void Configure(EntityTypeBuilder<Tag> builder)
+        {
+            builder
+                .Property(p => p.Id)
+                .IsRequired();
+            builder
+                .Property(p => p.Name)
+                .IsRequired();
+        }
     }
 }

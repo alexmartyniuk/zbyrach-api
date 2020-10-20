@@ -1,4 +1,6 @@
 using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Zbyrach.Api.Account;
 
 namespace Zbyrach.Api.Articles
@@ -15,5 +17,25 @@ namespace Zbyrach.Api.Articles
         public DateTime ReadAt { get; set; }
         public bool Favorite { get; set; }
         public bool ReadLater { get; set; }
+    }
+
+    public class ArticleUserConfiguration : IEntityTypeConfiguration<ArticleUser>
+    {
+        public void Configure(EntityTypeBuilder<ArticleUser> builder)
+        {
+            builder
+                .Property(r => r.Id)
+                .IsRequired();
+            builder
+                .HasIndex(r => new { r.ArticleId, r.UserId });
+            builder
+                 .HasOne(r => r.User)
+                .WithMany(u => u.ArticleUsers)
+                .HasForeignKey(r => r.UserId);
+            builder
+                .HasOne(r => r.Article)
+                .WithMany(a => a.ArticleUsers)
+                .HasForeignKey(r => r.ArticleId);
+        }
     }
 }

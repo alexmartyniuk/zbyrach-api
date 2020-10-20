@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Zbyrach.Api.Articles
 {
@@ -25,6 +27,19 @@ namespace Zbyrach.Api.Articles
         {
             ArticleUsers = new List<ArticleUser>();
             ArticleTags = new List<ArticleTag>();
+        }
+    }
+
+    public class ArticleConfiguration : IEntityTypeConfiguration<Article>
+    {
+        public void Configure(EntityTypeBuilder<Article> builder)
+        {
+            builder
+                .Property(a => a.Id)
+                .IsRequired();
+            builder
+                .Property(m => m.Url)
+                .IsRequired();
         }
     }
 }
