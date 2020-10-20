@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -10,11 +11,13 @@ namespace Zbyrach.Api.Account
     {
         private readonly AccountService _accountService;
         private readonly ILogger<AccountController> _logger;
+        private readonly IMediator _mediator; 
 
-        public AccountController(AccountService accountService, ILogger<AccountController> logger)
+        public AccountController(AccountService accountService, ILogger<AccountController> logger, IMediator mediator)
         {
             _accountService = accountService;
             _logger = logger;
+            _mediator = mediator;
         }
 
         [AllowAnonymous]
@@ -22,23 +25,11 @@ namespace Zbyrach.Api.Account
         [Route("/account/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginData)
         {
-            var token = await _accountService.Login(loginData.Token);
-            if (token == null)
+            var response = await _mediator.Send(loginData);
+            if (response == null)
             {
                 return Unauthorized("Token is invalid");
             }
-
-            var response = new LoginResponseDto
-            {
-                Token = token.Token,
-                User = new UserDto
-                {
-                    Id = token.User.Id,
-                    Email = token.User.Email,
-                    Name = token.User.Name,
-                    PictureUrl = token.User.PictureUrl
-                }
-            };
 
             return Ok(response);
         }
