@@ -55,9 +55,13 @@ namespace Zbyrach.Api.Account
 
         public ValueTask<User> GetCurrent()
         {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return new ValueTask<User>((User)null);
+            }
 
-            return _db.Users.FindAsync(long.Parse(userId));
+            return _db.Users.FindAsync(long.Parse(userIdClaim.Value));
         }
 
         public Task<List<User>> GetManyByIds(List<long> userIds)

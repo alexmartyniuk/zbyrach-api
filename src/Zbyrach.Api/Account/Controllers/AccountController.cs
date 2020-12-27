@@ -31,6 +31,19 @@ namespace Zbyrach.Api.Account
                 return Unauthorized("Token is invalid");
             }
 
+            var response = new LoginResponseDto
+            {
+                Token = token.Token,
+                User = new UserDto
+                {
+                    Id = token.User.Id,
+                    Email = token.User.Email,
+                    Name = token.User.Name,
+                    PictureUrl = token.User.PictureUrl,
+                    IsAdmin = token.User.IsAdmin
+                }
+            };
+
             return Ok(response);
         }
 
