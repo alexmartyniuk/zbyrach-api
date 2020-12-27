@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Zbyrach.Api.Admin.Services;
 using Zbyrach.Api.Common;
 
 namespace Zbyrach.Api
@@ -59,6 +60,7 @@ namespace Zbyrach.Api
             services.AddSingleton<TranslationService>();
 
             services.AddScoped<PdfService>();
+            services.AddScoped<AdminService>();
 
             services.AddDbContext<ApplicationContext>(options =>
             {

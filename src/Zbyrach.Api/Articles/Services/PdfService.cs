@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Wangkanai.Detection.Services;
 using Wangkanai.Detection.Models;
 using System.Net.Http;
 using Newtonsoft.Json;
@@ -81,6 +80,35 @@ namespace Zbyrach.Api.Articles
                 }
             }
         }
+
+        public async Task<StatisticResponse> GetStatistic()
+        {
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync($"{_pdfServiceUrl}/statistic");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<StatisticResponse>(content);
+            }
+        }
+
+        public async Task Cleanup(int daysCleanup)
+        {
+            using (var client = new HttpClient())
+            {
+                var response = await client.DeleteAsync($"{_pdfServiceUrl}/cleanup/{daysCleanup}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
+                }
+            }
+        }
     }
 
     public class GeneratePdfRequest
@@ -101,5 +129,11 @@ namespace Zbyrach.Api.Articles
         Mobile = 1,
         Tablet = 2,
         Desktop = 3
+    }
+
+    public class StatisticResponse
+    {
+        public long TotalRowsCount { get; set; }
+        public long TotalSizeInBytes { get; set; }
     }
 }
