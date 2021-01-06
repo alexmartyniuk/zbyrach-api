@@ -11,7 +11,7 @@ namespace Zbyrach.Api.Tests
         protected ApplicationContext Context { get; private set; }
         protected SqliteConnection Connection { get; private set; }
 
-        public static readonly Microsoft.Extensions.Logging.LoggerFactory _consoleLogger =
+        public static readonly LoggerFactory _consoleLogger =
             new LoggerFactory(new[] {
                 new Microsoft.Extensions.Logging.Debug.DebugLoggerProvider()
             });

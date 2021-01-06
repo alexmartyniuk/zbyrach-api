@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,11 @@ namespace Zbyrach.Api.Tests.Services
 {
     public class MailingSettingsServiceTests : DatabaseTests
     {
-        private readonly Mock<ArticleService> _articleServiceMock = new Mock<ArticleService>(MockBehavior.Strict, null, null);
-        private readonly Mock<DateTimeService> _dateTimeServiceMock = new Mock<DateTimeService>(MockBehavior.Strict);
+        private readonly Mock<ArticleService> _articleServiceMock;
+        private readonly Mock<DateTimeService> _dateTimeServiceMock;
+        private readonly Mock<IConfiguration> _configurationMock;
+        private readonly Mock<PdfService> _pdfServiceMock;
+
         private readonly CronService _cronService;
 
         private readonly List<(string, ScheduleType, string)> _data = new List<(string, ScheduleType, string)>
@@ -35,6 +39,10 @@ namespace Zbyrach.Api.Tests.Services
 
         public MailingSettingsServiceTests()
         {
+            _configurationMock = new Mock<IConfiguration>();
+            _pdfServiceMock = new Mock<PdfService>(MockBehavior.Strict, _configurationMock.Object);
+            _articleServiceMock = new Mock<ArticleService>(MockBehavior.Strict, null, null, _pdfServiceMock.Object);
+            _dateTimeServiceMock = new Mock<DateTimeService>(MockBehavior.Strict);
             _cronService = new CronService(_dateTimeServiceMock.Object);
 
             var updatedAt = new DateTime(2020, 04, 27);

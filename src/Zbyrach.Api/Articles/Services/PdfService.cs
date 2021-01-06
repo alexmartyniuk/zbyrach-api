@@ -55,7 +55,7 @@ namespace Zbyrach.Api.Articles
             }
         }
 
-        public async Task QueueArticle(string url)
+        public virtual async Task QueueArticle(string url)
         {
             if (string.IsNullOrEmpty(url))
             {

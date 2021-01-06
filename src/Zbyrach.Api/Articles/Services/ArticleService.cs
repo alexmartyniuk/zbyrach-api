@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +13,13 @@ namespace Zbyrach.Api.Articles
     {
         private readonly ApplicationContext _db;
         private readonly UsersService _usersService;
+        private readonly PdfService _pdfService;
 
-        public ArticleService(ApplicationContext db, UsersService usersService)
+        public ArticleService(ApplicationContext db, UsersService usersService, PdfService pdfService)
         {
             _db = db;
             _usersService = usersService;
+            _pdfService = pdfService;
         }
 
         public Task<List<Article>> GetByUrls(IEnumerable<string> urls)
@@ -28,27 +29,16 @@ namespace Zbyrach.Api.Articles
                 .ToListAsync();
         }
 
-        public async Task<Article> SaveOne(Article article)
+        public async Task MarkAsSent(IEnumerable<Article> articles, User user)
         {
-            _db.Articles.Add(article);
+            await SetStatus(articles, new List<User> { user }, ArticleStatus.Sent);
             await _db.SaveChangesAsync();
-
-            return await _db.Articles.FindAsync(article.Id);
         }
 
-        public Task SetStatus(Article article, IEnumerable<User> users, ArticleStatus status)
+        public async Task MarkAsRead(Article article, User user)
         {
-            return SetStatus(new List<Article> { article }, users, status);
-        }
-
-        public Task MarkAsSent(IEnumerable<Article> articles, User user)
-        {
-            return SetStatus(articles, new List<User> { user }, ArticleStatus.Sent);
-        }
-
-        public Task MarkAsRead(Article article, User user)
-        {
-            return SetStatus(new List<Article> { article }, new List<User> { user }, ArticleStatus.Read);
+            await SetStatus(new List<Article> { article }, new List<User> { user }, ArticleStatus.Read);
+            await _db.SaveChangesAsync();
         }
 
         public virtual async Task<Dictionary<User, DateTime>> GetLastMailSentDateByUsers()
@@ -71,41 +61,20 @@ namespace Zbyrach.Api.Articles
                 .Where(u => userIds.Contains(u.Id))
                 .ToDictionaryAsync(u => u.Id, u => u);
 
-            return groupedUsers.ToDictionary(g => users[g.userId], g => g.maxSentAt);
-        }        
+            return groupedUsers
+                .ToDictionary(g => users[g.userId], g => g.maxSentAt);
+        }
 
         public ValueTask<Article> FindById(long articleId)
         {
             return _db.Articles.FindAsync(articleId);
-        } 
-
-        public Task<Article> FindByTitleAndAuthorName(string title, string authorName)
-        {
-            return _db.Articles
-                .SingleOrDefaultAsync(a => a.Title == title && a.AuthorName == authorName);
-        }
-
-        public async Task LinkWithTag(Article article, Tag tag)
-        {
-            var isAlreadyLinked = await _db
-                .ArticleTags
-                .AnyAsync(at => at.ArticleId == article.Id && at.TagId == tag.Id);
-
-            if (isAlreadyLinked) return;
-
-            _db.ArticleTags.Add(new ArticleTag
-            {
-                ArticleId = article.Id,
-                TagId = tag.Id
-            });
-            await _db.SaveChangesAsync();
         }
 
         public async Task<List<Article>> GetLastSent(User user)
         {
             var lastSentAt = await _db.ArticleUsers
                 .Where(au => au.Status == ArticleStatus.Sent)
-                .Where(au => au.UserId == user.Id)                
+                .Where(au => au.UserId == user.Id)
                 .MaxAsync(au => au.SentAt);
 
             var result = await _db.ArticleUsers
@@ -114,15 +83,38 @@ namespace Zbyrach.Api.Articles
                 .Select(au => au.Article)
                 .OrderByDescending(a => a.LikesCount)
                 .ThenByDescending(a => a.CommentsCount)
-                .ThenByDescending(a => a.PublicatedAt)                
+                .ThenByDescending(a => a.PublicatedAt)
                 .ToListAsync();
 
             return result;
         }
 
+        public async Task<Article> SaveArticle(Article newArticle, List<User> users, Tag tag)
+        {
+            var originalArticle = await _db.Articles
+               .SingleOrDefaultAsync(a =>
+                    a.Title == newArticle.Title &&
+                    a.AuthorName == newArticle.AuthorName);
+
+            if (originalArticle == null)
+            {
+                _db.Articles.Add(newArticle);
+                await LinkWithTag(newArticle, tag);
+                await _pdfService.QueueArticle(newArticle.Url);
+
+                originalArticle = newArticle;
+            }
+
+            await SetStatus(new List<Article> { originalArticle }, users, ArticleStatus.New);
+
+            await _db.SaveChangesAsync();
+
+            return originalArticle;
+        }
+
         public async Task<List<Article>> GetForSending(User user, long noMoreThan)
         {
-            if (noMoreThan == 0) 
+            if (noMoreThan == 0)
             {
                 return new List<Article>();
             }
@@ -207,7 +199,7 @@ namespace Zbyrach.Api.Articles
             return await _db.Articles
                 .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
-                .Where(a => a.Id == article.Id)                
+                .Where(a => a.Id == article.Id)
                 .SingleAsync();
         }
 
@@ -241,18 +233,18 @@ namespace Zbyrach.Api.Articles
             _db.ArticleUsers.UpdateRange(existingReading);
 
             // 2. Add new readings
-            var newArticleUserPairs = articleIds
-                .Join(userIds,
+            var newArticleUserPairs = articles
+                .Join(users,
                     a => true,
                     u => true,
-                    (articleId, userId) => new { articleId, userId }
+                    (article, user) => new { article, user }
                 )
-                .Where(au => !existingReading.Any(r => r.ArticleId == au.articleId && r.UserId == au.userId));
+                .Where(au => !existingReading.Any(r => r.ArticleId == au.article.Id && r.UserId == au.user.Id));
             var newReadings = newArticleUserPairs
                 .Select(p => new ArticleUser
                 {
-                    ArticleId = p.articleId,
-                    UserId = p.userId
+                    Article = p.article,
+                    User = p.user
                 })
                 .ToList();
             newReadings.ForEach(reading =>
@@ -260,9 +252,6 @@ namespace Zbyrach.Api.Articles
                 UpdateStatus(reading, newStatus);
             });
             await _db.ArticleUsers.AddRangeAsync(newReadings);
-
-            // 3. Save changes
-            await _db.SaveChangesAsync();
         }
 
         private void UpdateStatus(ArticleUser reading, ArticleStatus newStatus)
@@ -286,6 +275,21 @@ namespace Zbyrach.Api.Articles
                     throw new Exception($"Unknown status: {newStatus}");
             }
             reading.Status = newStatus;
+        }
+
+        private async Task LinkWithTag(Article article, Tag tag)
+        {
+            var isAlreadyLinked = await _db
+                .ArticleTags
+                .AnyAsync(at => at.ArticleId == article.Id && at.TagId == tag.Id);
+
+            if (isAlreadyLinked) return;
+
+            _db.ArticleTags.Add(new ArticleTag
+            {
+                Article = article,
+                Tag = tag
+            });
         }
     }
 }

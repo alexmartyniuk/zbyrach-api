@@ -6,7 +6,6 @@ using Zbyrach.Api.Account;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Zbyrach.Api.Tags;
-using System.IO;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
@@ -27,6 +26,7 @@ namespace Zbyrach.Api.Articles
             _mediumTagsService = mediumTagsService;
             _logger = logger;
         }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -37,7 +37,7 @@ namespace Zbyrach.Api.Articles
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    _logger.LogError(e, "Unhandled exception during collecting articles");
                 }
                 await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
@@ -89,45 +89,34 @@ namespace Zbyrach.Api.Articles
                     break;
                 }
 
-                await SaveArticleIfNeeded(serviceScope, story, tag, users);
+                await SaveArticle(serviceScope, story, tag, users);
             }
         }
 
-        private async Task SaveArticleIfNeeded(IServiceScope serviceScope, StoryDto story, Tag tag, List<User> users)
+        private async Task SaveArticle(IServiceScope serviceScope, StoryDto story, Tag tag, List<User> users)
         {
             try
             {
                 var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
-                var pdfService = serviceScope.ServiceProvider.GetRequiredService<PdfService>();
-                var originalArticle = await articleService.FindByTitleAndAuthorName(story.Title, story.Author.Name);
-                if (originalArticle == null)
-                {
-                    originalArticle = await SaveArticle(serviceScope, story);
-                    await articleService.SetStatus(originalArticle, users, ArticleStatus.New);
-                    await articleService.LinkWithTag(originalArticle, tag);
-                    await pdfService.QueueArticle(originalArticle.Url);
-                    _logger.LogInformation("Story was successfully saved: {story}", story);
-                }
-                else
-                {
-                    _logger.LogInformation("Story was previously saved: {story}", story);
-                }
+                var translationService = serviceScope.ServiceProvider.GetRequiredService<TranslationService>();
+                
+                var textToDetect = story.Description ?? story.Title;
+                var language = translationService.DetectLanguage(textToDetect);
+                var newArticle = CreateArticle(serviceScope, story, language);
+
+                var savedArticle = await articleService.SaveArticle(newArticle, users, tag);           
+                
+                _logger.LogInformation("Story was successfully saved: {story}, article id: {articleId}", story, savedArticle.Id);                
             }
             catch (Exception e)
             {
-                _logger.LogError("Can't save story {story} because of {exception}", story, e);
+                _logger.LogError(e, "Can't save story {story} because of {exception}", story, e.Message);
             }
         }
 
-        private async Task<Article> SaveArticle(IServiceScope serviceScope, StoryDto story)
+        private Article CreateArticle(IServiceScope serviceScope, StoryDto story, string language)
         {
-            var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
-            var translationService = serviceScope.ServiceProvider.GetRequiredService<TranslationService>();
-
-            var textToDetect = story.Description ?? story.Title;
-            var language = translationService.DetectLanguage(textToDetect);
-
-            var newArticle = new Article
+            return new Article
             {
                 FoundAt = DateTime.UtcNow,
                 PublicatedAt = story.PublicatedAt,
@@ -142,8 +131,6 @@ namespace Zbyrach.Api.Articles
                 AuthorName = story.Author.Name,
                 AuthorPhoto = story.Author.AvatarUrl
             };
-
-            return await articleService.SaveOne(newArticle);
         }
     }
 }
