@@ -52,7 +52,6 @@ namespace Zbyrach.Api.Tags
             return Ok(tagInfo);
         }
 
-        [AllowAnonymous]
         [HttpGet]
         [Route("/tags/{tagName}/related")]
         public async Task<IActionResult> GetRelatedTags(string tagName)
@@ -80,10 +79,12 @@ namespace Zbyrach.Api.Tags
         public async Task<IActionResult> SetMyTags([FromBody] List<string> values)
         {
             var currentUser = await _userService.GetCurrent();
-            var tags = values.Select(v => new Tag
-            {
-                Name = v
-            });
+            var tags = values
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Select(v => new Tag
+                {
+                    Name = v.Trim()
+                });
             await _tagService.SetByUser(currentUser, tags);
 
             var myTags = await _tagService.GetByUser(currentUser);
