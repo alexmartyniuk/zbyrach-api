@@ -21,10 +21,9 @@ namespace Zbyrach.Api.Tags
             _userService = userService;
         }
 
-        [AllowAnonymous]
         [HttpGet]
         [Route("/tags/{tagName}")]
-        public async Task<IActionResult> GetTagInfo(string tagName)
+        public async Task<IActionResult> GetFullTagInfo(string tagName)
         {
             if (string.IsNullOrWhiteSpace(tagName))
             {
@@ -32,6 +31,24 @@ namespace Zbyrach.Api.Tags
             }
 
             var tagInfo = await _mediumTagsService.GetFullTagInfoByName(tagName);
+            return Ok(tagInfo);
+        }
+
+        [HttpGet]
+        [Route("/tags/{tagName}/short")]
+        public async Task<IActionResult> GetShortTagInfo(string tagName)
+        {
+            if (string.IsNullOrWhiteSpace(tagName))
+            {
+                return BadRequest("Tag name is empty.");
+            }
+
+            var tagInfo = await _mediumTagsService.GetShortTagInfoByName(tagName);
+            if (tagInfo == null)
+            {
+                return NotFound();
+            }
+
             return Ok(tagInfo);
         }
 

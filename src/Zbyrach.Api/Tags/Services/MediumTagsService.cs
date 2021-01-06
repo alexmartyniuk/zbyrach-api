@@ -29,6 +29,21 @@ namespace Zbyrach.Api.Tags
             }
         }
 
+        public async Task<TagDto> GetShortTagInfoByName(string tagName)
+        {
+            var config = Configuration.Default.WithDefaultLoader();
+            var context = BrowsingContext.New(config);
+            try
+            {
+                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");                
+                return GetTag(mainDocument);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Error during getting data from 'medium.com' by tag '{tagName}':\r\n {e}");
+            }
+        }
+
         public async Task<IEnumerable<TagDto>> GetRelatedTags(string tagName)
         {
             var config = Configuration.Default.WithDefaultLoader();
@@ -62,6 +77,22 @@ namespace Zbyrach.Api.Tags
                 RelatedTags = relatedTags,
                 TopStories = topStories,
                 Archive = archive
+            };
+        }
+
+        private TagDto GetTag(IDocument mainDocument)
+        {
+            var title = mainDocument
+                .QuerySelector("h1.heading-title");
+            if (title == null)
+            {
+                return null;
+            }                
+            
+            return new TagDto
+            {
+                Name = title.TextContent.Trim(),
+                Url = mainDocument.BaseUrl.ToString()
             };
         }
 
