@@ -13,7 +13,7 @@ using Zbyrach.Api.Tags;
 
 namespace Zbyrach.Api.Tests
 {
-    public class ArticleServiceTests : DatabaseTests
+    public class ArticleServiceTests : BaseDatabaseTests
     {
         private readonly string USER1_EMAIL = "user1@domain.com";
         private readonly string USER2_EMAIL = "user2@domain.com";

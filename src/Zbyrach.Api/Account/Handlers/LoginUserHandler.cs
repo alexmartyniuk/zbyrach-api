@@ -1,35 +1,42 @@
 ﻿using System;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Zbyrach.Api.Common;
 using Zbyrach.Api.Migrations;
 
 namespace Zbyrach.Api.Account.Handlers
 {
     public class LoginUserHandler : IRequestHandler<LoginRequestDto, LoginResponseDto>
-    {
-        private readonly HttpClient _httpClient = new HttpClient();
+    {        
         private readonly ILogger<AccessTokenService> _logger;
         private readonly ApplicationContext _db;
         private readonly IHttpContextAccessor _accessor;
+        private readonly IGoogleAuthService _googleAuthService;
+        private readonly DateTimeService _dateTimeService;
 
-        public LoginUserHandler(ILogger<AccessTokenService> logger, ApplicationContext db, IHttpContextAccessor accessor)
+        public LoginUserHandler(
+            ILogger<AccessTokenService> logger, 
+            ApplicationContext db, 
+            IHttpContextAccessor accessor, 
+            IGoogleAuthService googleAuthService,
+            DateTimeService dateTimeService)
         {
             _logger = logger;
             _db = db;
             _accessor = accessor;
+            _googleAuthService = googleAuthService;
+            _dateTimeService = dateTimeService;
         }
 
         public async Task<LoginResponseDto> Handle(LoginRequestDto request, CancellationToken cancellationToken)
         {
-            var googleTokenInfo = await FindGoogleToken(request.Token);
+            var googleTokenInfo = await _googleAuthService.FindGoogleToken(request.Token);
             if (googleTokenInfo == null)
             {
                 return null;
@@ -41,7 +48,7 @@ namespace Zbyrach.Api.Account.Handlers
                 user = await AddNewUser(new User
                 {
                     Email = googleTokenInfo.email,
-                    Name = $"{googleTokenInfo.given_name} {googleTokenInfo.family_name}",
+                    Name = $"{googleTokenInfo.given_name} {googleTokenInfo.family_name}".Trim(),
                     PictureUrl = googleTokenInfo.picture
                 });
             }
@@ -87,21 +94,7 @@ namespace Zbyrach.Api.Account.Handlers
         private Task<User> FindUserByEmail(string email)
         {
             return _db.Users.SingleOrDefaultAsync(u => u.Email == email);
-        }
-
-        private async Task<GoogleToken> FindGoogleToken(string idToken)
-        {
-            try
-            {
-                var response = await _httpClient.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}");
-                return JsonSerializer.Deserialize<GoogleToken>(response);
-            }
-            catch (HttpRequestException e)
-            {
-                _logger.LogError(e, "Google token could not be validated.");
-                return null;
-            }
-        }
+        }       
 
         public async Task<AccessToken> CreateAndSaveNewToken(User user)
         {
@@ -117,7 +110,7 @@ namespace Zbyrach.Api.Account.Handlers
                 ClientIp = GetClientIP(),
                 ClientUserAgent = GetClientUserAgent(),
                 User = user,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = _dateTimeService.Now()
             };
 
             _db.AccessTokens.Add(newToken);

@@ -8,7 +8,7 @@ using Zbyrach.Api.Tags;
 
 namespace Zbyrach.Api.Tests
 {
-    public class TagServiceTests : DatabaseTests
+    public class TagServiceTests : BaseDatabaseTests
     {
         public TagServiceTests() : base()
         {

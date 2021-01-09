@@ -13,7 +13,7 @@ using Zbyrach.Api.Mailing;
 
 namespace Zbyrach.Api.Tests.Services
 {
-    public class MailingSettingsServiceTests : DatabaseTests
+    public class MailingSettingsServiceTests : BaseDatabaseTests
     {
         private readonly Mock<ArticleService> _articleServiceMock;
         private readonly Mock<DateTimeService> _dateTimeServiceMock;

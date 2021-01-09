@@ -60,6 +60,7 @@ namespace Zbyrach.Api
             services.AddSingleton<MediumTagsService>();
             services.AddSingleton<CronService>();
             services.AddSingleton<TranslationService>();
+            services.AddSingleton<IGoogleAuthService, GoogleAuthService>();
 
             services.AddScoped<PdfService>();
             services.AddScoped<AdminService>();
