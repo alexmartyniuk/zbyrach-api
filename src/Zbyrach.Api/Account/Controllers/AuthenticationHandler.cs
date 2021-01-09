@@ -25,7 +25,7 @@ namespace Zbyrach.Api.Account
             _tokenService = tokenService;
         }
 
-        protected async override Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var endpoint = Context.GetEndpoint();
             if (endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null)

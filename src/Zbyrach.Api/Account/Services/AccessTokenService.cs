@@ -41,16 +41,6 @@ namespace Zbyrach.Api.Account
             return null;
         }
 
-        private string GetClientIP()
-        {
-            return _accessor.HttpContext.Connection.RemoteIpAddress.ToString();
-        }
-
-        private string GetClientUserAgent()
-        {
-            return _accessor.HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
-        }
-
         public async Task<bool> Remove(AccessToken token)
         {
             var existingToken = await _db.AccessTokens.FindAsync(token.Id);
@@ -65,45 +55,6 @@ namespace Zbyrach.Api.Account
             _logger.LogInformation($"AccessToken removed: Id='{token.Id}' ClientIp='{token.ClientIp}' CreateAt='{token.CreatedAt.ToLongDateString()}'");
 
             return entriesWritten > 0;
-        }
-
-        public async Task<GoogleToken> FindGoogleToken(string idToken)
-        {
-            try
-            {
-                var response = await _http.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}");
-                return JsonSerializer.Deserialize<GoogleToken>(response);
-            }
-            catch (HttpRequestException e)
-            {
-                _logger.LogError(e, "Google token could not be validated.");
-                return null;
-            }
-        }
-
-        public async Task<AccessToken> CreateAndSaveNewToken(User user)
-        {
-            var existingToken = await GetCurrentToken();
-            if (existingToken != null)
-            {
-                await Remove(existingToken);
-            }
-
-            var newToken = new AccessToken
-            {
-                Token = Guid.NewGuid().ToString(),
-                ClientIp = GetClientIP(),
-                ClientUserAgent = GetClientUserAgent(),
-                User = user,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _db.AccessTokens.Add(newToken);
-            await _db.SaveChangesAsync();
-
-            _logger.LogInformation($"AccessToken created: Id='{newToken.Id}' ClientIp='{newToken.ClientIp}' CreateAt='{newToken.CreatedAt.ToLongDateString()}'");
-
-            return newToken;
         }
 
         public async Task<AccessToken> GetCurrentToken()

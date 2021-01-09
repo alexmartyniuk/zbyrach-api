@@ -1,3 +1,5 @@
+using System.Reflection;
+using MediatR;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Articles;
 using Zbyrach.Api.Mailing;
@@ -73,6 +75,8 @@ namespace Zbyrach.Api
             services.AddScoped<TagService>();
             services.AddScoped<MailingSettingsService>();
             services.AddScoped<ArticleService>();
+
+            services.AddMediatR(Assembly.GetExecutingAssembly());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
