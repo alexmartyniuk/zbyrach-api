@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -54,11 +53,7 @@ namespace Zbyrach.Api.Account.Handlers
             }
 
             var token = await CreateAndSaveNewToken(user);
-            if (token == null)
-            {
-                return null;
-            }
-
+            
             return new LoginResponseDto
             {
                 Token = token.Token,
@@ -98,7 +93,10 @@ namespace Zbyrach.Api.Account.Handlers
 
         public async Task<AccessToken> CreateAndSaveNewToken(User user)
         {
-            var existingToken = await GetCurrentToken();
+            var clientIp = GetClientIP();
+            var clientUserAgent = GetClientUserAgent();
+            
+            var existingToken = await FindToken(user, clientIp, clientUserAgent);
             if (existingToken != null)
             {
                 await RemoveAccessToken(existingToken);
@@ -107,8 +105,8 @@ namespace Zbyrach.Api.Account.Handlers
             var newToken = new AccessToken
             {
                 Token = Guid.NewGuid().ToString(),
-                ClientIp = GetClientIP(),
-                ClientUserAgent = GetClientUserAgent(),
+                ClientIp = clientIp,
+                ClientUserAgent = clientUserAgent,
                 User = user,
                 CreatedAt = _dateTimeService.Now()
             };
@@ -121,29 +119,13 @@ namespace Zbyrach.Api.Account.Handlers
             return newToken;
         }
 
-        public async Task<AccessToken> GetCurrentToken()
+        public Task<AccessToken> FindToken(User user, string clientIp, string clientUserAgent)
         {
-            var token = _accessor.HttpContext.User.FindFirstValue(ClaimTypes.Authentication);
-            if (token == null)
-            {
-                return null;
-            }
-
-            return await FindByToken(token);
-        }
-
-        public async Task<AccessToken> FindByToken(string token)
-        {
-            var accessToken = await _db.AccessTokens
-                .Include(t => t.User)
-                .SingleOrDefaultAsync(t => t.Token == token);
-
-            if (accessToken != null && accessToken.ExpiredAt() > DateTime.UtcNow)
-            {
-                return accessToken;
-            }
-
-            return null;
+            return _db.AccessTokens
+                .Where(t => t.ClientIp == clientIp)
+                .Where(t => t.ClientUserAgent == clientUserAgent)
+                .Where(t => t.UserId == user.Id)
+                .SingleOrDefaultAsync();
         }
 
         public async Task<bool> RemoveAccessToken(AccessToken token)
