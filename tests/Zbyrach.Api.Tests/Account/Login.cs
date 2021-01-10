@@ -271,5 +271,11 @@ namespace Zbyrach.Api.Tests.Account
 
             _googleAuthService.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task VerifyFailedTest()
+        {
+            false.Should().BeTrue();
+        }
     }
 }
