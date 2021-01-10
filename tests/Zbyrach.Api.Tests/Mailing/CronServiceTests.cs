@@ -5,7 +5,7 @@ using Xunit;
 using Zbyrach.Api.Common;
 using Zbyrach.Api.Mailing;
 
-namespace Zbyrach.Api.Tests.Services
+namespace Zbyrach.Api.Tests.Mailing
 {
     public class CronServiceTests
     {

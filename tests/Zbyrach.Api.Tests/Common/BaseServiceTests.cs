@@ -1,11 +1,9 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Reflection;
-using System.Text;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Admin.Services;
 using Zbyrach.Api.Articles;
@@ -13,7 +11,7 @@ using Zbyrach.Api.Common;
 using Zbyrach.Api.Mailing;
 using Zbyrach.Api.Tags;
 
-namespace Zbyrach.Api.Tests.Services
+namespace Zbyrach.Api.Tests.Common
 {
     public abstract class BaseServiceTests : BaseDatabaseTests
     {

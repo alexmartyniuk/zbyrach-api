@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Zbyrach.Api.Migrations;
 
-namespace Zbyrach.Api.Tests
+namespace Zbyrach.Api.Tests.Common
 {
     public abstract class BaseDatabaseTests : IDisposable
     {

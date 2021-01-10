@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using Xunit;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Common.Helpers;
+using Zbyrach.Api.Tests.Common;
 
-namespace Zbyrach.Api.Tests.Services.AccountController
+namespace Zbyrach.Api.Tests.Account
 {
     public class Login : BaseControllerTests
     {

@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Zbyrach.Api.Account;
 
-namespace Zbyrach.Api.Tests.Services
+namespace Zbyrach.Api.Tests.Common
 {
     public abstract class BaseControllerTests : BaseServiceTests
     {

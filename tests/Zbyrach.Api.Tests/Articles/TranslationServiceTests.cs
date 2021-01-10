@@ -1,9 +1,8 @@
-﻿using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Xunit;
 using Zbyrach.Api.Articles;
 
-namespace Zbyrach.Api.Tests.Services
+namespace Zbyrach.Api.Tests.Articles
 {
     public class TranslationServiceTests
     {

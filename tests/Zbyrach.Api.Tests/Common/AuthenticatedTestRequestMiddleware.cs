@@ -5,7 +5,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Zbyrach.Api.Tests.Services
+namespace Zbyrach.Api.Tests.Common
 {
     public class AuthenticatedTestRequestMiddleware
     {
