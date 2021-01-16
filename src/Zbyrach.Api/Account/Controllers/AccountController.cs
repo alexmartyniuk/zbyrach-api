@@ -3,19 +3,18 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Zbyrach.Api.Account.Handlers;
 
 namespace Zbyrach.Api.Account
 {
     [Authorize]
     public class AccountController : Controller
     {
-        private readonly AccountService _accountService;
         private readonly ILogger<AccountController> _logger;
         private readonly IMediator _mediator; 
 
-        public AccountController(AccountService accountService, ILogger<AccountController> logger, IMediator mediator)
+        public AccountController(ILogger<AccountController> logger, IMediator mediator)
         {
-            _accountService = accountService;
             _logger = logger;
             _mediator = mediator;
         }
@@ -34,11 +33,12 @@ namespace Zbyrach.Api.Account
             return Ok(response);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("/account/logout")]
         public async Task<IActionResult> Logout()
-        {
-            await _accountService.Logout();
+        {                        
+            await _mediator.Send(new LogoutRequest());
             return Ok();
         }
     }

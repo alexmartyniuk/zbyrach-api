@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Zbyrach.Api.Admin.Services;
 using Zbyrach.Api.Common;
+using Hellang.Middleware.ProblemDetails;
 
 namespace Zbyrach.Api
 {
@@ -33,6 +34,9 @@ namespace Zbyrach.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
+            services.AddProblemDetails(options =>
+            {               
+            });
 
             services.AddAuthentication("TokenAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, AuthenticationHandler>("TokenAuthentication", null);
@@ -72,7 +76,6 @@ namespace Zbyrach.Api
 
             services.AddScoped<UsersService>();
             services.AddScoped<AccessTokenService>();
-            services.AddScoped<AccountService>();
             services.AddScoped<TagService>();
             services.AddScoped<MailingSettingsService>();
             services.AddScoped<ArticleService>();
@@ -83,10 +86,7 @@ namespace Zbyrach.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseProblemDetails();
 
             app.UseDetection();
 

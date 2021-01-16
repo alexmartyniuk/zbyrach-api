@@ -54,7 +54,6 @@ namespace Zbyrach.Api.Tests.Common
             services.AddScoped<AdminService>();                  
             services.AddScoped<UsersService>();
             services.AddScoped<AccessTokenService>();
-            services.AddScoped<AccountService>();
             services.AddScoped<TagService>();
             services.AddScoped<MailingSettingsService>();
             services.AddScoped<ArticleService>();

@@ -1,18 +1,20 @@
+﻿using MediatR;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Zbyrach.Api.Account
+namespace Zbyrach.Api.Account.Handlers
 {
-    public class AccountService
+    public class LogoutUserHandler : AsyncRequestHandler<LogoutRequest>
     {
         private readonly AccessTokenService _tokenService;
 
-        public AccountService(AccessTokenService tokenService)
+        public LogoutUserHandler(AccessTokenService tokenService)
         {
             _tokenService = tokenService;
         }
 
-        public async Task Logout()
+        protected override async Task Handle(LogoutRequest request, CancellationToken cancellationToken)
         {
             var token = await _tokenService.GetCurrentToken();
             if (token == null)
