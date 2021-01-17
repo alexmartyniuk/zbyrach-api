@@ -1,6 +1,4 @@
 ﻿using FluentAssertions;
-using Microsoft.Extensions.Configuration;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,19 +6,13 @@ using System.Threading.Tasks;
 using Xunit;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Articles;
-using Zbyrach.Api.Common;
 using Zbyrach.Api.Mailing;
 using Zbyrach.Api.Tests.Common;
 
 namespace Zbyrach.Api.Tests.Mailing
 {
-    public class MailingSettingsServiceTests : BaseDatabaseTests
+    public class MailingSettingsServiceTests : BaseServiceTests
     {
-        private readonly Mock<ArticleService> _articleServiceMock;
-        private readonly Mock<DateTimeService> _dateTimeServiceMock;
-        private readonly Mock<IConfiguration> _configurationMock;
-        private readonly Mock<PdfService> _pdfServiceMock;
-
         private readonly CronService _cronService;
 
         private readonly List<(string, ScheduleType, string)> _data = new List<(string, ScheduleType, string)>
@@ -39,32 +31,37 @@ namespace Zbyrach.Api.Tests.Mailing
         };
 
         public MailingSettingsServiceTests()
-        {
-            _configurationMock = new Mock<IConfiguration>();
-            _pdfServiceMock = new Mock<PdfService>(MockBehavior.Strict, _configurationMock.Object);
-            _articleServiceMock = new Mock<ArticleService>(MockBehavior.Strict, null, null, _pdfServiceMock.Object);
-            _dateTimeServiceMock = new Mock<DateTimeService>(MockBehavior.Strict);
-            _cronService = new CronService(_dateTimeServiceMock.Object);
+        {            
+            _cronService = new CronService(_dateTimeService.Object);
 
             var updatedAt = new DateTime(2020, 04, 27);
             foreach (var item in _data)
             {
-                Context.Add(new MailingSettings
+                var user = CreateUser(item.Item1);
+                var mailingSettings = new MailingSettings
                 {
-                    User = CreateUser(item.Item1),
+                    User = user,
                     Schedule = _cronService.ScheduleToExpression(item.Item2),
                     UpdatedAt = updatedAt
+                };
+                Context.Add(mailingSettings);
+
+                var article = new Article
+                {
+                    Url = "url",
+                    Title = "Title"
+                };
+                article.ArticleUsers.Add(new ArticleUser
+                {
+                    User = user,
+                    Status = ArticleStatus.Sent,
+                    SentAt = ParseDateTime(item.Item3)
                 });
+
+                Context.Add(article);
             }
 
             SaveAndRecreateContext();
-
-            var savedUsers = Context.Users.ToList();
-            var lastSentDays = _data.ToDictionary(d => savedUsers.Single(u => u.Name == d.Item1),
-                d => ParseDateTime(d.Item3));
-            _articleServiceMock
-                .Setup(x => x.GetLastMailSentDateByUsers())
-                .ReturnsAsync(lastSentDays);
         }
 
         [Theory]
@@ -80,10 +77,10 @@ namespace Zbyrach.Api.Tests.Mailing
             var datetime = ParseDateTime(now);
             var userNames = users.Split(',');
 
-            _dateTimeServiceMock.Setup(s => s.Now())
+            _dateTimeService.Setup(s => s.Now())
                 .Returns(datetime);
 
-            var service = new MailingSettingsService(Context, _cronService, _articleServiceMock.Object);
+            var service = GetSut<MailingSettingsService>();
             var settings = await service.GetBySchedule(TimeSpan.FromMinutes(30));
 
             settings.Should().HaveCount(userNames.Length);

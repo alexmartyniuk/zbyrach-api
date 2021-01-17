@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -11,11 +11,13 @@ namespace Zbyrach.Api.Articles
 {
     public class PdfService
     {
-        private readonly string _pdfServiceUrl;
+        private readonly HttpClient _httpClient;
 
-        public PdfService(IConfiguration configuration)
-        {            
-            _pdfServiceUrl = configuration["PdfServiceUrl"];
+        public PdfService(IConfiguration configuration, HttpClient client)
+        {
+            _httpClient = client;
+            if (_httpClient != null)
+                _httpClient.BaseAddress = new Uri(configuration["PdfServiceUrl"]);
         }
 
         public async Task<Stream> ConvertUrlToPdf(string url, Device device, bool inline = false)
@@ -32,27 +34,25 @@ namespace Zbyrach.Api.Articles
                 _ => DeviceType.Desktop
             };
 
-            using (var client = new HttpClient())
+
+            var request = new GeneratePdfRequest
             {
-                var request = new GeneratePdfRequest
-                {
-                    ArticleUrl = url,
-                    DeviceType = deviceType,
-                    Inline = inline
-                };
+                ArticleUrl = url,
+                DeviceType = deviceType,
+                Inline = inline
+            };
 
-                var response = await client.PostAsync($"{_pdfServiceUrl}/pdf", new StringContent(
-                    JsonConvert.SerializeObject(request),
-                    Encoding.UTF8,
-                    "application/json"));
+            var response = await _httpClient.PostAsync("/pdf", new StringContent(
+                JsonConvert.SerializeObject(request),
+                Encoding.UTF8,
+                "application/json"));
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
-                }
-
-                return await response.Content.ReadAsStreamAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
             }
+
+            return await response.Content.ReadAsStreamAsync();
         }
 
         public virtual async Task QueueArticle(string url)
@@ -60,53 +60,44 @@ namespace Zbyrach.Api.Articles
             if (string.IsNullOrEmpty(url))
             {
                 return;
-            }           
+            }
 
-            using (var client = new HttpClient())
+            var request = new QueueArticleRequest
             {
-                var request = new QueueArticleRequest
-                {
-                    ArticleUrl = url
-                };
+                ArticleUrl = url
+            };
 
-                var response = await client.PostAsync($"{_pdfServiceUrl}/queue", new StringContent(
-                    JsonConvert.SerializeObject(request),
-                    Encoding.UTF8,
-                    "application/json"));
+            var response = await _httpClient.PostAsync("/queue", new StringContent(
+                JsonConvert.SerializeObject(request),
+                Encoding.UTF8,
+                "application/json"));
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
-                }
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
             }
         }
 
         public async Task<StatisticResponse> GetStatistic()
         {
-            using (var client = new HttpClient())
+            var response = await _httpClient.GetAsync("/statistic");
+
+            if (!response.IsSuccessStatusCode)
             {
-                var response = await client.GetAsync($"{_pdfServiceUrl}/statistic");
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
-                }
-
-                var content = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<StatisticResponse>(content);
+                throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
             }
+
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<StatisticResponse>(content);
         }
 
         public async Task Cleanup(int daysCleanup)
         {
-            using (var client = new HttpClient())
-            {
-                var response = await client.DeleteAsync($"{_pdfServiceUrl}/cleanup/{daysCleanup}");
+            var response = await _httpClient.DeleteAsync($"/cleanup/{daysCleanup}");
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
-                }
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Unexpected response from PDF service: {response.StatusCode} {response.ReasonPhrase}");
             }
         }
     }

@@ -47,6 +47,10 @@ namespace Zbyrach.Api
                 .AddScheme<AuthenticationSchemeOptions, AuthenticationHandler>("TokenAuthentication", null);
             services.AddAuthorization();
 
+            services.AddHttpClient();
+            services.AddHttpClient<PdfService>();
+            services.AddHttpClient<GoogleAuthService>();
+
             services.AddHostedService<ArticlesSearcher>();
             services.AddHostedService<NotificationsSender>();
             services.AddControllers(options => {
@@ -69,9 +73,7 @@ namespace Zbyrach.Api
             services.AddSingleton<MediumTagsService>();
             services.AddSingleton<CronService>();
             services.AddSingleton<TranslationService>();
-            services.AddSingleton<IGoogleAuthService, GoogleAuthService>();
 
-            services.AddScoped<PdfService>();
             services.AddScoped<AdminService>();
 
             services.AddDbContext<ApplicationContext>(options =>

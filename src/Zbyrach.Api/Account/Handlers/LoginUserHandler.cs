@@ -16,14 +16,14 @@ namespace Zbyrach.Api.Account.Handlers
         private readonly ILogger<AccessTokenService> _logger;
         private readonly ApplicationContext _db;
         private readonly IHttpContextAccessor _accessor;
-        private readonly IGoogleAuthService _googleAuthService;
+        private readonly GoogleAuthService _googleAuthService;
         private readonly DateTimeService _dateTimeService;
 
         public LoginUserHandler(
             ILogger<AccessTokenService> logger, 
             ApplicationContext db, 
             IHttpContextAccessor accessor, 
-            IGoogleAuthService googleAuthService,
+            GoogleAuthService googleAuthService,
             DateTimeService dateTimeService)
         {
             _logger = logger;
@@ -38,6 +38,7 @@ namespace Zbyrach.Api.Account.Handlers
             var googleTokenInfo = await _googleAuthService.FindGoogleToken(request.Token);
             if (googleTokenInfo == null)
             {
+                _logger.LogError("Google token could not be validated.");
                 return null;
             }
 

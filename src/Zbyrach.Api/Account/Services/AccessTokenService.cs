@@ -1,12 +1,8 @@
-using System;
-using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Zbyrach.Api.Migrations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
-using System.Linq;
 using System.Security.Claims;
 using Zbyrach.Api.Common;
 
@@ -19,15 +15,12 @@ namespace Zbyrach.Api.Account
         private readonly DateTimeService _dateTimeService;
         private readonly ILogger<AccessTokenService> _logger;
 
-        public HttpClient _http { get; set; }
-
         public AccessTokenService(ApplicationContext db, IHttpContextAccessor accessor, DateTimeService dateTimeService, ILogger<AccessTokenService> logger)
         {
             _db = db;
             _accessor = accessor;
             _dateTimeService = dateTimeService;
             _logger = logger;
-            _http = new HttpClient();
         }
 
         public async Task<AccessToken> FindByToken(string token)

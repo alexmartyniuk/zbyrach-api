@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 using Zbyrach.Api.Account;
@@ -14,22 +13,11 @@ using Zbyrach.Api.Tests.Common;
 
 namespace Zbyrach.Api.Tests.Articles
 {
-    public class ArticleServiceTests : BaseDatabaseTests
+    public class ArticleServiceTests : BaseServiceTests
     {
         private readonly string USER1_EMAIL = "user1@domain.com";
         private readonly string USER2_EMAIL = "user2@domain.com";
         private readonly string TAG_NAME = "Tag";
-
-        private readonly Mock<UsersService> _usersServiceMock;
-        private readonly Mock<IConfiguration> _configurationMock;
-        private readonly Mock<PdfService> _pdfServiceMock;
-
-        public ArticleServiceTests()
-        {
-            _usersServiceMock = new Mock<UsersService>(MockBehavior.Strict, null, null);
-            _configurationMock = new Mock<IConfiguration>();
-            _pdfServiceMock = new Mock<PdfService>(MockBehavior.Strict, _configurationMock.Object);
-        }
 
         [Fact]
         public async Task SaveArticle_ForTwoUsersAndTwoArticles_ShouldSucceed()
@@ -56,10 +44,10 @@ namespace Zbyrach.Api.Tests.Articles
 
             SaveAndRecreateContext();
 
-            _pdfServiceMock.Setup(s => s.QueueArticle(It.IsAny<string>()))
+            _pdfService.Setup(s => s.QueueArticle(It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
-            var service = new ArticleService(Context, _usersServiceMock.Object, _pdfServiceMock.Object);
+            var service = GetSut<ArticleService>();
 
             var user1 = Context.Users.Single(u => u.Email == USER1_EMAIL);
             var user2 = Context.Users.Single(u => u.Email == USER2_EMAIL);
@@ -94,8 +82,8 @@ namespace Zbyrach.Api.Tests.Articles
             savedArticle.ArticleTags.Should().HaveCount(1);
             var articleTag = savedArticle.ArticleTags.Single(at => at.Tag.Name == TAG_NAME);
 
-            _pdfServiceMock.Verify(s => s.QueueArticle(article.Url), Times.Once);
-            _pdfServiceMock.VerifyNoOtherCalls();
+            _pdfService.Verify(s => s.QueueArticle(article.Url), Times.Once);
+            _pdfService.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -141,11 +129,11 @@ namespace Zbyrach.Api.Tests.Articles
 
             SaveAndRecreateContext();
 
-            _pdfServiceMock.Setup(s => s.QueueArticle(It.IsAny<string>()))
+            _pdfService.Setup(s => s.QueueArticle(It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
-            var service = new ArticleService(Context, _usersServiceMock.Object, _pdfServiceMock.Object);
-            
+            var service = GetSut<ArticleService>();
+
             var user2 = Context.Users.Single(u => u.Email == USER2_EMAIL);
             var tag = Context.Tags.Single(t => t.Name == TAG_NAME);
             var article = new Article
@@ -184,8 +172,8 @@ namespace Zbyrach.Api.Tests.Articles
             savedArticle.ArticleTags.Should().HaveCount(1);
             var articleTag = savedArticle.ArticleTags.Single(at => at.Tag.Name == TAG_NAME);
 
-            _pdfServiceMock.Verify(s => s.QueueArticle(article.Url), Times.Never);
-            _pdfServiceMock.VerifyNoOtherCalls();
+            _pdfService.Verify(s => s.QueueArticle(article.Url), Times.Never);
+            _pdfService.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -218,7 +206,7 @@ namespace Zbyrach.Api.Tests.Articles
 
             SaveAndRecreateContext();
 
-            var service = new ArticleService(Context, _usersServiceMock.Object, _pdfServiceMock.Object);
+            var service = GetSut<ArticleService>();
 
             var result = await service.GetLastMailSentDateByUsers();
 
@@ -302,7 +290,7 @@ namespace Zbyrach.Api.Tests.Articles
 
             SaveAndRecreateContext();
 
-            var service = new ArticleService(Context, _usersServiceMock.Object, _pdfServiceMock.Object);
+            var service = GetSut<ArticleService>();
 
             var result = await service.GetLastMailSentDateByUsers();
 
@@ -355,7 +343,7 @@ namespace Zbyrach.Api.Tests.Articles
                     }));
             SaveAndRecreateContext();
 
-            var service = new ArticleService(Context, _usersServiceMock.Object, _pdfServiceMock.Object);
+            var service = GetSut<ArticleService>();
 
             var result = await service.GetForSending(user, 10);
 

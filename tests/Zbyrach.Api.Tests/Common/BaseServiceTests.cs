@@ -20,8 +20,8 @@ namespace Zbyrach.Api.Tests.Common
         protected readonly Mock<MailService> _mailService = new Mock<MailService>(MockBehavior.Strict);
         protected readonly Mock<DateTimeService> _dateTimeService = new Mock<DateTimeService>(MockBehavior.Strict);
         protected readonly Mock<MediumTagsService> _mediumTagService = new Mock<MediumTagsService>(MockBehavior.Strict);
-        protected readonly Mock<PdfService> _pdfService = new Mock<PdfService>(MockBehavior.Strict);
-        protected readonly Mock<IGoogleAuthService> _googleAuthService = new Mock<IGoogleAuthService>(MockBehavior.Strict);
+        protected readonly Mock<PdfService> _pdfService = new Mock<PdfService>(MockBehavior.Strict, null, null);
+        protected readonly Mock<GoogleAuthService> _googleAuthService = new Mock<GoogleAuthService>(MockBehavior.Strict, null);
 
         public BaseServiceTests()
         {
