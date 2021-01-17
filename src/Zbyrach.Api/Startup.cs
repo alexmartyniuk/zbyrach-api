@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Zbyrach.Api.Admin.Services;
 using Zbyrach.Api.Common;
 using Hellang.Middleware.ProblemDetails;
+using System;
 
 namespace Zbyrach.Api
 {
@@ -35,7 +37,10 @@ namespace Zbyrach.Api
         {
             services.AddCors();
             services.AddProblemDetails(options =>
-            {               
+            {
+                // Map exeptions to HTTP status codes here
+                options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);                
+                options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
             });
 
             services.AddAuthentication("TokenAuthentication")

@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Zbyrach.Api.Account.Handlers;
+using Zbyrach.Api.Account.Dto;
 
 namespace Zbyrach.Api.Account
 {
@@ -33,7 +33,6 @@ namespace Zbyrach.Api.Account
             return Ok(response);
         }
 
-        [AllowAnonymous]
         [HttpPost]
         [Route("/account/logout")]
         public async Task<IActionResult> Logout()

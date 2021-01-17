@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Net.Http;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +32,13 @@ namespace Zbyrach.Api.Tests.Common
                     webHost.UseTestServer();
                     webHost.ConfigureTestServices(services =>
                     {
+                        services.AddProblemDetails(options =>
+                        {
+                            // Map exeptions to HTTP status codes here
+                            options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);
+                            options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
+                        });
+
                         AddApplicationServices(services);
 
                         services.AddCors();
@@ -51,6 +60,7 @@ namespace Zbyrach.Api.Tests.Common
 
                     webHost.Configure(app =>
                     {
+                        app.UseProblemDetails();
                         app.UseMiddleware<AuthenticatedTestRequestMiddleware>();
                         app.UseAuthentication();
                         app.UseRouting();

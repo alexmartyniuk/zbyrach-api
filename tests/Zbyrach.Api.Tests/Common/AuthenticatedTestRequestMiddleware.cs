@@ -21,7 +21,8 @@ namespace Zbyrach.Api.Tests.Common
             // fake authenticated the user
             var claimsIdentity = new ClaimsIdentity(new List<Claim>
             {
-                new Claim(ClaimTypes.Name, Constants.USER_NAME)
+                new Claim(ClaimTypes.Name, Constants.USER_NAME),
+                new Claim(ClaimTypes.Authentication, Constants.TOKEN)
             }, "TokenAuthentication");
 
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);

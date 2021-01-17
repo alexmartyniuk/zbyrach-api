@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Security.Claims;
+using Zbyrach.Api.Common;
 
 namespace Zbyrach.Api.Account
 {
@@ -15,14 +16,16 @@ namespace Zbyrach.Api.Account
     {
         private readonly ApplicationContext _db;
         private readonly IHttpContextAccessor _accessor;
+        private readonly DateTimeService _dateTimeService;
         private readonly ILogger<AccessTokenService> _logger;
 
         public HttpClient _http { get; set; }
 
-        public AccessTokenService(ApplicationContext db, IHttpContextAccessor accessor, ILogger<AccessTokenService> logger)
+        public AccessTokenService(ApplicationContext db, IHttpContextAccessor accessor, DateTimeService dateTimeService, ILogger<AccessTokenService> logger)
         {
             _db = db;
             _accessor = accessor;
+            _dateTimeService = dateTimeService;
             _logger = logger;
             _http = new HttpClient();
         }
@@ -33,7 +36,7 @@ namespace Zbyrach.Api.Account
                 .Include(t => t.User)
                 .SingleOrDefaultAsync(t => t.Token == token);
 
-            if (accessToken != null && accessToken.ExpiredAt() > DateTime.UtcNow)
+            if (accessToken != null && accessToken.ExpiredAt() > _dateTimeService.Now())
             {
                 return accessToken;
             }
