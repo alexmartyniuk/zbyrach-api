@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Zbyrach.Api.Migrations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
 using System.IO;
+using System.Linq;
 
 namespace Zbyrach.Api.Account
 {
@@ -25,32 +24,9 @@ namespace Zbyrach.Api.Account
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Task<User> FindByEmail(string email)
-        {
-            return _db.Users.SingleOrDefaultAsync(u => u.Email == email);
-        }
-
         public async Task<User> FindById(long userId)
         {
             return await _db.Users.FindAsync(userId);
-        }
-
-        public async Task<User> AddNew(User user)
-        {
-            if (user.Id != default)
-            {
-                throw new Exception("A new user should not have an Id.");
-            }
-
-            if (string.IsNullOrWhiteSpace(user.Email))
-            {
-                throw new Exception("A new user should have not empty email.");
-            }
-
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
-
-            return user;
         }
 
         public ValueTask<User> GetCurrent()
@@ -62,14 +38,6 @@ namespace Zbyrach.Api.Account
             }
 
             return _db.Users.FindAsync(long.Parse(userIdClaim.Value));
-        }
-
-        public Task<List<User>> GetManyByIds(List<long> userIds)
-        {
-            return _db
-                .Users
-                .Where(u => userIds.Contains(u.Id))
-                .ToListAsync();
         }
 
         public string GetUnsubscribeTokenByUser(User user)
@@ -101,24 +69,41 @@ namespace Zbyrach.Api.Account
                 .SingleOrDefaultAsync(u => u.Email == email);
         }
 
+        public async Task<string> GetLanguage(User user = null)
+        {
+            user ??= await GetCurrent();
+
+            var readUser = await FindById(user.Id);
+
+            return readUser.Language;
+        }
+
+        public async Task SetLanguage(string language, User user = null)
+        {
+            user ??= await GetCurrent();
+
+            var readUser = await FindById(user.Id);
+
+            readUser.Language = language;
+
+            await _db.SaveChangesAsync();
+        }
+
         private string Encrypt(string clearText)
         {
-            byte[] clearBytes = Encoding.Unicode.GetBytes(clearText);
-            using (Aes encryptor = Aes.Create())
+            var clearBytes = Encoding.Unicode.GetBytes(clearText);
+            using var encryptor = Aes.Create();
+            var pdb = new Rfc2898DeriveBytes(ENCRYPTION_KEY, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+            encryptor.Key = pdb.GetBytes(32);
+            encryptor.IV = pdb.GetBytes(16);
+            using var ms = new MemoryStream();
+            using (var cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(ENCRYPTION_KEY, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
-                encryptor.Key = pdb.GetBytes(32);
-                encryptor.IV = pdb.GetBytes(16);
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
-                    {
-                        cs.Write(clearBytes, 0, clearBytes.Length);
-                        cs.Close();
-                    }
-                    clearText = Convert.ToBase64String(ms.ToArray());
-                }
+                cs.Write(clearBytes, 0, clearBytes.Length);
+                cs.Close();
             }
+            clearText = Convert.ToBase64String(ms.ToArray());
+
             return clearText;
         }
 
@@ -127,22 +112,19 @@ namespace Zbyrach.Api.Account
             try
             {
                 cipherText = cipherText.Replace(" ", "+");
-                byte[] cipherBytes = Convert.FromBase64String(cipherText);
-                using (Aes encryptor = Aes.Create())
+                var cipherBytes = Convert.FromBase64String(cipherText);
+                using var encryptor = Aes.Create();
+                var pdb = new Rfc2898DeriveBytes(ENCRYPTION_KEY, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                encryptor.Key = pdb.GetBytes(32);
+                encryptor.IV = pdb.GetBytes(16);
+                using var ms = new MemoryStream();
+                using (var cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
                 {
-                    Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(ENCRYPTION_KEY, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
-                    encryptor.Key = pdb.GetBytes(32);
-                    encryptor.IV = pdb.GetBytes(16);
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
-                        {
-                            cs.Write(cipherBytes, 0, cipherBytes.Length);
-                            cs.Close();
-                        }
-                        cipherText = Encoding.Unicode.GetString(ms.ToArray());
-                    }
+                    cs.Write(cipherBytes, 0, cipherBytes.Length);
+                    cs.Close();
                 }
+                cipherText = Encoding.Unicode.GetString(ms.ToArray());
+
                 return cipherText;
             }
             catch (Exception)

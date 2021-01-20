@@ -40,5 +40,18 @@ namespace Zbyrach.Api.Account
             await _mediator.Send(new LogoutRequest());
             return Ok();
         }
+
+        [HttpPost]
+        [Route("/account/language")]
+        public async Task<IActionResult> SetLanguage([FromBody] SetLanguageRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Language) || (request.Language != "en" && request.Language != "uk"))
+            {
+                return BadRequest($"Unsupported language '{request.Language}'");
+            }
+
+            await _mediator.Send(request);
+            return Ok();
+        }
     }
 }

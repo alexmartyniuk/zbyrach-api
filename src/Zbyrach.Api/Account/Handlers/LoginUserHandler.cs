@@ -64,7 +64,8 @@ namespace Zbyrach.Api.Account.Handlers
                     Email = token.User.Email,
                     Name = token.User.Name,
                     PictureUrl = token.User.PictureUrl,
-                    IsAdmin = token.User.IsAdmin
+                    IsAdmin = token.User.IsAdmin,
+                    Language = token.User.Language
                 }
             };
         }

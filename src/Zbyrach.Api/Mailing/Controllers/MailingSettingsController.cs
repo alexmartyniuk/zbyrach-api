@@ -114,7 +114,9 @@ namespace Zbyrach.Api.Mailing
                 Id = currentUser.Id,
                 Email = currentUser.Email,
                 Name = currentUser.Name,
-                PictureUrl = currentUser.PictureUrl
+                PictureUrl = currentUser.PictureUrl,
+                IsAdmin = currentUser.IsAdmin,
+                Language = currentUser.Language
             });
         }
 
@@ -137,7 +139,9 @@ namespace Zbyrach.Api.Mailing
                 Id = user.Id,
                 Email = user.Email,
                 Name = user.Name,
-                PictureUrl = user.PictureUrl
+                PictureUrl = user.PictureUrl,
+                Language = user.Language,
+                IsAdmin = user.IsAdmin
             });
         }
     }

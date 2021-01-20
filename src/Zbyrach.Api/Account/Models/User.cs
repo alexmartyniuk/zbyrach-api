@@ -13,6 +13,7 @@ namespace Zbyrach.Api.Account
         public string Email { get; set; }
         public string PictureUrl { get; set; }
         public bool IsAdmin { get; set; }
+        public string Language { get; set; }
         public ICollection<AccessToken> AccessTokens { get; set; }
         public ICollection<TagUser> TagUsers { get; set; }
         public MailingSettings MailingSettings { get; set; }
