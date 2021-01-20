@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zbyrach</title>
+
+<style type="text/css">
+ * {
+        margin: 0px;
+        padding: 0px;
+        box-sizing: border-box;
+    }
+    a {
+        cursor: pointer !important;
+        color: #202A40 !important;
+    }
+    p, div {
+        cursor: default;
+    }
+    body {
+        background-color: #D6E3F0;
+        font-family: sans-serif;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 16px;
+        color: black;
+        margin: 0px !important;
+        padding: 0px !important;
+        box-sizing: border-box;
+    }
+    img {
+        vertical-align: middle;
+        border-style: none;
+    }
+    .container {
+        width: 786px;
+        min-height: 100vh !important;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border: 1px solid #202A40;
+    }
+    .container__body {
+        width: 100% !important;
+        margin: 0 auto;
+        padding-top: .3125rem;
+        padding-bottom: .3125rem;
+        display: block;
+    }
+    .header {
+        width: 100% !important;
+        height: 48px;
+        background-color: #576987;
+        border-bottom: 1px solid #202A40;
+        box-sizing: border-box;
+    }
+    .brand-navbar {
+        margin: auto auto;
+        display: block;
+        padding: .3125em;
+    }
+    .greetings {
+        margin: 0 2em;
+    }
+    .greetings p {
+        margin: 1em 0 1em 0;
+        font-size: 1.3rem;
+    }
+    .list {
+        width: 96% !important;
+        margin: auto auto;
+        max-width: 96vw;
+        max-width: 96%;
+    }
+    .article {
+        width: 100% !important;
+        margin-bottom: 1em;
+        align-items: center;
+    }
+    .author-avatar {
+        width: 70px !important;
+        height: 70px !important;
+        border-radius: 50%;
+    }
+    .article__info {
+        font-size: 1rem;
+        margin-left: 2%;
+    }
+    .article__info__title {
+        width: 100% !important;
+        margin-bottom: .5em;
+        text-align: left;
+    }
+    .article__info__data {
+        font-size: 14px;
+        color: #999999;
+    }
+    .article__info__data span {
+        margin: 0 .5em;
+    }
+    .article__pdf {
+        width: 36px;
+        height: 48px;
+        margin-right: .5em;
+    }
+    .options {
+        font-size: 1em;
+        width: -webkit-fill-available;
+        width: fit-content;
+        margin: 0 auto !important;
+        padding: 1em;
+        text-decoration: underline;
+        color: #000000;
+    }
+    .options * {
+        text-decoration: none;
+        color: #000000;
+    }
+    @media only screen and (max-width: 768px) {
+        body {
+            background-color: #ffffff;
+            width: 100vw !important;
+            min-height: 100vh !important;
+            margin: 0px !important;
+            padding: 0px !important;
+              }
+        .greetings p {font-size: 1.1rem;}
+        .container {
+            border: none; 
+            width: 100vw !important;
+            min-height: 100vh !important;
+            margin: 0 !important;
+            }
+        .author-avatar {
+            width: 50px !important; 
+            height: 50px !important;
+            }
+        .article__info__title {margin: 0;}
+        .article__info__data {display: none;}
+        .article__pdf {
+            width: 27px !important; 
+            height: 36px !important;
+            }
+        .options {font-size: .8em;}
+    }
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #888; 
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555; 
+    }
+</style>
+
+</head>
+<body>
+        
+        <div class="container">
+            <div class="header">
+                    <a href="#link#">
+                        <img  class="brand-navbar" src="https://zbyrach-ui.herokuapp.com/assets/img/logo-main.png" alt="logo">
+                    </a>      
+            </div>
+
+            <div class="container__body">
+                <div class="greetings">
+                    <p><span id="user_name">{{model.user_name}}</span>, your articles for {{model.period}}</p> 
+                </div>
+                <div class="list">
+
+                    {{for article in model.articles}}
+                    <table class="article" style="width: 100%;">
+                        <tr>
+                            <td style="width: 5%;">
+                                <img class="author-avatar" src="{{article.author_photo}}" alt="author avatar">
+                            </td>
+                            <td>
+                                <table class="article__info">
+                                    <tr>
+                                        <td>
+                                            <div class="article__info__title">
+                                                <a href="{{article.url}}">{{article.title}}</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <table>
+                                                <tr class="article__info__data">
+                                                    <td>
+                                                        <p id="author-name">{{article.author_name}}</p> 
+                                                    </td>
+                                                    <td>
+                                                        <span>|</span>
+                                                    </td>
+                                                    <td>
+                                                        <p id="date">{{article.publicated_at}}</p> 
+                                                    </td>
+                                                    <td>
+                                                        <span>|</span>   
+                                                    </td>
+                                                    <td>
+                                                        <p id="duration">{{article.read_time}}</p>  
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>                                
+                                    
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                    {{end}}                   
+
+                </div>
+                <div class="options">
+                    <a id="website_link" href="{{model.view_on_site_url}}">View on the site</a>
+                    <span>|</span>
+                    <a id="unsubscribe" href="{{model.unsubscribe_url}}">Unsubscribe</a>
+                </div>
+
+            </div>
+
+            
+        </div>
+
+</body>
+</html>

@@ -32,7 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Mailing\Templates\Articles.html">
+    <Content Update="Mailing\Templates\Articles-uk.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Mailing\Templates\Articles-en.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
