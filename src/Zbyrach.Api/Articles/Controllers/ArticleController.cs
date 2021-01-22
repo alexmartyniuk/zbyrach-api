@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -149,6 +150,30 @@ namespace Zbyrach.Api.Articles
             }
 
             return File(stream, "application/pdf");
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("/articles/status/read/send/test/{userEmail}")]
+        public async Task<IActionResult> SendNewArticleEvent(string userEmail)
+        {
+            var user = await _userService.GetUserByEmail(userEmail);
+            if (user == null)
+            {
+                return NotFound("User not found by email");
+            }
+
+            var articles = await _articleService.GetForReading(user);
+            var random = new Random();
+            var number = random.Next(0, articles.Count - 1);
+            var article = articles.ElementAtOrDefault(number);
+            if (article == null)
+            {
+                return NotFound("No articles for reading");
+            }
+            await _articleService.SendNewArticleEvent(article, new List<User> {user});
+            
+            return NoContent();
         }
 
         private string GetPdfFileName(string url)

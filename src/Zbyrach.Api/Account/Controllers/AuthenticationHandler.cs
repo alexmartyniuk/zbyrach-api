@@ -11,7 +11,7 @@ namespace Zbyrach.Api.Account
 {
     public class AuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        private const string AUTH_TOKEN_HEADER_NAME = "AuthToken";        
+        private const string AUTH_TOKEN_PARAM_NAME = "AuthToken";        
         private readonly AccessTokenService _tokenService;
 
         public AuthenticationHandler(
@@ -33,13 +33,13 @@ namespace Zbyrach.Api.Account
                 return AuthenticateResult.NoResult();
             }
 
-            if (!Request.Headers.ContainsKey(AUTH_TOKEN_HEADER_NAME))
+            var authToken = GetAuthToken();
+            if (string.IsNullOrEmpty(authToken))
             {
                 return AuthenticateResult.Fail("Missing AuthToken Header");
             }
 
-            var authHeader = Request.Headers[AUTH_TOKEN_HEADER_NAME];
-            var tokenWithUser = await _tokenService.FindByToken(authHeader);
+            var tokenWithUser = await _tokenService.FindByToken(authToken);
             if (tokenWithUser == null)
             {
                 return AuthenticateResult.Fail("Invalid authentication token");
@@ -58,6 +58,21 @@ namespace Zbyrach.Api.Account
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
             return AuthenticateResult.Success(ticket);
+        }
+
+        private string GetAuthToken()
+        {
+            if (Request.Headers.TryGetValue(AUTH_TOKEN_PARAM_NAME, out var headerValue))
+            {
+                return headerValue.ToString();
+            }
+
+            if (Request.Query.TryGetValue(AUTH_TOKEN_PARAM_NAME, out var queryValue))
+            {
+                return queryValue.ToString();
+            }
+
+            return null;
         }
     }
 }

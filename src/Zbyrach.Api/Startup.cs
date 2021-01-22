@@ -35,7 +35,14 @@ namespace Zbyrach.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.WithOrigins("http://localhost:4200")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
             services.AddProblemDetails(options =>
             {
                 // Map exeptions to HTTP status codes here
@@ -53,6 +60,12 @@ namespace Zbyrach.Api
 
             services.AddHostedService<ArticlesSearcher>();
             services.AddHostedService<NotificationsSender>();
+
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
+
             services.AddControllers(options => {
                 options.Filters.Add(typeof(ModelStateValidatorAttribute));            
             });
@@ -97,12 +110,9 @@ namespace Zbyrach.Api
 
             app.UseDetection();
 
-            app.UseCors(builder => builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
-
             app.UseHttpsRedirection();
+
+            app.UseCors("CorsPolicy");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -118,6 +128,7 @@ namespace Zbyrach.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ArticlesEventHub>("/newarticles");
             });
         }
     }

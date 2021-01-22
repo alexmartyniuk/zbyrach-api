@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Migrations;
@@ -14,12 +16,14 @@ namespace Zbyrach.Api.Articles
         private readonly ApplicationContext _db;
         private readonly UsersService _usersService;
         private readonly PdfService _pdfService;
+        private readonly IHubContext<ArticlesEventHub> _signalrHub;
 
-        public ArticleService(ApplicationContext db, UsersService usersService, PdfService pdfService)
+        public ArticleService(ApplicationContext db, UsersService usersService, PdfService pdfService, IHubContext<ArticlesEventHub> signalrHub)
         {
             _db = db;
             _usersService = usersService;
             _pdfService = pdfService;
+            _signalrHub = signalrHub;
         }
 
         public Task<List<Article>> GetByUrls(IEnumerable<string> urls)
@@ -103,6 +107,8 @@ namespace Zbyrach.Api.Articles
                 await _pdfService.QueueArticle(newArticle.Url);
 
                 originalArticle = newArticle;
+
+                await SendNewArticleEvent(originalArticle, users);
             }
 
             await SetStatus(new List<Article> { originalArticle }, users, ArticleStatus.New);
@@ -110,6 +116,31 @@ namespace Zbyrach.Api.Articles
             await _db.SaveChangesAsync();
 
             return originalArticle;
+        }
+
+        public async Task SendNewArticleEvent(Article article, List<User> users)
+        {
+            var userIds = users.Select(u => u.Id.ToString()).ToList();
+
+            var articleDto = new ArticleDto
+            {
+                Id = article.Id,
+                Title = article.Title,
+                Description = article.Description,
+                PublicatedAt = article.PublicatedAt,
+                IllustrationUrl = article.IllustrationUrl,
+                OriginalUrl = article.Url,
+                AuthorName = article.AuthorName,
+                AuthorPhoto = article.AuthorPhoto,
+                CommentsCount = article.CommentsCount,
+                LikesCount = article.LikesCount,
+                ReadTime = article.ReadTime,
+                // Favorite = articleUser.Favorite,
+                //ReadLater = articleUser.ReadLater,
+                //Tags = article.ArticleTags.Select(at => at.Tag.Name).ToList()
+            };
+
+            await _signalrHub.Clients.Groups(userIds).SendAsync("newarticle", articleDto);
         }
 
         public async Task<List<Article>> GetForSending(User user, long noMoreThan)
