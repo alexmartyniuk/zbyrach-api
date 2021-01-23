@@ -87,7 +87,7 @@ namespace Zbyrach.Api.Tests.Articles
         }
 
         [Fact]
-        public async Task SaveArticle_ForExistsArticleWithNewUsers_ShouldSucceed()
+        public async Task SaveArticle_ForExistingArticleWithNewUsers_ShouldSucceed()
         {
             var originalUser1 = new User
             {
@@ -126,6 +126,20 @@ namespace Zbyrach.Api.Tests.Articles
                 Status = ArticleStatus.New
             };
             Context.ArticleUsers.Add(originalArticleUser);
+
+            var originalTagUser1 = new TagUser
+            {
+                Tag = originalTag,
+                User = originalUser1,                
+            };
+            Context.TagUsers.Add(originalTagUser1);
+
+            var originalTagUser2 = new TagUser
+            {
+                Tag = originalTag,
+                User = originalUser2,
+            };
+            Context.TagUsers.Add(originalTagUser1);
 
             SaveAndRecreateContext();
 

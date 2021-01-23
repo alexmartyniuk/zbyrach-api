@@ -12,15 +12,20 @@ namespace Zbyrach.Api.Tags
     public class MediumTagsService
     {
         private const string _baseUrl = "https://medium.com/";
+        private IBrowsingContext _context;
+
+        public MediumTagsService()
+        {
+            var config = Configuration.Default.WithDefaultLoader();
+            _context = BrowsingContext.New(config);
+        }
 
         public async Task<TagFullDto> GetFullTagInfoByName(string tagName)
         {
-            var config = Configuration.Default.WithDefaultLoader();
-            var context = BrowsingContext.New(config);
             try
             {
-                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");
-                var archiveDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}/archive");
+                var mainDocument = await _context.OpenAsync(_baseUrl + $"tag/{tagName}");
+                var archiveDocument = await _context.OpenAsync(_baseUrl + $"tag/{tagName}/archive");
                 return GetFullTag(mainDocument, archiveDocument);
             }
             catch (Exception e)
@@ -31,11 +36,9 @@ namespace Zbyrach.Api.Tags
 
         public async Task<TagDto> GetShortTagInfoByName(string tagName)
         {
-            var config = Configuration.Default.WithDefaultLoader();
-            var context = BrowsingContext.New(config);
             try
             {
-                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");                
+                var mainDocument = await _context.OpenAsync(_baseUrl + $"tag/{tagName}");                
                 return GetTag(mainDocument);
             }
             catch (Exception e)

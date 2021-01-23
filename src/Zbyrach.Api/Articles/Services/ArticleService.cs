@@ -12,13 +12,11 @@ namespace Zbyrach.Api.Articles
     public class ArticleService
     {
         private readonly ApplicationContext _db;
-        private readonly UsersService _usersService;
         private readonly PdfService _pdfService;
 
-        public ArticleService(ApplicationContext db, UsersService usersService, PdfService pdfService)
+        public ArticleService(ApplicationContext db, PdfService pdfService)
         {
             _db = db;
-            _usersService = usersService;
             _pdfService = pdfService;
         }
 
@@ -146,12 +144,9 @@ namespace Zbyrach.Api.Articles
 
             var supportedLanguages = new List<string>
             {
-                "English",
-                "Ukrainian",
-                "Russian",
-                "en",
-                "uk",
-                "ru"
+                "eng",
+                "ukr",
+                "rus"
             };
 
             var articles = await _db.Articles

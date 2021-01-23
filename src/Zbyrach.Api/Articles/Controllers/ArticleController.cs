@@ -41,6 +41,7 @@ namespace Zbyrach.Api.Articles
         {
             var currentUser = await _userService.GetCurrent();
             var articles = await _articleService.GetForReading(currentUser);
+            var articleUsers = await _articleService.GetArticleUsers(currentUser, articles);
 
             var articlesDtos = articles
                 .Select(a =>
@@ -57,6 +58,8 @@ namespace Zbyrach.Api.Articles
                     CommentsCount = a.CommentsCount,
                     LikesCount = a.LikesCount,
                     ReadTime = a.ReadTime,
+                    Favorite = articleUsers.Single(au => au.ArticleId == a.Id).Favorite,
+                    ReadLater = articleUsers.Single(au => au.ArticleId == a.Id).ReadLater,
                     Tags = a.ArticleTags.Select(at => at.Tag.Name).ToList()
                 });
             return Ok(articlesDtos);
