@@ -99,6 +99,7 @@ namespace Zbyrach.Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("AuthorName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("AuthorPhoto")
@@ -129,6 +130,7 @@ namespace Zbyrach.Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Url")
@@ -136,6 +138,8 @@ namespace Zbyrach.Api.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasAlternateKey("Title", "AuthorName");
 
                     b.ToTable("Articles");
                 });
