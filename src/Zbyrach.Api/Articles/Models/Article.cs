@@ -38,8 +38,16 @@ namespace Zbyrach.Api.Articles
                 .Property(a => a.Id)
                 .IsRequired();
             builder
-                .Property(m => m.Url)
+                .Property(a => a.Url)
                 .IsRequired();
+            builder
+                .Property(a => a.Title)
+                .IsRequired();
+            builder
+                .Property(a => a.AuthorName)
+                .IsRequired();
+            builder                
+                .HasAlternateKey(a => new { a.Title, a.AuthorName });
         }
     }
 }

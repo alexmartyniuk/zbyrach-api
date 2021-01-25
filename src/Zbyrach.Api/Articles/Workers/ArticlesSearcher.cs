@@ -15,15 +15,18 @@ namespace Zbyrach.Api.Articles
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly MediumTagsService _mediumTagsService;
+        private readonly TranslationService _translationService;
         private readonly ILogger<ArticlesSearcher> _logger;
 
         public ArticlesSearcher(
             IServiceScopeFactory serviceScopeFactory,
             MediumTagsService mediumTagsService,
+            TranslationService translationService,
             ILogger<ArticlesSearcher> logger)
         {
             _serviceScopeFactory = serviceScopeFactory;
             _mediumTagsService = mediumTagsService;
+            _translationService = translationService;
             _logger = logger;
         }
 
@@ -97,11 +100,10 @@ namespace Zbyrach.Api.Articles
         {
             try
             {
-                var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();
-                var translationService = serviceScope.ServiceProvider.GetRequiredService<TranslationService>();
+                var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();                
                 
                 var textToDetect = story.Description ?? story.Title;
-                var language = translationService.DetectLanguage(textToDetect);
+                var language = _translationService.DetectLanguage(textToDetect);
                 var newArticle = CreateArticle(serviceScope, story, language);
 
                 var savedArticle = await articleService.SaveArticle(newArticle, users, tag);           

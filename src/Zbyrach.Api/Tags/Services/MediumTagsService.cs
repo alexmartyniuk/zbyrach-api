@@ -6,21 +6,29 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
+using Microsoft.Extensions.Logging;
 
 namespace Zbyrach.Api.Tags
 {
     public class MediumTagsService
     {
         private const string _baseUrl = "https://medium.com/";
+        private readonly ILogger<MediumTagsService> _logger;
+        private IBrowsingContext _context;
+
+        public MediumTagsService(ILogger<MediumTagsService> logger)
+        {
+            var config = Configuration.Default.WithDefaultLoader();
+            _context = BrowsingContext.New(config);
+            _logger = logger;
+        }
 
         public async Task<TagFullDto> GetFullTagInfoByName(string tagName)
         {
-            var config = Configuration.Default.WithDefaultLoader();
-            var context = BrowsingContext.New(config);
             try
             {
-                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");
-                var archiveDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}/archive");
+                var mainDocument = await _context.OpenAsync(_baseUrl + $"tag/{tagName}");
+                var archiveDocument = await _context.OpenAsync(_baseUrl + $"tag/{tagName}/archive");
                 return GetFullTag(mainDocument, archiveDocument);
             }
             catch (Exception e)
@@ -31,11 +39,9 @@ namespace Zbyrach.Api.Tags
 
         public async Task<TagDto> GetShortTagInfoByName(string tagName)
         {
-            var config = Configuration.Default.WithDefaultLoader();
-            var context = BrowsingContext.New(config);
             try
             {
-                var mainDocument = await context.OpenAsync(_baseUrl + $"tag/{tagName}");                
+                var mainDocument = await _context.OpenAsync(_baseUrl + $"tag/{tagName}");
                 return GetTag(mainDocument);
             }
             catch (Exception e)
@@ -87,8 +93,8 @@ namespace Zbyrach.Api.Tags
             if (title == null)
             {
                 return null;
-            }                
-            
+            }
+
             return new TagDto
             {
                 Name = title.TextContent.Trim(),
@@ -114,54 +120,75 @@ namespace Zbyrach.Api.Tags
             return document
                 .QuerySelectorAll("div.postArticle")
                 .Select(article => GetStory(article))
+                .Where(story => story != null)
                 .ToList();
         }
 
         private StoryDto GetStory(IElement article)
         {
-            var author = GetAuthor(article);
+            try
+            {
+                return new StoryDto
+                {
+                    Author = GetAuthor(article),
+                    Title = GetTitle(article),
+                    Description = GetDescription(article),
+                    Url = GetUrl(article),
+                    PublicatedAt = GetPublicationDate(article),
+                    IllustrationUrl = GetIllustrationUrl(article),
+                    CommentsCount = GetCommentsCount(article),
+                    LikesCount = GetLikesCount(article),
+                    ReadingTime = GetReadTime(article)
+                };
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Error during parsing article {pageUrl}: {error}", article.BaseUri.ToString(), e.Message);
+                return null;
+            }
+        }
 
-            var title = GetTitle(article);                
-            var description = GetDescription(article);
-            var illustrationUrl = article
-                .QuerySelector("figure img")?
-                .Attributes["src"]
+        private string GetReadTime(IElement article)
+        {
+            return article
+                .QuerySelector("span.readingTime")?
+                .Attributes["title"]?
                 .Value;
-            var date = article
-                .QuerySelector("time")
-                .Attributes["datetime"]
-                .Value;
-            var url = article
-                .QuerySelector("div.postArticle-readMore a")
-                .Attributes["href"]
-                .Value;
-            var commentsCount = article
-                .QuerySelector("div.buttonSet a")?
-                .TextContent
-                .Trim();
-            var likesCount = article
+        }
+
+        private long GetLikesCount(IElement article)
+        {
+            var value = article
                 .QuerySelector("div.multirecommend span button")?
                 .TextContent
                 .Trim();
-            var readTime = article
-                .QuerySelector("span.readingTime")
-                .Attributes["title"]
+            return GetNumber(value);
+        }
+
+        private long GetCommentsCount(IElement article)
+        {
+            var value = article
+                .QuerySelector("div.buttonSet a")?
+                .TextContent
+                .Trim();
+            return GetNumber(value);
+        }
+
+        private DateTime GetPublicationDate(IElement article)
+        {
+            var value = article
+                .QuerySelector("time")
+                .Attributes["datetime"]
                 .Value;
+            return GetDateTime(value);
+        }
 
-            url = NormalizeUrl(url);
-
-            return new StoryDto
-            {
-                Author = author,
-                Title = title,
-                Description = description,
-                Url = url,
-                PublicatedAt = GetDateTime(date),
-                IllustrationUrl = illustrationUrl,
-                CommentsCount = GetNumber(commentsCount),
-                LikesCount = GetNumber(likesCount),
-                ReadingTime = readTime
-            };
+        private string GetIllustrationUrl(IElement article)
+        {
+            return article
+                .QuerySelector("figure img")?
+                .Attributes["src"]
+                .Value;
         }
 
         private string NormalizeUrl(string url)
@@ -214,8 +241,8 @@ namespace Zbyrach.Api.Tags
 
         private string GetTitle(IElement article)
         {
-            var titleNode = article.QuerySelector("h3") 
-                ?? article.QuerySelector("p.graf-after--figure");                
+            var titleNode = article.QuerySelector("h3")
+                ?? article.QuerySelector("p.graf-after--figure");
 
             return titleNode?
                 .TextContent
@@ -224,13 +251,33 @@ namespace Zbyrach.Api.Tags
 
         private string GetDescription(IElement article)
         {
-            var descriptionNode = article.QuerySelector("h4") 
+            var descriptionNode = article.QuerySelector("h4")
                 ?? article.QuerySelector("p.graf-after--h3")
                 ?? article.QuerySelector("p.graf-after--p");
 
             return descriptionNode?
                 .TextContent
                 .Trim();
+        }
+
+        private string GetUrl(IElement article)
+        {
+            var readMoreLink = article
+                .QuerySelector("div.postArticle-readMore a");
+            if (readMoreLink != null)
+            {
+                return NormalizeUrl(readMoreLink.Attributes["href"].Value);
+            }
+
+            var titleNode = article.QuerySelector("h3")
+               ?? article.QuerySelector("p.graf-after--figure");
+            var link = titleNode.Closest("a[href]");
+            if (link != null)
+            {
+                return NormalizeUrl(link.Attributes["href"].Value);
+            }
+
+            throw new Exception($"Can't find url of the article.");
         }
 
         private AuthorDto GetAuthor(IElement article)

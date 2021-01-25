@@ -34,7 +34,7 @@ namespace Zbyrach.Api.Mailing
             
             await SendMessage(message);
 
-            _logger.LogInformation($"Message was sent to {message.ToEmail} with articles:\n {articles.Select(a => a.Title + "\n")}");
+            _logger.LogInformation($"Message was sent to {message.ToEmail} with articles:\n {articles.Select(a => a.Title + "\n").ToList()}");
         }
 
         private async Task SendMessage(Message message)

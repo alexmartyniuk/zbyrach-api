@@ -87,7 +87,7 @@ namespace Zbyrach.Api.Tests.Articles
         }
 
         [Fact]
-        public async Task SaveArticle_ForExistsArticleWithNewUsers_ShouldSucceed()
+        public async Task SaveArticle_ForExistingArticleWithNewUsers_ShouldSucceed()
         {
             var originalUser1 = new User
             {
@@ -127,6 +127,20 @@ namespace Zbyrach.Api.Tests.Articles
             };
             Context.ArticleUsers.Add(originalArticleUser);
 
+            var originalTagUser1 = new TagUser
+            {
+                Tag = originalTag,
+                User = originalUser1,                
+            };
+            Context.TagUsers.Add(originalTagUser1);
+
+            var originalTagUser2 = new TagUser
+            {
+                Tag = originalTag,
+                User = originalUser2,
+            };
+            Context.TagUsers.Add(originalTagUser1);
+
             SaveAndRecreateContext();
 
             _pdfService.Setup(s => s.QueueArticle(It.IsAny<string>()))
@@ -139,7 +153,8 @@ namespace Zbyrach.Api.Tests.Articles
             var article = new Article
             { 
                 Title = originalArticle.Title,
-                Url = originalArticle.Url
+                Url = originalArticle.Url,
+                AuthorName = originalArticle.AuthorName
             };
 
             await service.SaveArticle(
@@ -365,7 +380,8 @@ namespace Zbyrach.Api.Tests.Articles
             return new Article
             {
                 Title = Guid.NewGuid().ToString(),
-                Url = "http://domain.com/article"
+                Url = "http://domain.com/article",
+                AuthorName = "Author Name"
             };
         }
     }
