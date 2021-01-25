@@ -153,7 +153,8 @@ namespace Zbyrach.Api.Tests.Articles
             var article = new Article
             { 
                 Title = originalArticle.Title,
-                Url = originalArticle.Url
+                Url = originalArticle.Url,
+                AuthorName = originalArticle.AuthorName
             };
 
             await service.SaveArticle(
@@ -379,7 +380,8 @@ namespace Zbyrach.Api.Tests.Articles
             return new Article
             {
                 Title = Guid.NewGuid().ToString(),
-                Url = "http://domain.com/article"
+                Url = "http://domain.com/article",
+                AuthorName = "Author Name"
             };
         }
     }

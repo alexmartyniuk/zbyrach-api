@@ -48,8 +48,9 @@ namespace Zbyrach.Api.Tests.Mailing
 
                 var article = new Article
                 {
-                    Url = "url",
-                    Title = "Title"
+                    Url = "http://article.url/" ,
+                    Title = "Title",
+                    AuthorName = user.Name
                 };
                 article.ArticleUsers.Add(new ArticleUser
                 {
