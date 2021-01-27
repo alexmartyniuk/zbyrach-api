@@ -59,6 +59,10 @@ namespace Zbyrach.Api.Tests.Common
             services.AddScoped<ArticleService>();
 
             services.AddMediatR(Assembly.GetAssembly(typeof(Startup)));
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
 
             _serviceProvider = services.BuildServiceProvider();
         }

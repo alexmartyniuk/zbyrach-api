@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Migrations;
@@ -13,11 +15,13 @@ namespace Zbyrach.Api.Articles
     {
         private readonly ApplicationContext _db;
         private readonly PdfService _pdfService;
+        private readonly IHubContext<ArticlesEventHub> _signalrHub;
 
-        public ArticleService(ApplicationContext db, PdfService pdfService)
+        public ArticleService(ApplicationContext db, UsersService usersService, PdfService pdfService, IHubContext<ArticlesEventHub> signalrHub)
         {
             _db = db;
             _pdfService = pdfService;
+            _signalrHub = signalrHub;
         }
 
         public Task<List<Article>> GetByUrls(IEnumerable<string> urls)
@@ -90,16 +94,16 @@ namespace Zbyrach.Api.Articles
         public async Task<Article> SaveArticle(Article newArticle, List<User> users, Tag tag)
         {
             var originalArticle = await _db.Articles
+               .Include(a => a.ArticleTags)
                .SingleOrDefaultAsync(a =>
                     a.Title == newArticle.Title &&
                     a.AuthorName == newArticle.AuthorName);
 
-            if (originalArticle == null)
+            var isNewArticle = originalArticle == null;
+            if (isNewArticle)
             {
-                _db.Articles.Add(newArticle);
-                await LinkWithTag(newArticle, tag);
-                await _pdfService.QueueArticle(newArticle.Url);
-
+                AddTag(newArticle, tag);
+                _db.Articles.Add(newArticle);                
                 originalArticle = newArticle;
             }
 
@@ -107,7 +111,38 @@ namespace Zbyrach.Api.Articles
 
             await _db.SaveChangesAsync();
 
+            if (isNewArticle)
+            {
+                await _pdfService.QueueArticle(originalArticle.Url);
+                await SendNewArticleEvent(originalArticle, users);
+            }
+
             return originalArticle;
+        }
+
+        public async Task SendNewArticleEvent(Article article, List<User> users)
+        {
+            var userIds = users.Select(u => u.Id.ToString()).ToList();
+
+            var articleDto = new ArticleDto
+            {
+                Id = article.Id,
+                Title = article.Title,
+                Description = article.Description,
+                PublicatedAt = article.PublicatedAt,
+                IllustrationUrl = article.IllustrationUrl,
+                OriginalUrl = article.Url,
+                AuthorName = article.AuthorName,
+                AuthorPhoto = article.AuthorPhoto,
+                CommentsCount = article.CommentsCount,
+                LikesCount = article.LikesCount,
+                ReadTime = article.ReadTime,
+                // Favorite = articleUser.Favorite,
+                //ReadLater = articleUser.ReadLater,
+                Tags = article.ArticleTags.Select(at => at.Tag.Name).ToList()
+            };
+
+            await _signalrHub.Clients.Groups(userIds).SendAsync("newarticle", articleDto);
         }
 
         public async Task<List<Article>> GetForSending(User user, long noMoreThan)
@@ -272,19 +307,21 @@ namespace Zbyrach.Api.Articles
             reading.Status = newStatus;
         }
 
-        private async Task LinkWithTag(Article article, Tag tag)
+        private void AddTag(Article article, Tag tag)
         {
-            var isAlreadyLinked = await _db
-                .ArticleTags
-                .AnyAsync(at => at.ArticleId == article.Id && at.TagId == tag.Id);
+            var exists = article.ArticleTags
+                .Any(at =>
+                    at.ArticleId == article.Id &&
+                    at.TagId == tag.Id);
 
-            if (isAlreadyLinked) return;
-
-            _db.ArticleTags.Add(new ArticleTag
+            if (!exists)
             {
-                Article = article,
-                Tag = tag
-            });
+                _db.ArticleTags.Add(new ArticleTag
+                {
+                    Article = article,
+                    Tag = tag
+                });
+            }
         }
     }
 }
