@@ -94,24 +94,28 @@ namespace Zbyrach.Api.Articles
         public async Task<Article> SaveArticle(Article newArticle, List<User> users, Tag tag)
         {
             var originalArticle = await _db.Articles
+               .Include(a => a.ArticleTags)
                .SingleOrDefaultAsync(a =>
                     a.Title == newArticle.Title &&
                     a.AuthorName == newArticle.AuthorName);
 
-            if (originalArticle == null)
+            var isNewArticle = originalArticle == null;
+            if (isNewArticle)
             {
-                _db.Articles.Add(newArticle);
-                await LinkWithTag(newArticle, tag);
-                await _pdfService.QueueArticle(newArticle.Url);
-
+                AddTag(newArticle, tag);
+                _db.Articles.Add(newArticle);                
                 originalArticle = newArticle;
-
-                await SendNewArticleEvent(originalArticle, users);
             }
 
             await SetStatus(new List<Article> { originalArticle }, users, ArticleStatus.New);
 
             await _db.SaveChangesAsync();
+
+            if (isNewArticle)
+            {
+                await _pdfService.QueueArticle(originalArticle.Url);
+                await SendNewArticleEvent(originalArticle, users);
+            }
 
             return originalArticle;
         }
@@ -135,7 +139,7 @@ namespace Zbyrach.Api.Articles
                 ReadTime = article.ReadTime,
                 // Favorite = articleUser.Favorite,
                 //ReadLater = articleUser.ReadLater,
-                //Tags = article.ArticleTags.Select(at => at.Tag.Name).ToList()
+                Tags = article.ArticleTags.Select(at => at.Tag.Name).ToList()
             };
 
             await _signalrHub.Clients.Groups(userIds).SendAsync("newarticle", articleDto);
@@ -303,19 +307,21 @@ namespace Zbyrach.Api.Articles
             reading.Status = newStatus;
         }
 
-        private async Task LinkWithTag(Article article, Tag tag)
+        private void AddTag(Article article, Tag tag)
         {
-            var isAlreadyLinked = await _db
-                .ArticleTags
-                .AnyAsync(at => at.ArticleId == article.Id && at.TagId == tag.Id);
+            var exists = article.ArticleTags
+                .Any(at =>
+                    at.ArticleId == article.Id &&
+                    at.TagId == tag.Id);
 
-            if (isAlreadyLinked) return;
-
-            _db.ArticleTags.Add(new ArticleTag
+            if (!exists)
             {
-                Article = article,
-                Tag = tag
-            });
+                _db.ArticleTags.Add(new ArticleTag
+                {
+                    Article = article,
+                    Tag = tag
+                });
+            }
         }
     }
 }

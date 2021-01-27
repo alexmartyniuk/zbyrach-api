@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -7,13 +8,15 @@ using Microsoft.Extensions.Logging;
 namespace Zbyrach.Api.Articles
 {
     [Authorize]
-    public class ArticlesEventHub: Hub
+    public class ArticlesEventHub : Hub
     {
         private readonly ILogger<ArticlesEventHub> _logger;
+        private readonly ConcurrentDictionary<string, string> _connections = new ConcurrentDictionary<string, string>();
 
         public ArticlesEventHub(ILogger<ArticlesEventHub> logger)
         {
             _logger = logger;
+            _connections = new ConcurrentDictionary<string, string>();
         }
 
         public override Task OnConnectedAsync()
@@ -25,8 +28,11 @@ namespace Zbyrach.Api.Articles
         public override async Task OnDisconnectedAsync(Exception ex)
         {
             _logger.LogDebug("OnDisconnectedAsync {ConnectionId}, {exception}", Context.ConnectionId, ex?.Message);
-           
-            // implement removing from groups
+
+            if (_connections.TryGetValue(Context.ConnectionId, out var userId))
+            {
+                await Unsubscribe(userId);
+            }
 
             await base.OnDisconnectedAsync(ex);
         }
@@ -36,10 +42,11 @@ namespace Zbyrach.Api.Articles
             try
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+                _connections[Context.ConnectionId] = userId;
             }
             catch (Exception e)
             {
-                _logger.LogWarning("Something went wrong when subscribing user {userId}: {exception}", userId, e.Message);
+                _logger.LogError("Something went wrong when subscribing user {userId}: {exception}", userId, e.Message);
             }
         }
 
@@ -48,14 +55,13 @@ namespace Zbyrach.Api.Articles
             try
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
-
+                _connections.TryRemove(Context.ConnectionId, out var value);
             }
             catch (Exception e)
             {
-                _logger.LogWarning("Something went wrong when unsubscribing user {userId}: {exception}", userId, e.Message);
+                _logger.LogError("Something went wrong when unsubscribing user {userId}: {exception}", userId, e.Message);
             }
         }
-
 
         public class User
         {
