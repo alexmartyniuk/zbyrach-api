@@ -35,10 +35,17 @@ namespace Zbyrach.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.WithOrigins("http://localhost:4200", "https://zbyrach-ui.herokuapp.com")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
             services.AddProblemDetails(options =>
             {
-                // Map exeptions to HTTP status codes here
+                // Map exceptions to HTTP status codes here
                 options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);                
                 options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
             });
@@ -105,10 +112,7 @@ namespace Zbyrach.Api
 
             app.UseHttpsRedirection();
 
-            app.UseCors(builder => builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+            app.UseCors("CorsPolicy");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
