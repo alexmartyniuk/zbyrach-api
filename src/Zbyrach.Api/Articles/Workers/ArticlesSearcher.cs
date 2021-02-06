@@ -125,7 +125,7 @@ namespace Zbyrach.Api.Articles
                 IllustrationUrl = story.IllustrationUrl,
                 Description = story.Description,
                 ReadTime = story.ReadingTime,
-                Title = story.Title,
+                Title = story.Title ?? story.Description,
                 Language = language,
                 Url = story.Url,
                 LikesCount = story.LikesCount,
