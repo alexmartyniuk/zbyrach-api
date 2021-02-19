@@ -9,10 +9,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,6 +18,9 @@ using Zbyrach.Api.Admin.Services;
 using Zbyrach.Api.Common;
 using Hellang.Middleware.ProblemDetails;
 using System;
+using Zbyrach.Api.Account.Handlers;
+using Zbyrach.Api.Common.Controllers;
+using Zbyrach.Api.Account.Exceptions;
 
 namespace Zbyrach.Api
 {
@@ -46,6 +47,8 @@ namespace Zbyrach.Api
             services.AddProblemDetails(options =>
             {
                 // Map exceptions to HTTP status codes here
+                options.MapToStatusCode<InvalidTokenException>(StatusCodes.Status401Unauthorized);
+
                 options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);                
                 options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
             });
@@ -69,6 +72,7 @@ namespace Zbyrach.Api
             services.AddControllers(options => {
                 options.Filters.Add(typeof(ModelStateValidatorAttribute));            
             });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -95,7 +99,6 @@ namespace Zbyrach.Api
             });
 
             services.AddScoped<UsersService>();
-            services.AddScoped<AccessTokenService>();
             services.AddScoped<TagService>();
             services.AddScoped<MailingSettingsService>();
             services.AddScoped<ArticleService>();
@@ -107,6 +110,7 @@ namespace Zbyrach.Api
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseProblemDetails();
+            app.UseErrorLogging();
 
             app.UseDetection();
 

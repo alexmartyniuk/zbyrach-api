@@ -52,8 +52,7 @@ namespace Zbyrach.Api.Tests.Common
             services.AddSingleton<CronService>();
             services.AddSingleton<TranslationService>();
             services.AddScoped<AdminService>();                  
-            services.AddScoped<UsersService>();
-            services.AddScoped<AccessTokenService>();
+            services.AddScoped<UsersService>();            
             services.AddScoped<TagService>();
             services.AddScoped<MailingSettingsService>();
             services.AddScoped<ArticleService>();

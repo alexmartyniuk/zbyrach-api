@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using LanguageExt;
 
 namespace Zbyrach.Api.Account
 {
@@ -13,7 +14,7 @@ namespace Zbyrach.Api.Account
             _httpClient = client;
         }
 
-        public virtual async Task<GoogleToken> FindGoogleToken(string idToken)
+        public virtual async Task<Option<GoogleToken>> FindGoogleToken(string idToken)
         {
             try
             {

@@ -24,11 +24,7 @@ namespace Zbyrach.Api.Account
         [Route("/account/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginData)
         {
-            var response = await _mediator.Send(loginData);
-            if (response == null)
-            {
-                return Unauthorized("Token is invalid");
-            }           
+            var response = await _mediator.Send(loginData);       
 
             return Ok(response);
         }

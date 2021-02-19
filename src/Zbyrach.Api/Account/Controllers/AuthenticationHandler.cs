@@ -4,25 +4,31 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Zbyrach.Api.Common;
+using Zbyrach.Api.Migrations;
 
 namespace Zbyrach.Api.Account
 {
     public class AuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        private const string AUTH_TOKEN_PARAM_NAME = "AuthToken";        
-        private readonly AccessTokenService _tokenService;
+        private const string AUTH_TOKEN_PARAM_NAME = "AuthToken";
+        private readonly ApplicationContext _db;
+        private readonly DateTimeService _dateTimeService;
 
         public AuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            AccessTokenService tokenService)
+            ApplicationContext db,
+            DateTimeService dateTimeService)
             : base(options, logger, encoder, clock)
         {
-            _tokenService = tokenService;
+            _db = db;
+            _dateTimeService = dateTimeService;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -39,7 +45,7 @@ namespace Zbyrach.Api.Account
                 return AuthenticateResult.Fail("Missing AuthToken Header");
             }
 
-            var tokenWithUser = await _tokenService.FindByToken(authToken);
+            var tokenWithUser = await FindAccessToken(authToken);
             if (tokenWithUser == null)
             {
                 return AuthenticateResult.Fail("Invalid authentication token");
@@ -70,6 +76,20 @@ namespace Zbyrach.Api.Account
             if (Request.Query.TryGetValue(AUTH_TOKEN_PARAM_NAME, out var queryValue))
             {
                 return queryValue.ToString();
+            }
+
+            return null;
+        }
+
+        private async Task<AccessToken> FindAccessToken(string token)
+        {
+            var accessToken = await _db.AccessTokens
+                .Include(t => t.User)
+                .SingleOrDefaultAsync(t => t.Token == token);
+
+            if (accessToken != null && accessToken.ExpiredAt() > _dateTimeService.Now())
+            {
+                return accessToken;
             }
 
             return null;

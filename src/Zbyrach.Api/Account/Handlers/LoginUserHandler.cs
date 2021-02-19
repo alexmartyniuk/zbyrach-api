@@ -2,27 +2,29 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using LanguageExt;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Zbyrach.Api.Account.Exceptions;
 using Zbyrach.Api.Common;
 using Zbyrach.Api.Migrations;
 
 namespace Zbyrach.Api.Account.Handlers
 {
     public class LoginUserHandler : IRequestHandler<LoginRequestDto, LoginResponseDto>
-    {        
-        private readonly ILogger<AccessTokenService> _logger;
+    {
+        private readonly ILogger<LoginUserHandler> _logger;
         private readonly ApplicationContext _db;
         private readonly IHttpContextAccessor _accessor;
         private readonly GoogleAuthService _googleAuthService;
         private readonly DateTimeService _dateTimeService;
 
         public LoginUserHandler(
-            ILogger<AccessTokenService> logger, 
-            ApplicationContext db, 
-            IHttpContextAccessor accessor, 
+            ILogger<LoginUserHandler> logger,
+            ApplicationContext db,
+            IHttpContextAccessor accessor,
             GoogleAuthService googleAuthService,
             DateTimeService dateTimeService)
         {
@@ -35,26 +37,25 @@ namespace Zbyrach.Api.Account.Handlers
 
         public async Task<LoginResponseDto> Handle(LoginRequestDto request, CancellationToken cancellationToken)
         {
-            var googleTokenInfo = await _googleAuthService.FindGoogleToken(request.Token);
-            if (googleTokenInfo == null)
-            {
-                _logger.LogError("Google token could not be validated.");
-                return null;
-            }
+            var googleTokenOption = await _googleAuthService
+                .FindGoogleToken(request.Token);
+            var googleToken = googleTokenOption
+                .IfNone(() => throw new InvalidTokenException("Token is invalid."));
 
-            var user = await FindUserByEmail(googleTokenInfo.email);
-            if (user == null)
-            {
-                user = await AddNewUser(new User
+            var userOption = await FindUserByEmail(googleToken.email);
+            var user = userOption
+                .IfNone(() => AddNewUser(new User
                 {
-                    Email = googleTokenInfo.email,
-                    Name = $"{googleTokenInfo.given_name} {googleTokenInfo.family_name}".Trim(),
-                    PictureUrl = googleTokenInfo.picture
-                });
-            }
+                    Email = googleToken.email,
+                    Name = $"{googleToken.given_name} {googleToken.family_name}".Trim(),
+                    PictureUrl = googleToken.picture
+                })
+            );
 
-            var token = await CreateAndSaveNewToken(user);
-            
+            var token = await AddNewToken(user);
+
+            await _db.SaveChangesAsync();
+
             return new LoginResponseDto
             {
                 Token = token.Token,
@@ -70,41 +71,36 @@ namespace Zbyrach.Api.Account.Handlers
             };
         }
 
-        private async Task<User> AddNewUser(User user)
+        private User AddNewUser(User user)
         {
-            if (user.Id != default)
-            {
-                throw new Exception("A new user should not have an Id.");
-            }
-
             if (string.IsNullOrWhiteSpace(user.Email))
             {
-                throw new Exception("A new user should have not empty email.");
+                throw new Exception("A new user can't have an empty email.");
             }
 
-            await _db.Users.AddAsync(user);
-            await _db.SaveChangesAsync();
+            _db.Users.Add(user);
 
             return user;
         }
 
-        private Task<User> FindUserByEmail(string email)
+        private async Task<Option<User>> FindUserByEmail(string email)
         {
-            return _db.Users.SingleOrDefaultAsync(u => u.Email == email);
-        }       
+            return await _db.Users
+                .SingleOrDefaultAsync(u => u.Email == email);
+        }
 
-        public async Task<AccessToken> CreateAndSaveNewToken(User user)
+        public async Task<AccessToken> AddNewToken(User user)
         {
             var clientIp = GetClientIP();
             var clientUserAgent = GetClientUserAgent();
-            
-            var existingToken = await FindToken(user, clientIp, clientUserAgent);
-            if (existingToken != null)
-            {
-                await RemoveAccessToken(existingToken);
-            }
 
-            var newToken = new AccessToken
+            var existingTokenOption = await FindToken(user, clientIp, clientUserAgent);
+            existingTokenOption.IfSome((token) =>
+            {
+                RemoveAccessToken(token);
+            });
+
+            var token = new AccessToken
             {
                 Token = Guid.NewGuid().ToString(),
                 ClientIp = clientIp,
@@ -113,37 +109,27 @@ namespace Zbyrach.Api.Account.Handlers
                 CreatedAt = _dateTimeService.Now()
             };
 
-            _db.AccessTokens.Add(newToken);
-            await _db.SaveChangesAsync();
+            _db.AccessTokens.Add(token);
 
-            _logger.LogInformation($"AccessToken created: Id='{newToken.Id}' ClientIp='{newToken.ClientIp}' CreateAt='{newToken.CreatedAt.ToLongDateString()}'");
+            _logger.LogInformation($"AccessToken created: ClientIp='{token.ClientIp}' CreateAt='{token.CreatedAt.ToLongDateString()}'");
 
-            return newToken;
+            return token;
         }
 
-        public Task<AccessToken> FindToken(User user, string clientIp, string clientUserAgent)
+        public async Task<Option<AccessToken>> FindToken(User user, string clientIp, string clientUserAgent)
         {
-            return _db.AccessTokens
+            return await _db.AccessTokens
                 .Where(t => t.ClientIp == clientIp)
                 .Where(t => t.ClientUserAgent == clientUserAgent)
                 .Where(t => t.UserId == user.Id)
                 .SingleOrDefaultAsync();
         }
 
-        public async Task<bool> RemoveAccessToken(AccessToken token)
+        public void RemoveAccessToken(AccessToken token)
         {
-            var existingToken = await _db.AccessTokens.FindAsync(token.Id);
-            if (existingToken == null)
-            {
-                return false;
-            }
+            _db.AccessTokens.Remove(token);
 
-            _db.AccessTokens.Remove(existingToken);
-            var entriesWritten = await _db.SaveChangesAsync();
-
-            _logger.LogInformation($"AccessToken removed: Id='{token.Id}' ClientIp='{token.ClientIp}' CreateAt='{token.CreatedAt.ToLongDateString()}'");
-
-            return entriesWritten > 0;
+            _logger.LogInformation($"AccessToken removed: ClientIp='{token.ClientIp}' CreateAt='{token.CreatedAt.ToLongDateString()}'");
         }
 
         private string GetClientIP()

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Zbyrach.Api.Account;
+using Zbyrach.Api.Account.Exceptions;
 
 namespace Zbyrach.Api.Tests.Common
 {
@@ -34,7 +35,9 @@ namespace Zbyrach.Api.Tests.Common
                     {
                         services.AddProblemDetails(options =>
                         {
-                            // Map exeptions to HTTP status codes here
+                            // Map exceptions to HTTP status codes here
+                            options.MapToStatusCode<InvalidTokenException>(StatusCodes.Status401Unauthorized);
+
                             options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);
                             options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
                         });

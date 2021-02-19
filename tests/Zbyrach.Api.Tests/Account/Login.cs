@@ -236,7 +236,7 @@ namespace Zbyrach.Api.Tests.Account
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
             var payload = await response.Content.ReadAsStringAsync();
-            payload.Should().Be("Token is invalid");
+            payload.Should().NotBeEmpty();
 
             RecreateContext();
             var savedUser = Context
