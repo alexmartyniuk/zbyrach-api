@@ -20,9 +20,9 @@ namespace Zbyrach.Api.Mailing.Templates
         public string? PublicatedAt { get; set; }
         public string Url { get; set; } = default!;
         public string PdfUrl { get; set; } = default!;
-        public string AuthorName { get; set; } = default!;
-        public string AuthorEmail { get; set; } = default!;
-        public string AuthorPhoto { get; set; } = default!;
+        public string? AuthorName { get; set; } = default!;
+        public string? AuthorEmail { get; set; } = default!;
+        public string? AuthorPhoto { get; set; } = default!;
         public long CommentsCount { get; set; } = default!;
         public long LikesCount { get; set; } = default!;
         public string? ReadTime { get; set; } = default!;

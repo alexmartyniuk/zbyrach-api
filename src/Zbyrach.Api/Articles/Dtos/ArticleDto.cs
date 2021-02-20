@@ -10,9 +10,9 @@ namespace Zbyrach.Api.Articles
         public string? Description { get; set; }
         public DateTime PublicatedAt { get; set; }
         public string? IllustrationUrl { get; set; }
-        public string OriginalUrl { get; set; } = default!;
-        public string AuthorName { get; set; } = default!;
-        public string AuthorPhoto { get; set; } = default!;
+        public string? OriginalUrl { get; set; } = default!;
+        public string? AuthorName { get; set; } = default!;
+        public string? AuthorPhoto { get; set; } = default!;
         public long CommentsCount { get; set; }
         public long LikesCount { get; set; }
         public string? ReadTime { get; set; }

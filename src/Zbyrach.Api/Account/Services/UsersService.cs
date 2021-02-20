@@ -72,15 +72,6 @@ namespace Zbyrach.Api.Account
                 .SingleOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<string> GetLanguage(User? user = null)
-        {
-            user ??= await GetCurrent();
-
-            var readUser = await FindById(user.Id);
-
-            return readUser.Language;
-        }
-
         public async Task SetLanguage(string language, User? user = null)
         {
             user ??= await GetCurrent();
