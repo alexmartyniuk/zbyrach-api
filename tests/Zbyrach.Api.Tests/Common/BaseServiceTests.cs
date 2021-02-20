@@ -1,8 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
+using System.Configuration;
+using System.Net.Http;
 using System.Reflection;
 using Zbyrach.Api.Account;
 using Zbyrach.Api.Admin.Services;
@@ -20,8 +23,8 @@ namespace Zbyrach.Api.Tests.Common
         protected readonly Mock<MailService> _mailService = new Mock<MailService>(MockBehavior.Strict);
         protected readonly Mock<DateTimeService> _dateTimeService = new Mock<DateTimeService>(MockBehavior.Strict);
         protected readonly Mock<MediumTagsService> _mediumTagService = new Mock<MediumTagsService>(MockBehavior.Strict);
-        protected readonly Mock<PdfService> _pdfService = new Mock<PdfService>(MockBehavior.Strict, null, null);
-        protected readonly Mock<GoogleAuthService> _googleAuthService = new Mock<GoogleAuthService>(MockBehavior.Strict, null);
+        protected readonly Mock<PdfService> _pdfService = new Mock<PdfService>(MockBehavior.Strict);
+        protected readonly Mock<GoogleAuthService> _googleAuthService = new Mock<GoogleAuthService>(MockBehavior.Strict);
 
         public BaseServiceTests()
         {
@@ -37,6 +40,7 @@ namespace Zbyrach.Api.Tests.Common
         protected void AddApplicationServices(IServiceCollection services)
         {
             // external services
+            services.AddHttpClient();
             services.AddLogging();
             services.AddScoped(sp => Context);
             services.AddScoped(sp => _mailService.Object);

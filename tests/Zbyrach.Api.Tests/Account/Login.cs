@@ -34,7 +34,7 @@ namespace Zbyrach.Api.Tests.Account
 
             var request = new LoginRequestDto
             {
-                TokenId = token
+                Token = token
             };
             var response = await Client.PostJson("/account/login", request);
 
@@ -106,7 +106,7 @@ namespace Zbyrach.Api.Tests.Account
 
             var request = new LoginRequestDto
             {
-                TokenId = token
+                Token = token
             };
             var response = await Client.PostJson("/account/login", request);
 
@@ -180,7 +180,7 @@ namespace Zbyrach.Api.Tests.Account
 
             var request = new LoginRequestDto
             {
-                TokenId = token
+                Token = token
             };
             var response = await Client.PostJson("/account/login", request);
 
@@ -229,7 +229,7 @@ namespace Zbyrach.Api.Tests.Account
 
             var request = new LoginRequestDto
             {
-                TokenId = token
+                Token = token
             };
             var response = await Client.PostJson("/account/login", request);
 
@@ -254,7 +254,7 @@ namespace Zbyrach.Api.Tests.Account
         {
             var request = new LoginRequestDto
             {
-                TokenId = null
+                Token = null
             };
             var response = await Client.PostJson("/account/login", request);
 

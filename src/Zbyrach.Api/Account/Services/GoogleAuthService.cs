@@ -7,11 +7,16 @@ namespace Zbyrach.Api.Account
 {
     public class GoogleAuthService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _httpClient = default!;
 
         public GoogleAuthService(HttpClient client)
         {
             _httpClient = client;
+        }
+
+        protected GoogleAuthService()
+        {
+
         }
 
         public virtual async Task<GoogleTokenInfo?> FindGoogleToken(string idToken, CancellationToken cancellationToken)

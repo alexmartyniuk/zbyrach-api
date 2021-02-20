@@ -37,7 +37,7 @@ namespace Zbyrach.Api.Account.Handlers
         public async Task<LoginResponseDto> Handle(LoginRequestDto request, CancellationToken cancellationToken)
         {
             var googleTokenInfo = await _googleAuthService
-                .FindGoogleToken(request.TokenId ,cancellationToken);
+                .FindGoogleToken(request.Token ,cancellationToken);
             if (googleTokenInfo == null)
             { 
                 throw new InvalidTokenException("Token is invalid.");

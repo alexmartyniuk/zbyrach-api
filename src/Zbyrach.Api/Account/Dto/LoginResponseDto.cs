@@ -1,8 +1,8 @@
 namespace Zbyrach.Api.Account
 {
-    public record LoginResponseDto
+    public class LoginResponseDto
     {
-        public string Token = default!;
-        public UserDto User = default!;
+        public string Token { get; set; } = default!;
+        public UserDto User { get; set; } = default!;
     }
 }
