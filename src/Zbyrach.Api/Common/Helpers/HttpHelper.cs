@@ -21,7 +21,7 @@ namespace Zbyrach.Api.Common.Helpers
             return httpClient.PostAsync(requestUri, content);
         }
 
-        public static async Task<T> GetBody<T>(this HttpResponseMessage responseMessage)
+        public static async Task<T?> GetBody<T>(this HttpResponseMessage responseMessage)
         {
             var content = await responseMessage.Content.ReadAsStringAsync();
             var options = new JsonSerializerOptions

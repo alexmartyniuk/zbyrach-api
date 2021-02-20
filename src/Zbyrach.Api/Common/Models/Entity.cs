@@ -13,7 +13,7 @@ namespace Zbyrach.Api
             return (int) Id;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             var entity = obj as Entity;
             if (entity == null)

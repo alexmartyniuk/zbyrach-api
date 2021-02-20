@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -37,24 +36,22 @@ namespace Zbyrach.Api.Account.Handlers
 
         public async Task<LoginResponseDto> Handle(LoginRequestDto request, CancellationToken cancellationToken)
         {
-            var googleTokenOption = await _googleAuthService
-                .FindGoogleToken(request.Token);
-            var googleToken = googleTokenOption
-                .IfNone(() => throw new InvalidTokenException("Token is invalid."));
+            var googleTokenInfo = await _googleAuthService
+                .FindGoogleToken(request.TokenId ,cancellationToken);
+            if (googleTokenInfo == null)
+            { 
+                throw new InvalidTokenException("Token is invalid.");
+            }
 
-            var userOption = await FindUserByEmail(googleToken.email);
-            var user = userOption
-                .IfNone(() => AddNewUser(new User
-                {
-                    Email = googleToken.email,
-                    Name = $"{googleToken.given_name} {googleToken.family_name}".Trim(),
-                    PictureUrl = googleToken.picture
-                })
-            );
+            var user = await FindUserByEmail(googleTokenInfo.email);
+            if (user == null)
+            {
+                user = AddNewUser(googleTokenInfo);
+            }                
 
             var token = await AddNewToken(user);
 
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(cancellationToken);
 
             return new LoginResponseDto
             {
@@ -71,19 +68,26 @@ namespace Zbyrach.Api.Account.Handlers
             };
         }
 
-        private User AddNewUser(User user)
+        private User AddNewUser(GoogleTokenInfo googleTokenInfo)
         {
-            if (string.IsNullOrWhiteSpace(user.Email))
+            if (string.IsNullOrWhiteSpace(googleTokenInfo.email))
             {
                 throw new Exception("A new user can't have an empty email.");
             }
+
+            var user = new User
+            {
+                Email = googleTokenInfo.email,
+                Name = $"{googleTokenInfo.given_name} {googleTokenInfo.family_name}".Trim(),
+                PictureUrl = googleTokenInfo.picture
+            };
 
             _db.Users.Add(user);
 
             return user;
         }
 
-        private async Task<Option<User>> FindUserByEmail(string email)
+        private async Task<User?> FindUserByEmail(string email)
         {
             return await _db.Users
                 .SingleOrDefaultAsync(u => u.Email == email);
@@ -94,11 +98,11 @@ namespace Zbyrach.Api.Account.Handlers
             var clientIp = GetClientIP();
             var clientUserAgent = GetClientUserAgent();
 
-            var existingTokenOption = await FindToken(user, clientIp, clientUserAgent);
-            existingTokenOption.IfSome((token) =>
+            var existingToken = await FindToken(user, clientIp, clientUserAgent);
+            if (existingToken != null)
             {
-                RemoveAccessToken(token);
-            });
+                RemoveAccessToken(existingToken);
+            }            
 
             var token = new AccessToken
             {
@@ -116,7 +120,7 @@ namespace Zbyrach.Api.Account.Handlers
             return token;
         }
 
-        public async Task<Option<AccessToken>> FindToken(User user, string clientIp, string clientUserAgent)
+        public async Task<AccessToken> FindToken(User user, string clientIp, string clientUserAgent)
         {
             return await _db.AccessTokens
                 .Where(t => t.ClientIp == clientIp)
@@ -134,12 +138,20 @@ namespace Zbyrach.Api.Account.Handlers
 
         private string GetClientIP()
         {
-            return _accessor.HttpContext.Connection.RemoteIpAddress.ToString();
+            return _accessor
+                .HttpContext?
+                .Connection?
+                .RemoteIpAddress?
+                .ToString() ?? string.Empty;
         }
 
         private string GetClientUserAgent()
         {
-            return _accessor.HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
+            return _accessor
+                .HttpContext?
+                .Request?
+                .Headers["User-Agent"]
+                .FirstOrDefault() ?? string.Empty;
         }
     }
 }

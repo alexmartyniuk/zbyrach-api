@@ -66,7 +66,7 @@ namespace Zbyrach.Api.Account
             return AuthenticateResult.Success(ticket);
         }
 
-        private string GetAuthToken()
+        private string? GetAuthToken()
         {
             if (Request.Headers.TryGetValue(AUTH_TOKEN_PARAM_NAME, out var headerValue))
             {
@@ -81,18 +81,23 @@ namespace Zbyrach.Api.Account
             return null;
         }
 
-        private async Task<AccessToken> FindAccessToken(string token)
+        private async Task<AccessToken?> FindAccessToken(string token)
         {
             var accessToken = await _db.AccessTokens
                 .Include(t => t.User)
                 .SingleOrDefaultAsync(t => t.Token == token);
 
-            if (accessToken != null && accessToken.ExpiredAt() > _dateTimeService.Now())
+            if (accessToken == null)
             {
-                return accessToken;
+                return null;
             }
 
-            return null;
+            if (accessToken.ExpiredAt() <= _dateTimeService.Now())
+            {
+                return null;
+            }
+            
+            return accessToken;
         }
     }
 }

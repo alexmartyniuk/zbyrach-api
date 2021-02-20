@@ -25,7 +25,7 @@ namespace Zbyrach.Api.Articles
             return base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception ex)
+        public override async Task OnDisconnectedAsync(Exception? ex)
         {
             _logger.LogDebug("OnDisconnectedAsync {ConnectionId}, {exception}", Context.ConnectionId, ex?.Message);
 
@@ -61,12 +61,6 @@ namespace Zbyrach.Api.Articles
             {
                 _logger.LogError("Something went wrong when unsubscribing user {userId}: {exception}", userId, e.Message);
             }
-        }
-
-        public class User
-        {
-            public string Id { get; set; }
-            public string Connection { get; set; }
         }
     }
 }

@@ -7,12 +7,22 @@ namespace Zbyrach.Api.Mailing
 {
     internal class Message
     {
-        public string FromEmail { get; set; }
-        public string FromName { get; set; }
-        public string ToEmail { get; set; }
-        public string ToName { get; set; }
-        public string Subject { get; set; }
-        public string HtmlBody { get; set; }
+        public string FromEmail { get; }
+        public string FromName { get; }
+        public string ToEmail { get; }
+        public string ToName { get; }
+        public string Subject { get; }
+        public string HtmlBody { get; }
+
+        public Message(string fromEmail, string fromName, string toEmail, string toName, string subject, string htmlBody)
+        {
+            FromEmail = fromEmail;
+            FromName = fromName;
+            ToEmail = toEmail;
+            ToName = toName;
+            Subject = subject;
+            HtmlBody = htmlBody;
+        }
 
         public static Message Make(string webUiBasePath, User user, string unsubscribeToken, List<Article> articles, ScheduleType scheduleType)
         {

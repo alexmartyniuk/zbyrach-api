@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Zbyrach.Api.Account;
@@ -23,8 +24,8 @@ namespace Zbyrach.Api.Tests.Account
 
             _dateTimeService.Setup(s => s.Now())
                 .Returns(now);
-            _googleAuthService.Setup(s => s.FindGoogleToken(It.IsAny<string>()))
-                .ReturnsAsync(new GoogleToken
+            _googleAuthService.Setup(s => s.FindGoogleToken(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GoogleTokenInfo
                 {
                     email = Constants.USER_EMAIL,
                     family_name = Constants.USER_NAME,
@@ -33,7 +34,7 @@ namespace Zbyrach.Api.Tests.Account
 
             var request = new LoginRequestDto
             {
-                Token = token
+                TokenId = token
             };
             var response = await Client.PostJson("/account/login", request);
 
@@ -65,7 +66,7 @@ namespace Zbyrach.Api.Tests.Account
             savedToken.ClientUserAgent.Should().Be(Constants.USER_AGENT);
             savedToken.CreatedAt.Should().Be(now);
 
-            _googleAuthService.Verify(s => s.FindGoogleToken(token), Times.Once);
+            _googleAuthService.Verify(s => s.FindGoogleToken(token, It.IsAny<CancellationToken>()), Times.Once);
             _googleAuthService.VerifyNoOtherCalls();
         }
 
@@ -95,8 +96,8 @@ namespace Zbyrach.Api.Tests.Account
 
             _dateTimeService.Setup(s => s.Now())
                 .Returns(now);
-            _googleAuthService.Setup(s => s.FindGoogleToken(It.IsAny<string>()))
-                .ReturnsAsync(new GoogleToken
+            _googleAuthService.Setup(s => s.FindGoogleToken(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GoogleTokenInfo
                 {
                     email = Constants.USER_EMAIL,
                     family_name = Constants.USER_NAME,
@@ -105,7 +106,7 @@ namespace Zbyrach.Api.Tests.Account
 
             var request = new LoginRequestDto
             {
-                Token = token
+                TokenId = token
             };
             var response = await Client.PostJson("/account/login", request);
 
@@ -137,7 +138,7 @@ namespace Zbyrach.Api.Tests.Account
             savedToken.ClientUserAgent.Should().Be(Constants.USER_AGENT);
             savedToken.CreatedAt.Should().Be(now);
 
-            _googleAuthService.Verify(s => s.FindGoogleToken(token), Times.Once);
+            _googleAuthService.Verify(s => s.FindGoogleToken(token, It.IsAny<CancellationToken>()), Times.Once);
             _googleAuthService.VerifyNoOtherCalls();
         }
 
@@ -169,8 +170,8 @@ namespace Zbyrach.Api.Tests.Account
 
             _dateTimeService.Setup(s => s.Now())
                 .Returns(now);
-            _googleAuthService.Setup(s => s.FindGoogleToken(It.IsAny<string>()))
-                .ReturnsAsync(new GoogleToken
+            _googleAuthService.Setup(s => s.FindGoogleToken(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GoogleTokenInfo
                 {
                     email = Constants.USER_EMAIL,
                     family_name = Constants.USER_NAME,
@@ -179,7 +180,7 @@ namespace Zbyrach.Api.Tests.Account
 
             var request = new LoginRequestDto
             {
-                Token = token
+                TokenId = token
             };
             var response = await Client.PostJson("/account/login", request);
 
@@ -215,7 +216,7 @@ namespace Zbyrach.Api.Tests.Account
             oldToken.Id.Should().BeGreaterThan(0);
             oldToken.CreatedAt.Should().Be(oldTokenDate);
 
-            _googleAuthService.Verify(s => s.FindGoogleToken(token), Times.Once);
+            _googleAuthService.Verify(s => s.FindGoogleToken(token, It.IsAny<CancellationToken>()), Times.Once);
             _googleAuthService.VerifyNoOtherCalls();
         }
 
@@ -223,12 +224,12 @@ namespace Zbyrach.Api.Tests.Account
         public async Task ShouldFail_ForIncorrectGoogleToken()
         {
             const string token = "TOKEN";            
-            _googleAuthService.Setup(s => s.FindGoogleToken(It.IsAny<string>()))
-                .ReturnsAsync((GoogleToken)null);
+            _googleAuthService.Setup(s => s.FindGoogleToken(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((GoogleTokenInfo)null);
 
             var request = new LoginRequestDto
             {
-                Token = token
+                TokenId = token
             };
             var response = await Client.PostJson("/account/login", request);
 
@@ -244,7 +245,7 @@ namespace Zbyrach.Api.Tests.Account
                 .SingleOrDefault();
             savedUser.Should().BeNull();
             
-            _googleAuthService.Verify(s => s.FindGoogleToken(token), Times.Once);
+            _googleAuthService.Verify(s => s.FindGoogleToken(token, It.IsAny<CancellationToken>()), Times.Once);
             _googleAuthService.VerifyNoOtherCalls();
         }
 
@@ -253,7 +254,7 @@ namespace Zbyrach.Api.Tests.Account
         {
             var request = new LoginRequestDto
             {
-                Token = null
+                TokenId = null
             };
             var response = await Client.PostJson("/account/login", request);
 

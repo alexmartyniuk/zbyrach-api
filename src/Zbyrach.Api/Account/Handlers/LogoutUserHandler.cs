@@ -1,5 +1,4 @@
-﻿using LanguageExt;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -27,26 +26,31 @@ namespace Zbyrach.Api.Account.Handlers
 
         protected override async Task Handle(LogoutRequest request, CancellationToken cancellationToken)
         {
-            var tokenOption = await GetCurrentToken();
-            var token = tokenOption
-                .IfNone(() => throw new Exception("Token was not found for current user."));            
-
-            if (!await Remove(token))
+            var accessToken = await GetCurrentToken();
+            if (accessToken == null)
             {
-                throw new Exception("Token was not removed during logout.");
+                throw new Exception("Access token was not found for current user.");
+            }
+
+            if (!await Remove(accessToken))
+            {
+                throw new Exception("Access token was not removed during logout.");
             }
         }
 
-        private async Task<Option<AccessToken>> GetCurrentToken()
+        private async Task<AccessToken?> GetCurrentToken()
         {
-            var token = _httpContext.HttpContext.User.FindFirstValue(ClaimTypes.Authentication);
-            if (token == null)
+            var tokenId = _httpContext
+                .HttpContext?
+                .User
+                .FindFirstValue(ClaimTypes.Authentication);
+            if (tokenId == null)
             {
                 return null;
             }
 
             return await _db.AccessTokens
-                .SingleOrDefaultAsync(t => t.Token == token);
+                .SingleOrDefaultAsync(t => t.Token == tokenId);
         }
 
         public async Task<bool> Remove(AccessToken token)

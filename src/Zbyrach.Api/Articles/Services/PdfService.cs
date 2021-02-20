@@ -16,17 +16,12 @@ namespace Zbyrach.Api.Articles
         public PdfService(IConfiguration configuration, HttpClient client)
         {
             _httpClient = client;
-            if (_httpClient != null)
+            //if (_httpClient != null)
                 _httpClient.BaseAddress = new Uri(configuration["PdfServiceUrl"]);
         }
 
         public async Task<Stream> ConvertUrlToPdf(string url, Device device, bool inline = false)
         {
-            if (string.IsNullOrEmpty(url))
-            {
-                return null;
-            }
-
             var deviceType = device switch
             {
                 Device.Mobile => DeviceType.Mobile,
@@ -104,14 +99,14 @@ namespace Zbyrach.Api.Articles
 
     public class GeneratePdfRequest
     {
-        public string ArticleUrl { get; set; }
+        public string ArticleUrl { get; set; } = default!;
         public DeviceType DeviceType { get; set; }
         public bool Inline { get; set; }
     }
 
     public class QueueArticleRequest
     {
-        public string ArticleUrl { get; set; }
+        public string ArticleUrl { get; set; } = default!;
     }
 
     public enum DeviceType

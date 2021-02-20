@@ -11,18 +11,18 @@ namespace Zbyrach.Api.Migrations
 {
     public class ApplicationContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<AccessToken> AccessTokens { get; set; }
-        public DbSet<Tag> Tags { get; set; }
-        public DbSet<TagUser> TagUsers { get; set; }
-        public DbSet<MailingSettings> MailingSettings { get; set; }
-        public DbSet<Article> Articles { get; set; }
-        public DbSet<ArticleUser> ArticleUsers { get; set; }
-        public DbSet<ArticleTag> ArticleTags { get; set; }
+        public DbSet<User> Users { get; set; } = default!;
+        public DbSet<AccessToken> AccessTokens { get; set; } = default!;
+        public DbSet<Tag> Tags { get; set; } = default!;
+        public DbSet<TagUser> TagUsers { get; set; } = default!;
+        public DbSet<MailingSettings> MailingSettings { get; set; } = default!;
+        public DbSet<Article> Articles { get; set; } = default!;
+        public DbSet<ArticleUser> ArticleUsers { get; set; } = default!;
+        public DbSet<ArticleTag> ArticleTags { get; set; } = default!;
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
-            
+
         }
 
         public ApplicationContext()

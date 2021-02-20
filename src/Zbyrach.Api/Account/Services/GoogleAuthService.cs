@@ -1,7 +1,7 @@
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
 
 namespace Zbyrach.Api.Account
 {
@@ -14,12 +14,12 @@ namespace Zbyrach.Api.Account
             _httpClient = client;
         }
 
-        public virtual async Task<Option<GoogleToken>> FindGoogleToken(string idToken)
+        public virtual async Task<GoogleTokenInfo?> FindGoogleToken(string idToken, CancellationToken cancellationToken)
         {
             try
             {
                 var response = await _httpClient.GetStringAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={idToken}");
-                return JsonSerializer.Deserialize<GoogleToken>(response);
+                return JsonSerializer.Deserialize<GoogleTokenInfo>(response);
             }
             catch (HttpRequestException)
             {                
