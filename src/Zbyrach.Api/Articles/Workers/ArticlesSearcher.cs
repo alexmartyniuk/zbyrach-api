@@ -102,7 +102,7 @@ namespace Zbyrach.Api.Articles
             {
                 var articleService = serviceScope.ServiceProvider.GetRequiredService<ArticleService>();                
                 
-                var textToDetect = story.Description ?? story.Title;
+                var textToDetect = story.Description ?? story.Title ?? string.Empty;
                 var language = _translationService.DetectLanguage(textToDetect);
                 var newArticle = CreateArticle(serviceScope, story, language);
 
@@ -116,7 +116,7 @@ namespace Zbyrach.Api.Articles
             }
         }
 
-        private Article CreateArticle(IServiceScope serviceScope, StoryDto story, string language)
+        private Article CreateArticle(IServiceScope serviceScope, StoryDto story, string? language)
         {
             return new Article
             {

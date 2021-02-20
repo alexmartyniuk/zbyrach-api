@@ -31,10 +31,13 @@ namespace Zbyrach.Api.Account
 
         public ValueTask<User> GetCurrent()
         {
-            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = _httpContextAccessor
+                .HttpContext?
+                .User
+                .FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
-                return new ValueTask<User>((User)null);
+                return new ValueTask<User>(default(User)!);
             }
 
             return _db.Users.FindAsync(long.Parse(userIdClaim.Value));
@@ -45,7 +48,7 @@ namespace Zbyrach.Api.Account
             return Encrypt($"userId:{user.Id}");
         }
 
-        public async Task<User> GetUserByUnsubscribeToken(string secret)
+        public async Task<User?> GetUserByUnsubscribeToken(string secret)
         {
             var clearText = Decrypt(secret);
             if (clearText == null || !clearText.StartsWith(ENCRYPTION_PREFIX))
@@ -69,16 +72,7 @@ namespace Zbyrach.Api.Account
                 .SingleOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<string> GetLanguage(User user = null)
-        {
-            user ??= await GetCurrent();
-
-            var readUser = await FindById(user.Id);
-
-            return readUser.Language;
-        }
-
-        public async Task SetLanguage(string language, User user = null)
+        public async Task SetLanguage(string language, User? user = null)
         {
             user ??= await GetCurrent();
 
@@ -107,7 +101,7 @@ namespace Zbyrach.Api.Account
             return clearText;
         }
 
-        private string Decrypt(string cipherText)
+        private string? Decrypt(string cipherText)
         {
             try
             {

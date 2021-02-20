@@ -5,26 +5,26 @@ namespace Zbyrach.Api.Mailing.Templates
 {
     public class ArticlesModel
     {
-        public string UserName { get; set; }
-        public string UserEmail { get; set; }
-        public string Period { get; set; }
-        public string ViewOnSiteUrl { get; set; }
-        public string UnsubscribeUrl { get; set; }
-        public List<ArticleModel> Articles { get; set; }
+        public string UserName { get; set; } = default!;
+        public string UserEmail { get; set; } = default!;
+        public string Period { get; set; } = default!;
+        public string ViewOnSiteUrl { get; set; } = default!;
+        public string UnsubscribeUrl { get; set; } = default!;
+        public List<ArticleModel> Articles { get; set; } = default!;
     }
 
     public class ArticleModel
     {
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string PublicatedAt { get; set; }
-        public string Url { get; set; }
-        public string PdfUrl { get; set; }
-        public string AuthorName { get; set; }
-        public string AuthorEmail { get; set; }
-        public string AuthorPhoto { get; set; }
-        public long CommentsCount { get; set; }
-        public long LikesCount { get; set; }
-        public string ReadTime { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public string? PublicatedAt { get; set; }
+        public string Url { get; set; } = default!;
+        public string PdfUrl { get; set; } = default!;
+        public string? AuthorName { get; set; } = default!;
+        public string? AuthorEmail { get; set; } = default!;
+        public string? AuthorPhoto { get; set; } = default!;
+        public long CommentsCount { get; set; } = default!;
+        public long LikesCount { get; set; } = default!;
+        public string? ReadTime { get; set; } = default!;
     }
 }

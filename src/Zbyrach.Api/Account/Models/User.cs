@@ -8,16 +8,16 @@ using Zbyrach.Api.Tags;
 namespace Zbyrach.Api.Account
 {
     public class User : Entity
-    {       
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string PictureUrl { get; set; }
-        public bool IsAdmin { get; set; }
-        public string Language { get; set; }
-        public ICollection<AccessToken> AccessTokens { get; set; }
-        public ICollection<TagUser> TagUsers { get; set; }
-        public MailingSettings MailingSettings { get; set; }
-        public ICollection<ArticleUser> ArticleUsers { get; set; }
+    {
+        public string Name { get; set; } = default!;
+        public string Email { get; set; } = default!;
+        public string? PictureUrl { get; set; }
+        public bool IsAdmin { get; set; } = default!;
+        public string? Language { get; set; }
+        public ICollection<AccessToken> AccessTokens { get; set; } = default!;
+        public ICollection<TagUser> TagUsers { get; set; } = default!;
+        public MailingSettings MailingSettings { get; set; } = default!;
+        public ICollection<ArticleUser> ArticleUsers { get; set; } = default!;
     }
 
     public class UserConfiguration : IEntityTypeConfiguration<User>

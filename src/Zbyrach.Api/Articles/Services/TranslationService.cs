@@ -14,7 +14,7 @@ namespace Zbyrach.Api.Articles
             _detector.AddAllLanguages();
         }
 
-        public string DetectLanguage(string text)
+        public string? DetectLanguage(string text)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -22,7 +22,18 @@ namespace Zbyrach.Api.Articles
             }
 
             var language = _detector.DetectAll(text).FirstOrDefault();
-            return language?.Probability > 0.9 ? language.Language : null;
+            
+            if (language == null)
+            {
+                return null;
+            }
+
+            if (language.Probability <= 0.9)
+            {
+                return null;
+            }
+
+            return language.Language;
         }
     }
 }

@@ -7,9 +7,9 @@ namespace Zbyrach.Api.Articles
     public class ArticleTag
     {
         public long TagId { get; set; }
-        public Tag Tag { get; set; }
+        public Tag Tag { get; set; } = default!;
         public long ArticleId { get; set; }
-        public Article Article { get; set; }
+        public Article Article { get; set; } = default!;
     }
 
     public class ArticleTagConfiguration : IEntityTypeConfiguration<ArticleTag>

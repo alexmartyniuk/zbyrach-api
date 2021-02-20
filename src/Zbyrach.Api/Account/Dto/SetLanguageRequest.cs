@@ -4,6 +4,6 @@ namespace Zbyrach.Api.Account
 {
     public class SetLanguageRequest : IRequest
     {
-        public string Language { get; set; }
+        public string Language { get; set; } = default!;
     }
 }

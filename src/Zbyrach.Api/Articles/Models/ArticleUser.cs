@@ -8,9 +8,9 @@ namespace Zbyrach.Api.Articles
     public class ArticleUser : Entity
     {
         public long UserId { get; set; }
-        public User User { get; set; }
+        public User User { get; set; } = default!;
         public long ArticleId { get; set; }
-        public Article Article { get; set; }
+        public Article Article { get; set; } = default!;
         public ArticleStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime SentAt { get; set; }

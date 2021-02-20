@@ -25,15 +25,13 @@ namespace Zbyrach.Api.Mailing
             var templateFileName = Path.Combine(AppContext.BaseDirectory, "Mailing", "Templates", GetTemplateFileName());
             var articlesEmailTemplate = Template.Parse(File.ReadAllText(templateFileName));
 
-            var result = new Message
-            {
-                Subject = GetTitle() + " " + GetPeriod(scheduleType),
-                HtmlBody = GetHtmlMessageBody(user, unsubscribeToken, articles, scheduleType, articlesEmailTemplate),
-                FromEmail = "zbyrach@ukr.net",
-                FromName = GetFromName(),
-                ToEmail = user.Email,
-                ToName = user.Name
-            };
+            var result = new Message(
+                "zbyrach@ukr.net",
+                GetFromName(),
+                user.Email,
+                user.Name,
+                GetTitle() + " " + GetPeriod(scheduleType),
+                GetHtmlMessageBody(user, unsubscribeToken, articles, scheduleType, articlesEmailTemplate));
 
             return result;
         }

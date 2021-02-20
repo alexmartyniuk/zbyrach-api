@@ -7,9 +7,9 @@ namespace Zbyrach.Api.Tags
 {
     public class Tag : Entity
     {
-        public string Name { get; set; }
-        public ICollection<TagUser> TagUsers { get; set; }
-        public ICollection<ArticleTag> ArticleTags { get; set; }
+        public string Name { get; set; } = default!;
+        public ICollection<TagUser> TagUsers { get; set; } = default!;
+        public ICollection<ArticleTag> ArticleTags { get; set; } = default!;
         public override string ToString() => Name;
     }
 

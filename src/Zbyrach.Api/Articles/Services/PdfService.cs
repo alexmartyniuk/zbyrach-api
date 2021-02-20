@@ -11,22 +11,21 @@ namespace Zbyrach.Api.Articles
 {
     public class PdfService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _httpClient = default!;
 
         public PdfService(IConfiguration configuration, HttpClient client)
         {
             _httpClient = client;
-            if (_httpClient != null)
-                _httpClient.BaseAddress = new Uri(configuration["PdfServiceUrl"]);
+            _httpClient.BaseAddress = new Uri(configuration["PdfServiceUrl"]);
+        }
+
+        protected PdfService()
+        {
+
         }
 
         public async Task<Stream> ConvertUrlToPdf(string url, Device device, bool inline = false)
         {
-            if (string.IsNullOrEmpty(url))
-            {
-                return null;
-            }
-
             var deviceType = device switch
             {
                 Device.Mobile => DeviceType.Mobile,
@@ -104,14 +103,14 @@ namespace Zbyrach.Api.Articles
 
     public class GeneratePdfRequest
     {
-        public string ArticleUrl { get; set; }
+        public string ArticleUrl { get; set; } = default!;
         public DeviceType DeviceType { get; set; }
         public bool Inline { get; set; }
     }
 
     public class QueueArticleRequest
     {
-        public string ArticleUrl { get; set; }
+        public string ArticleUrl { get; set; } = default!;
     }
 
     public enum DeviceType

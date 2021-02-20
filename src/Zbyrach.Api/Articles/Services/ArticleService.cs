@@ -107,6 +107,11 @@ namespace Zbyrach.Api.Articles
                 originalArticle = newArticle;
             }
 
+            if (originalArticle == null)
+            {
+                throw new ArgumentNullException("Article is null.");
+            }
+
             await SetStatus(new List<Article> { originalArticle }, users, ArticleStatus.New);
 
             await _db.SaveChangesAsync();
@@ -188,7 +193,7 @@ namespace Zbyrach.Api.Articles
                 .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
                 .Where(a => articleIds.Contains(a.Id))
-                .Where(a => supportedLanguages.Contains(a.Language))
+                .Where(a => supportedLanguages.Contains(a.Language!))
                 .OrderByDescending(a => a.PublicatedAt)
                 .Take(20)
                 .ToListAsync();

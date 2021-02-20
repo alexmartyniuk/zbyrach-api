@@ -6,6 +6,6 @@ namespace Zbyrach.Api.Account
     public class LoginRequestDto : IRequest<LoginResponseDto>
     {
         [Required]
-        public string Token { get; set; }
+        public string Token { get; set; } = default!;
     }
 }

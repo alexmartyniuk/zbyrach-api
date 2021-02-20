@@ -7,11 +7,11 @@ namespace Zbyrach.Api.Mailing
 {
     public class MailingSettings : Entity
     {
-        public string Schedule { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public long NumberOfArticles { get; set; }
-        public long UserId { get; set; }
-        public User User { get; set; }
+        public string Schedule { get; set; } = default!;
+        public DateTime UpdatedAt { get; set; } = default!;
+        public long NumberOfArticles { get; set; } = default!;
+        public long UserId { get; set; } = default!;
+        public User User { get; set; } = default!;
     }
 
     public class MailingSettingsConfiguration : IEntityTypeConfiguration<MailingSettings>

@@ -37,7 +37,7 @@ namespace Zbyrach.Api.Tags
             }
         }
 
-        public async Task<TagDto> GetShortTagInfoByName(string tagName)
+        public async Task<TagDto?> GetShortTagInfoByName(string tagName)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace Zbyrach.Api.Tags
             };
         }
 
-        private TagDto GetTag(IDocument mainDocument)
+        private TagDto? GetTag(IDocument mainDocument)
         {
             var title = mainDocument
                 .QuerySelector("h1.heading-title");
@@ -121,10 +121,10 @@ namespace Zbyrach.Api.Tags
                 .QuerySelectorAll("div.postArticle")
                 .Select(article => GetStory(article))
                 .Where(story => story != null)
-                .ToList();
+                .ToList()!;
         }
 
-        private StoryDto GetStory(IElement article)
+        private StoryDto? GetStory(IElement article)
         {
             try
             {
@@ -148,7 +148,7 @@ namespace Zbyrach.Api.Tags
             }
         }
 
-        private string GetReadTime(IElement article)
+        private string? GetReadTime(IElement article)
         {
             return article
                 .QuerySelector("span.readingTime")?
@@ -183,7 +183,7 @@ namespace Zbyrach.Api.Tags
             return GetDateTime(value);
         }
 
-        private string GetIllustrationUrl(IElement article)
+        private string? GetIllustrationUrl(IElement article)
         {
             return article
                 .QuerySelector("figure img")?
@@ -206,7 +206,7 @@ namespace Zbyrach.Api.Tags
             return result;
         }
 
-        private long GetNumber(string text)
+        private long GetNumber(string? text)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -239,7 +239,7 @@ namespace Zbyrach.Api.Tags
             return match.Groups[group].Value;
         }
 
-        private string GetTitle(IElement article)
+        private string? GetTitle(IElement article)
         {
             var titleNode = article.QuerySelector("h3")
                 ?? article.QuerySelector("p.graf-after--figure");
@@ -249,7 +249,7 @@ namespace Zbyrach.Api.Tags
                 .Trim();
         }
 
-        private string GetDescription(IElement article)
+        private string? GetDescription(IElement article)
         {
             var descriptionNode = article.QuerySelector("h4")
                 ?? article.QuerySelector("p.graf-after--h3")
