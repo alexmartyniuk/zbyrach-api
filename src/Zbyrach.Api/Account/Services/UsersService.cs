@@ -19,11 +19,11 @@ namespace Zbyrach.Api.Account
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly string _encryptionKey;
 
-        public UsersService(ApplicationContext db, IHttpContextAccessor httpContextAccessor, IConfiguration config)
+        public UsersService(ApplicationContext db, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
         {
             _db = db;
             _httpContextAccessor = httpContextAccessor;
-            _encryptionKey = config["ENCRYPTION_KEY"];
+            _encryptionKey = configuration["ENCRYPTION_KEY"];
         }
 
         public async Task<User> FindById(long userId)

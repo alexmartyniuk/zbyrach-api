@@ -20,6 +20,7 @@ namespace Zbyrach.Api.Tests.Common
     {
         private IServiceProvider _serviceProvider;
 
+        protected readonly Mock<IConfiguration> _configuration = new Mock<IConfiguration>(MockBehavior.Loose);
         protected readonly Mock<MailService> _mailService = new Mock<MailService>(MockBehavior.Strict);
         protected readonly Mock<DateTimeService> _dateTimeService = new Mock<DateTimeService>(MockBehavior.Strict);
         protected readonly Mock<MediumTagsService> _mediumTagService = new Mock<MediumTagsService>(MockBehavior.Strict);
@@ -43,6 +44,7 @@ namespace Zbyrach.Api.Tests.Common
             services.AddHttpClient();
             services.AddLogging();
             services.AddScoped(sp => Context);
+            services.AddScoped(sp => _configuration.Object);
             services.AddScoped(sp => _mailService.Object);
             services.AddScoped(sp => _dateTimeService.Object);
             services.AddScoped(sp => _mediumTagService.Object);
