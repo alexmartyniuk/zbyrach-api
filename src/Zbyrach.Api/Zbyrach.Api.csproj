@@ -8,6 +8,7 @@
     <PreserveCompilationReferences>true</PreserveCompilationReferences>
     <PreserveCompilationContext>true</PreserveCompilationContext>
 	<Nullable>enable</Nullable>
+    <UserSecretsId>003dd9fe-4c78-42bb-a4ba-3357befa71f4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

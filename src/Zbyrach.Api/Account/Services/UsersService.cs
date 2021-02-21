@@ -7,21 +7,23 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Security.Cryptography;
 using System.IO;
-using System.Linq;
+using Microsoft.Extensions.Configuration;
 
 namespace Zbyrach.Api.Account
 {
     public class UsersService
-    {
-        private const string ENCRYPTION_KEY = "6917937020";
+    {        
         private const string ENCRYPTION_PREFIX = "userId:";
+
         private readonly ApplicationContext _db;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly string _encryptionKey;
 
-        public UsersService(ApplicationContext db, IHttpContextAccessor httpContextAccessor)
+        public UsersService(ApplicationContext db, IHttpContextAccessor httpContextAccessor, IConfiguration config)
         {
             _db = db;
             _httpContextAccessor = httpContextAccessor;
+            _encryptionKey = config["ENCRYPTION_KEY"];
         }
 
         public async Task<User> FindById(long userId)
@@ -45,7 +47,7 @@ namespace Zbyrach.Api.Account
 
         public string GetUnsubscribeTokenByUser(User user)
         {
-            return Encrypt($"userId:{user.Id}");
+            return Encrypt($"{ENCRYPTION_PREFIX}{user.Id}");
         }
 
         public async Task<User?> GetUserByUnsubscribeToken(string secret)
@@ -87,7 +89,7 @@ namespace Zbyrach.Api.Account
         {
             var clearBytes = Encoding.Unicode.GetBytes(clearText);
             using var encryptor = Aes.Create();
-            var pdb = new Rfc2898DeriveBytes(ENCRYPTION_KEY, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+            var pdb = new Rfc2898DeriveBytes(_encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
             encryptor.Key = pdb.GetBytes(32);
             encryptor.IV = pdb.GetBytes(16);
             using var ms = new MemoryStream();
@@ -108,7 +110,7 @@ namespace Zbyrach.Api.Account
                 cipherText = cipherText.Replace(" ", "+");
                 var cipherBytes = Convert.FromBase64String(cipherText);
                 using var encryptor = Aes.Create();
-                var pdb = new Rfc2898DeriveBytes(ENCRYPTION_KEY, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                var pdb = new Rfc2898DeriveBytes(_encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
                 using var ms = new MemoryStream();
