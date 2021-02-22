@@ -24,6 +24,8 @@ Internally Zbyrach API uses three dependant components:
 * medium.com - for finding articles by keywords
 * PDF service - for converting HTML pages into PDF documents
 
+To communicate to the Web UI in the real time is used SignalR.
+
 ![](https://github.com/alexmartyniuk/zbyrach-api/blob/master/docs/img/architecture-diagram.png?raw=true)
 
 ### Database
@@ -34,7 +36,7 @@ The database is managed by PostgreSQL engine and hosted in the Heroku cloud.
 
 ## medium.com
 
-The Medium.com site is used to find articles by keywords and get the content of the article. The technic is used to grab content from the site is similar to the web crawler.
+The [Medium.com](http://medium.com) site is used to find articles by keywords and get the content of the article. The technic is used to grab content from the site is similar to the web crawler.
 
 ## PDF service
 
