@@ -40,6 +40,6 @@ The [Medium.com](http://medium.com) site is used to find articles by keywords an
 
 ## PDF service
 
-[PDF service](http://zbyrach-pdf-service.herokuapp.com/index.html) is an internal service for Zbyrach that provides HTTP web API for converting and storing the PDF files for articles.
+[PDF service](https://github.com/alexmartyniuk/zbyrach-pdf-service) is an internal service for Zbyrach that provides HTTP web API for converting and storing the PDF files for articles.
 
 ![](https://github.com/alexmartyniuk/zbyrach-api/blob/master/docs/img/pdf-service-swagger.png?raw=true)
