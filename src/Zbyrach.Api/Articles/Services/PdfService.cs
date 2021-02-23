@@ -17,6 +17,7 @@ namespace Zbyrach.Api.Articles
         {
             _httpClient = client;
             _httpClient.BaseAddress = new Uri(configuration["PdfServiceUrl"]);
+            _httpClient.DefaultRequestHeaders.Add("AuthToken",configuration["PDF_SERVICE_AUTH_TOKEN"]);
         }
 
         protected PdfService()
@@ -32,7 +33,6 @@ namespace Zbyrach.Api.Articles
                 Device.Tablet => DeviceType.Tablet,
                 _ => DeviceType.Desktop
             };
-
 
             var request = new GeneratePdfRequest
             {
