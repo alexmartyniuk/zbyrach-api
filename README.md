@@ -4,7 +4,7 @@ Zbyrach API is a backend for the Zbyrach App. It manages users, user settings, a
 
 ## Swagger
 
-[Zbyrach API](http://zbyrach-api.herokuapp.com/index.html) is an HTTP API that holds such entities:
+[Zbyrach API](http://zbyrach-api.herokuapp.com/index.html) is an HTTP API that holds such resources:
 
 * Accounts
 * Articles
@@ -12,13 +12,13 @@ Zbyrach API is a backend for the Zbyrach App. It manages users, user settings, a
 * Tags
 * Statistic
 
-API uses token bases third-party authentication provided by Google.
+API uses token-based third-party authentication provided by Google.
 
 ![](https://github.com/alexmartyniuk/zbyrach-api/blob/master/docs/img/api-swagger.png?raw=true)
 
 ## Architecture
 
-Internally Zbyrach API uses three dependant components:
+Internally Zbyrach Web API uses three dependant components:
 
 * database - for storing own data
 * medium.com - for finding articles by keywords
@@ -40,6 +40,6 @@ The [Medium.com](http://medium.com) site is used to find articles by keywords an
 
 ## PDF service
 
-[PDF service](https://github.com/alexmartyniuk/zbyrach-pdf-service) is an internal service for Zbyrach that provides HTTP web API for converting and storing the PDF files for articles.
+PDF service is an internal service for Zbyrach that provides HTTP web API for converting and storing the PDF files for articles. It has own [repository](https://github.com/alexmartyniuk/zbyrach-pdf-service).
 
 ![](https://github.com/alexmartyniuk/zbyrach-api/blob/master/docs/img/pdf-service-swagger.png?raw=true)
