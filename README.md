@@ -1,5 +1,7 @@
 # Zbyrach API
 
+[![Deploy to Heroku](https://github.com/alexmartyniuk/zbyrach-api/actions/workflows/deploy-to-heroku.yml/badge.svg)](https://github.com/alexmartyniuk/zbyrach-api/actions/workflows/deploy-to-heroku.yml)
+
 Zbyrach API is a backend for the Zbyrach App. It manages users, user settings, and articles. Also, Zbyrach API responsible for searching articles and sending emails with the last found articles according to the schedule.
 
 ## Swagger
