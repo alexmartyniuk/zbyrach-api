@@ -39,7 +39,7 @@ namespace Zbyrach.Api
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
-                    builder => builder.WithOrigins("http://localhost:4200", "https://zbyrach-ui.herokuapp.com", "http://zbyrach.martyniuk.info")
+                    builder => builder.WithOrigins("http://localhost:4200", "https://zbyrach-ui.herokuapp.com")
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
